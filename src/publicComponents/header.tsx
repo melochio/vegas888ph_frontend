@@ -36,7 +36,7 @@ export default function Header() {
                 backgroundColor: 'rgb(40, 42, 48)', borderBottom: 'solid 2px ' + colors.gold
             }}>
             <Grid item sm md lg xl xs>
-                <Button href='/' variant={'text'} sx={{
+                <Button href='/dashboard' variant={'text'} sx={{
                     paddingLeft: 6, paddingRight: 6,border: 0, color: colors.silver, fontWeight: 700,fontSize: 18
                     }}>Sabong</Button>
                 <Button href='/' variant={'text'} sx={{
