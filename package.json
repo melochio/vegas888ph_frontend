@@ -16,6 +16,7 @@
     "@fontsource/public-sans": "^5.0.5",
     "@mui/icons-material": "^5.14.0",
     "@mui/joy": "^5.0.0-alpha.87",
+    "@mui/lab": "^5.0.0-alpha.136",
     "@mui/material": "^5.14.0",
     "@types/node": "20.4.2",
     "@types/react": "18.2.15",
