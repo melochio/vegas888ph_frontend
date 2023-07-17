@@ -113,7 +113,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
               </Button>
             </ButtonGroup>
             <Avatar onClick={handleAvatarClick} sx={{cursor:'pointer', margin: '0em 1em 0em 1em'}} />
-            <Typography variant='body2'>{user?.player_name}</Typography>
+            <Typography variant='body1' style={{color: 'white', display:'flex', alignItems:'center'}}>{user?.player_name}</Typography>
             <Popper open={Boolean(anchorEl)} anchorEl={anchorEl}>
               <Paper>
                 <Menu
