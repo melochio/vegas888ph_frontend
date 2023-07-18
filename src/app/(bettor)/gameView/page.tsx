@@ -5,6 +5,7 @@ import { colors } from "@/publicComponents/customStyles";
 import EastIcon from '@mui/icons-material/East';
 import React from "react";
 import { isJsxElement } from "typescript";
+import { LoggedHeader } from "@/publicComponents/header";
 
 type Round = {
     winner: 'meron' | 'wala';
@@ -33,14 +34,14 @@ const GameHeader = () => {
         <div>
             <Grid columns={12} container flexDirection={"row"} justifyContent={'space-between'}>
                 <Grid item md sm xs>
-                    <Typography sx={{color: 'white', marginLeft: '2em'}} variant="h6">Fight #1</Typography>
+                    <Typography sx={{color: 'white'}} variant="h6">Fight #1</Typography>
                 </Grid>
                 <Grid item md sm xs textAlign={'right'}>
-                    <Typography sx={{color: 'white', display: 'flex', justifyContent: 'flex-end', alignItems:'center', marginRight: '2em'}}
+                    <Typography sx={{color: 'white', display: 'flex', justifyContent: 'flex-end', alignItems:'center'}}
                     variant="body2">Last Call <CircleIcon style={{color: 'white', paddingLeft: '10px'}} /></Typography>
                 </Grid>
             </Grid>
-            <Typography variant="body2" sx={{color: 'white', marginLeft: '3em'}}>
+            <Typography variant="body2" sx={{color: 'white'}}>
                 <Typography variant="caption" sx={{backgroundColor:'red', padding: '5px', borderRadius: '3px', color: 'white'}}>MIRROR</Typography>
                 Private Sabong
                 <Typography variant="caption" sx={{color: 'white'}}>(300 exp. fights)</Typography>(300 exp. fights)
@@ -52,7 +53,7 @@ const BetButtons = () => {
     return (
         <div>
             <Grid columns={12} container>
-                <Grid item sm={6} md={6}>
+                <Grid item sm md xs lg xl>
                     <div style={{padding: '1rem', backgroundColor: 'maroon', color: 'white', minWidth: '100%', textAlign:'center'}}>
                         MERON
                     </div>
@@ -68,7 +69,7 @@ const BetButtons = () => {
                         }}>CHOOSE MERON</Button>
                     </div>
                 </Grid>
-                <Grid item sm={6} md={6}>
+                <Grid item sm md xs lg xl>
                     <div style={{padding: '1rem', backgroundColor: '#0404b1', color: 'white', textAlign:'center'}}>
                         WALA
                     </div>
@@ -105,9 +106,7 @@ export default function GameView() {
     const LiveStreamComponent = () => {
         return (
           <div style={{
-            minHeight: '40vh',
-            minWidth: '90vw',
-            backgroundColor: 'black',
+            minWidth: '100%',
           }}>
             <video
               style={{
@@ -159,6 +158,7 @@ export default function GameView() {
     // }
     return (
         <div>
+            <LoggedHeader />
             <LiveStreamComponent />
             <GameHeader />
             <BetButtons />
