@@ -144,7 +144,7 @@ export default function Dashboard() {
                 <Card sx={{backgroundColor: colors.silver}}>
                     <Grid container columns={12} flexDirection={'row'} rowSpacing={3} columnSpacing={3}>
                         {gameList.map((val, index) => (
-                            <Grid key={index} item sm={4} md={4} lg={4} xl={4} xs={6}>
+                            <Grid key={index} item sm={12} md={6} lg={4} xl={4} xs={12}>
                                 <a href={val.href}>
                                     <GameCard {...val}/>
                                 </a>

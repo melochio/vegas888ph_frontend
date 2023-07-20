@@ -6,10 +6,10 @@ interface betResponseModel {
     responseMessage: string,
 }
 const bet_api = async (gameID: string, side: string, amount: string):Promise<string | any> => {
-    const tokenResponse = await fetchUser()
+    const userResponse = await fetchUser()
     let userDetails = null
-    if (tokenResponse !== undefined) {
-        userDetails = tokenResponse;
+    if (userResponse !== undefined) {
+        userDetails = userResponse;
     } else {
         return "Invalid account details";
     }

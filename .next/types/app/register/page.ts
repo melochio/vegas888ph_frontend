@@ -1,4 +1,4 @@
-// File: D:\SABONG_APP\vegas888ph_frontend-dGameViewTemplate\src\app\register\page.tsx
+// File: C:\eSabong\frontend\src\app\register\page.tsx
 import * as entry from '../../../../src/app/register/page.js'
 import type { ResolvingMetadata } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

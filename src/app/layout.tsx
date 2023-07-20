@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { colors } from '@/publicComponents/customStyles'
-import bgImg from '@assets/playgame-bg.jpg'
 
 const inter = Inter({ subsets: ['latin'] })
 

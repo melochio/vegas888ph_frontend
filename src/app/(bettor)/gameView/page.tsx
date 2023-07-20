@@ -8,6 +8,10 @@ import { isJsxElement } from "typescript";
 import { LoggedHeader } from "@/publicComponents/header";
 import MuxPlayer from "@mux/mux-player-react"; 
 import { bet_api } from "@/api/bettor/bet";
+import { currentGame, getStream } from "@/api/bettor/game";
+import Game_Model, { initialGameValue } from "@/models/game";
+import Stream_Model, { initialStreamValue } from "@/models/stream";
+import socket from "@/utils/webSocket";
 
 type Round = {
     winner: 'meron' | 'wala';
@@ -32,31 +36,33 @@ const rounds: Round[] = [
     {fightNo: '15', winner: 'wala'},
     {fightNo: '16', winner: 'wala'},
 ]
-const GameHeader = () => {
+const GameHeader = (
+    {fight_num, bettingStatus, expFights, streamStatus}: 
+    {fight_num: string, bettingStatus: null | "OPEN" | "CLOSED", expFights: string, streamStatus: "Private" | "Public"} ) => {
     return (
         <div>
             <Grid columns={12} container flexDirection={"row"} justifyContent={'space-between'}>
                 <Grid item md sm xs>
-                    <Typography sx={{color: 'white'}} variant="h6">Fight #1</Typography>
+                    <Typography sx={{color: 'white'}} variant="h6">Fight #{fight_num}</Typography>
                 </Grid>
                 <Grid item md sm xs textAlign={'right'}>
                     <Typography sx={{color: 'white', display: 'flex', justifyContent: 'flex-end', alignItems:'center'}}
-                    variant="body2">Last Call <CircleIcon style={{color: 'white', paddingLeft: '10px'}} /></Typography>
+                    variant="body2">Last Call <CircleIcon style={{color: bettingStatus === "OPEN" ? 'green': bettingStatus === "CLOSED" ?'red':'white', paddingLeft: '10px'}} /></Typography>
                 </Grid>
             </Grid>
             <Typography variant="body2" sx={{color: 'white'}}>
                 <Typography variant="caption" sx={{backgroundColor:'red', padding: '5px', borderRadius: '3px', color: 'white'}}>MIRROR</Typography>
-                Private Sabong
-                <Typography variant="caption" sx={{color: 'white'}}>(300 exp. fights)</Typography>(300 exp. fights)
+                {streamStatus} Sabong
+                <Typography variant="caption" sx={{color: 'white'}}>({expFights} exp. fights)</Typography>
             </Typography>
         </div>
     )
 }
 const BetButtons = () => {
     const handleBet = (side: string) => {
-        const submitBet = async () => {
-            // const apiResponse = await bet_api("")
-        }
+        // const submitBet = async () => {
+        //     // const apiResponse = await bet_api("")
+        // }
     }
     return (
         <div>
@@ -116,6 +122,37 @@ const Trends = ({isMeron, textValue}:{isMeron: boolean, textValue: string}) => {
     )
 }
 export default function GameView() {
+    const [currentGameState, setCurrentGameState] = React.useState<Game_Model>(initialGameValue)
+    const [streamData, setStreamData] = React.useState<Stream_Model>(initialStreamValue)
+    React.useEffect(() => {
+        socket.on('sabong_currentDetails-channel:App\\Events\\sabong_currentDetails', (data: any) => {
+          // Handle the received users data
+          console.log(data)
+        });
+    
+        // Clean up the event listener when the component is unmounted
+        return () => {
+          socket.off('sabong_currentDetails-channel:App\\Events\\sabong_currentDetails');
+        };
+    }, []);
+    React.useEffect(() => {
+        const fetchCurrentGame = async () => {
+            const gameResponse = await currentGame()
+            if (gameResponse !== undefined){
+                setCurrentGameState(gameResponse.data)
+
+            }
+        }
+        fetchCurrentGame()
+        const fetchCurrentStream = async () => {
+            const gameResponse = await getStream()
+            if (gameResponse !== undefined){
+                setStreamData(gameResponse.data)
+
+            }
+        }
+        fetchCurrentStream()
+    }, [])
     const LiveStreamComponent = () => {
         return (
           <div style={{
@@ -123,7 +160,7 @@ export default function GameView() {
           }}>
             <MuxPlayer
                 streamType="ll-live"
-                playbackId="MRLwgB4HRQkeUmbPXZS2aDbdqOz100yvX1BG17JJv68M"
+                playbackId={streamData.streamID}
                 autoPlay={true}
                 metadata={{
                     video_id: "video-id-54321",
@@ -133,7 +170,7 @@ export default function GameView() {
             />
           </div>
         );
-      };
+    };
     let counter = 0;
     type trendCount = {
         count: number,
@@ -158,7 +195,10 @@ export default function GameView() {
         <div>
             <LoggedHeader />
             <LiveStreamComponent />
-            <GameHeader />
+            <GameHeader fight_num={currentGameState.gameNo}
+                bettingStatus={currentGameState.result}
+                expFights={streamData.expfights}
+                streamStatus={streamData.viewState} />
             <BetButtons />
             <br />
             <div>

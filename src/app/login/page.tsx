@@ -1,4 +1,5 @@
 'use client'
+import { fetchUser, login } from "@/api/bettor/auth"
 import Model_User, { initialUser } from "@/models/users"
 import { colors } from "@/publicComponents/customStyles"
 import Footer from "@/publicComponents/footer"
@@ -14,6 +15,31 @@ import Error from "next/error"
 import React from "react"
 import Swal from "sweetalert2"
 
+const userValidator = (level: string | any) => {
+switch (level) {
+    case "bettor":
+        document.location.href = "/dashboard"
+        break;
+    case "declarator":
+        document.location.href = "/declarator"
+        break;
+    case "admin":
+        document.location.href = "/admin/dashboard"
+        break;
+    case "super admin":
+        document.location.href = "/super_admin/dashboard"
+        break;
+    case "agent":
+        document.location.href = "/agent/dashboard"
+        break;
+    case "super agent":
+        document.location.href = "/super_agent/dashboard"
+        break;
+    default:
+        document.location.href = "/login"
+        break;
+    }
+}
 const Form = () => {
     const [formInput, setFormInput] = React.useState<Model_User>(initialUser)
     const [loginState, setLoginState] = React.useState(false)
@@ -23,13 +49,11 @@ const Form = () => {
     const handleLogin = async () => {
     setLoginState(true)
       try {
-        const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+'/api/bettor/login', formInput);
-  
-        const token = response.data.token;
-  
+        const response = await login(formInput);
+        const token = response.token;
         localStorage.setItem('token', token);
-
-        window.location.href = '/dashboard';
+        const userResponse = await fetchUser();
+        userValidator(userResponse?.user_level)
       } catch {
         Swal.fire(
             'Failed',
@@ -37,7 +61,6 @@ const Form = () => {
             'error'
         )
         setLoginState(false)
-        // Handle login error
       }
     };
     return (
