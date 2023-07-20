@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 // File: C:\eSabong\frontend\src\app\(bettor)\dashboard\page.tsx
+=======
+// File: D:\SABONG_APP\vegas888ph_frontend-dGameViewTemplate\src\app\(bettor)\dashboard\page.tsx
+>>>>>>> origin/jAddAgentDashboard
 import * as entry from '../../../../../src/app/(bettor)/dashboard/page.js'
 import type { ResolvingMetadata } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
