@@ -6,28 +6,31 @@ import EastIcon from '@mui/icons-material/East';
 import React from "react";
 import { isJsxElement } from "typescript";
 import { LoggedHeader } from "@/publicComponents/header";
+import MuxPlayer from "@mux/mux-player-react"; 
+import { bet_api } from "@/api/bettor/bet";
 
 type Round = {
     winner: 'meron' | 'wala';
+    fightNo: string;
 };
   
 const rounds: Round[] = [
-    {winner: 'meron'},
-    {winner: 'meron'},
-    {winner: 'meron'},
-    {winner: 'meron'},
-    {winner: 'wala'},
-    {winner: 'meron'},
-    {winner: 'meron'},
-    {winner: 'wala'},
-    {winner: 'wala'},
-    {winner: 'wala'},
-    {winner: 'meron'},
-    {winner: 'wala'},
-    {winner: 'meron'},
-    {winner: 'wala'},
-    {winner: 'wala'},
-    {winner: 'wala'},
+    {fightNo: '1', winner: 'meron'},
+    {fightNo: '2', winner: 'meron'},
+    {fightNo: '3', winner: 'meron'},
+    {fightNo: '4', winner: 'meron'},
+    {fightNo: '5', winner: 'wala'},
+    {fightNo: '6', winner: 'meron'},
+    {fightNo: '7', winner: 'meron'},
+    {fightNo: '8', winner: 'wala'},
+    {fightNo: '9', winner: 'wala'},
+    {fightNo: '10', winner: 'wala'},
+    {fightNo: '11', winner: 'meron'},
+    {fightNo: '12', winner: 'wala'},
+    {fightNo: '13', winner: 'meron'},
+    {fightNo: '14', winner: 'wala'},
+    {fightNo: '15', winner: 'wala'},
+    {fightNo: '16', winner: 'wala'},
 ]
 const GameHeader = () => {
     return (
@@ -50,46 +53,56 @@ const GameHeader = () => {
     )
 }
 const BetButtons = () => {
+    const handleBet = (side: string) => {
+        const submitBet = async () => {
+            // const apiResponse = await bet_api("")
+        }
+    }
     return (
         <div>
             <Grid columns={12} container>
                 <Grid item sm md xs lg xl>
-                    <div style={{padding: '1rem', backgroundColor: 'maroon', color: 'white', minWidth: '100%', textAlign:'center'}}>
+                    <div style={{backgroundColor: 'maroon', color: 'white', minWidth: '100%', textAlign:'center'}}>
                         MERON
                     </div>
                     <div style={{backgroundColor: 'red', minWidth: '100%', textAlign:'center'}}>
                         <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
-                            400,000.<Typography sx={{color: 'white'}} variant="caption">00</Typography>
+                            {/* 400,000.<Typography sx={{color: 'white'}} variant="caption">00</Typography> */}
+                            0.00
                         </Typography>
                         <Button style={{
                             backgroundColor: colors.gold,
                             color: 'black',
                             padding: '1em 1em',
                             marginBottom: '2rem'
-                        }}>CHOOSE MERON</Button>
+                        }}
+                        onClick={() => handleBet('meron')}
+                        >CHOOSE MERON</Button>
                     </div>
                 </Grid>
                 <Grid item sm md xs lg xl>
-                    <div style={{padding: '1rem', backgroundColor: '#0404b1', color: 'white', textAlign:'center'}}>
+                    <div style={{backgroundColor: '#0404b1', color: 'white', textAlign:'center'}}>
                         WALA
                     </div>
                     <div style={{backgroundColor: 'blue', textAlign:'center'}}>
                         <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
-                            230,780.<Typography sx={{color: 'white'}} variant="caption">66</Typography>
+                            0.00
                         </Typography>
                         <Button style={{
                             backgroundColor: colors.gold,
                             color: 'black',
                             padding: '1em 1em',
                             marginBottom: '2rem'
-                        }}>CHOOSE WALA</Button>
+                        }}
+                        onClick={() => handleBet('wala')}
+                        >CHOOSE WALA</Button>
                     </div>
                 </Grid>
             </Grid>
         </div>
     )
 }
-const Trends = ({isMeron}:{isMeron: boolean}) => {
+const Trends = ({isMeron, textValue}:{isMeron: boolean, textValue: string}) => {
     return (
         <div style={{
             border: '1px solid gray',
@@ -98,7 +111,7 @@ const Trends = ({isMeron}:{isMeron: boolean}) => {
             minWidth: '25px',
             minHeight: '25px',
         }}>
-            <CircleIcon style={{fontSize:'25px',color: isMeron ? 'red': 'blue'}} />
+            <div style={{backgroundColor: isMeron ? 'red': 'blue', borderRadius: '50%', color: 'white'}}>{textValue}</div>
         </div>
     )
 }
@@ -108,18 +121,16 @@ export default function GameView() {
           <div style={{
             minWidth: '100%',
           }}>
-            <video
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-              controls // Add this if you want to show video controls (play, pause, volume, etc.)
-            >
-              {/* Add the source of your live stream here */}
-              <source src="your-live-stream-url" type="video/mp4" />
-              {/* You can add more source elements with different formats (e.g., WebM, Ogg) for browser compatibility */}
-            </video>
+            <MuxPlayer
+                streamType="ll-live"
+                playbackId="MRLwgB4HRQkeUmbPXZS2aDbdqOz100yvX1BG17JJv68M"
+                autoPlay={true}
+                metadata={{
+                    video_id: "video-id-54321",
+                    video_title: "Test video title",
+                    viewer_user_id: "user-id-007",
+                }}
+            />
           </div>
         );
       };
@@ -143,19 +154,6 @@ export default function GameView() {
             trendCountList.push({count: counter, isMeron: val.winner === 'meron'});
         }
     });
-    console.log(trendCountList)
-    // for (const val of rounds) {
-    //     const isMeron = val.winner === 'meron';
-    //     currentColumn.push(<Trends key={currentColumn.length} isMeron={isMeron} />);
-    //     if (currentColumn.length === 1) {
-    //     trendColumns.push(currentColumn);
-    //     currentColumn = [];
-    //     }
-    // }
-    // Add any remaining column
-    // if (currentColumn.length > 0) {
-    //     trendColumns.push(currentColumn);
-    // }
     return (
         <div>
             <LoggedHeader />
@@ -170,115 +168,7 @@ export default function GameView() {
                         trendCountList.map((val, i) => (
                             <div style={{ display: 'flex', flexDirection: 'column' }}>
                             {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
-                            ))}
-                            </div>
-                        ))
-                    }
-                    {
-                        trendCountList.map((val, i) => (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                            {Array.from({ length: val.count }).map((_, index) => (
-                                <Trends key={i + index} isMeron={val.isMeron} />
+                                <Trends key={i + index} isMeron={val.isMeron} textValue={`${index}`} />
                             ))}
                             </div>
                         ))

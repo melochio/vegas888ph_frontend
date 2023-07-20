@@ -13,6 +13,18 @@ interface Model_User {
     updated_at: Date | any,
 }
 
+type UserModel_Hidden = {
+    created_at:any,
+    email: any,
+    email_verified_at: any,
+    id: any,
+    name: any,
+    player_name: any,
+    pp_filepath: any,
+    updated_at: any,
+    user_level: any,
+}
+
 const initialUser: Model_User = {
     id: '',
     name: '',
@@ -28,6 +40,10 @@ const initialUser: Model_User = {
     updated_at: '',
 }
 export default Model_User
+
+export type {
+    UserModel_Hidden
+}
 
 export {
     initialUser
