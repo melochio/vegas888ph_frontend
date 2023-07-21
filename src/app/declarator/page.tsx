@@ -13,21 +13,21 @@ import socket from "@/utils/webSocket"
 export default function Declarator() {
     const [currentGameState, setCurrentGameState] = React.useState<Game_Model>(initialGameValue)
     const [streamData, setStreamData] = React.useState<Stream_Model>(initialStreamValue)
-    type statusType = "OPEN" | "CLOSED" | "MERON" | "WALA" | "CANCELLED" | "FAILED"
-    const handleBetting = async (status: statusType) => {
+    type statusType = "OPEN" | "CLOSED" | "MERON" | "WALA" | "CANCELLED" | "FAILED" | "DRAW"
+    const handleResult = async (status: statusType) => {
         await updateGameResult(currentGameState.gameNo, status)
         setCurrentGameState({...currentGameState, result: status})
     }
     React.useEffect(() => {
-        socket.on('sabong_currentDetails-channel:App\\Events\\sabong_currentDetails', (data: any) => {
-          // Handle the received users data
-          console.log(data)
-        });
+        // socket.on('sabong_currentDetails-channel:App\\Events\\sabong_currentDetails', (data: any) => {
+        //   // Handle the received users data
+        //   console.log(data)
+        // });
     
         // Clean up the event listener when the component is unmounted
-        return () => {
-          socket.off('sabong_currentDetails-channel:App\\Events\\sabong_currentDetails');
-        };
+        // return () => {
+        //   socket.off('sabong_currentDetails-channel:App\\Events\\sabong_currentDetails');
+        // };
     }, []);
     React.useEffect(() => {
         const fetchCurrentGame = async () => {
@@ -107,7 +107,7 @@ export default function Declarator() {
                                 fontWeight: 700,
                                 width: '50%'
                             }}
-                            onClick={() => handleBetting('OPEN')}
+                            onClick={() => handleResult('OPEN')}
                             >OPEN</Button>
                         </div>
                     </Grid>
@@ -123,7 +123,7 @@ export default function Declarator() {
                                 fontWeight: 700,
                                 width: '50%'
                             }}
-                            onClick={() => handleBetting('CLOSED')}
+                            onClick={() => handleResult('CLOSED')}
                             >CLOSE</Button>
                         </div>
                     </Grid>
@@ -132,8 +132,6 @@ export default function Declarator() {
         )
     }
     const WinnerControls = () => {
-        const handleWinner = (winner: string) => {
-        }
         return (
             <div>
                 <Grid columns={12} container>
@@ -157,7 +155,7 @@ export default function Declarator() {
                                 fontWeight: 700,
                                 width: '50%'
                             }}
-                            onClick={() => handleWinner('MERON')}
+                            onClick={() => handleResult('MERON')}
                             >MERON</Button>
                         </div>
                     </Grid>
@@ -177,7 +175,7 @@ export default function Declarator() {
                                 fontWeight: 700,
                                 width: '50%'
                             }}
-                            onClick={() => handleWinner('WALA')}
+                            onClick={() => handleResult('WALA')}
                             >WALA</Button>
                         </div>
                     </Grid>
@@ -198,7 +196,7 @@ export default function Declarator() {
                                 fontWeight: 700,
                                 width: '50%'
                             }}
-                            onClick={() => handleWinner('DRAW')}
+                            onClick={() => handleResult('DRAW')}
                             >DRAW</Button>
                         </div>
                     </Grid>
@@ -219,7 +217,7 @@ export default function Declarator() {
                                 fontWeight: 700,
                                 width: '50%'
                             }}
-                            onClick={() => handleWinner('FAILED')}
+                            onClick={() => handleResult('FAILED')}
                             >CANCELLED</Button>
                         </div>
                     </Grid>

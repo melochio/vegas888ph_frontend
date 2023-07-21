@@ -12,7 +12,6 @@ interface Model_User {
     created_at: Date | any,
     updated_at: Date | any,
 }
-
 type UserModel_Hidden = {
     created_at:any,
     email: any,
@@ -42,9 +41,9 @@ const initialUser: Model_User = {
 export default Model_User
 
 export type {
-    UserModel_Hidden
+    UserModel_Hidden,
 }
 
 export {
-    initialUser
+    initialUser,
 }

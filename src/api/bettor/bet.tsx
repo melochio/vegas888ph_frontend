@@ -5,7 +5,7 @@ import { fetchUser } from "./auth"
 interface betResponseModel {
     responseMessage: string,
 }
-const bet_api = async (gameID: string, side: string, amount: string):Promise<string | any> => {
+const bet_api = async (gameCode: string, side: string, amount: string):Promise<string | any> => {
     const userResponse = await fetchUser()
     let userDetails = null
     if (userResponse !== undefined) {
@@ -15,8 +15,7 @@ const bet_api = async (gameID: string, side: string, amount: string):Promise<str
     }
     
     const betResponse = await axios.post(process.env.NEXT_PUBLIC_API_URL+'/api/bettor/sabong/bet', {
-        bettorID: userDetails?.id,
-        gameID: gameID,
+        gameCode: gameCode,
         side: side,
         amount: amount,
     }, config)
