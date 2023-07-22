@@ -11,8 +11,6 @@ interface Model_User {
     remember_token: string | any,
     created_at: Date | any,
     updated_at: Date | any,
-    bday: Date | any,
-    commission: Date | any,
 }
 
 type UserModel_Hidden = {
@@ -25,9 +23,6 @@ type UserModel_Hidden = {
     pp_filepath: any,
     updated_at: any,
     user_level: any,
-    bday: any,
-    commission: any,
-    
 }
 
 const initialUser: Model_User = {
@@ -37,14 +32,12 @@ const initialUser: Model_User = {
     player_name: '',
     email: '',
     email_verified_at: '',
-    bday:'',
     password: '',
     pp_filepath: '',
     wallet_id: '',
     remember_token: '',
     created_at: '',
     updated_at: '',
-    commission: '',
 }
 export default Model_User
 

@@ -1,10 +1,19 @@
+// 'requesteeId' => 'required',
+// 'amount' => 'required',
+// 'type' => 'required'  
 interface Model_tranferMoney { 
-    receiverId: number | any,
-    amount: number | any, 
+    requestee: number | any,
+    amount: number, 
+    transactionDetails: string | any, 
+    type: string | any,
+    password: string | any
 } 
-const initialUser: Model_tranferMoney = { 
-    receiverId: '',
-    amount: 0, 
+const initialUser: Model_tranferMoney = {
+    requestee: '',
+    amount: 0,
+    transactionDetails: '',
+    type: '',
+    password: ''
 }
 export default Model_tranferMoney
 
