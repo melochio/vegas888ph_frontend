@@ -16,14 +16,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-        <body className={inter.className} style={{backgroundImage: "url(/playgame-bg3.jpg) ", height: '100vh', margin: 0}}>
-            <DeclaratorHeader />
-            <div style={{minHeight: '67.3vh'}}>
-                {children}
-            </div>
-            <Footer />
-        </body>
-    </html>
+    <div>
+        <DeclaratorHeader />
+        <div style={{minHeight: '67.3vh'}}>
+            {children}
+        </div>
+        <Footer />
+    </div>
   )
 }

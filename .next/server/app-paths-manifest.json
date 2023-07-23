@@ -1,7 +1,8 @@
 {
   "/page": "app/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
   "/login/page": "app/login/page.js",
-  "/(bettor)/gameView/page": "app/(bettor)/gameView/page.js",
   "/(bettor)/dashboard/page": "app/(bettor)/dashboard/page.js",
-  "/declarator/page": "app/declarator/page.js"
+  "/declarator/page": "app/declarator/page.js",
+  "/(bettor)/gameView/page": "app/(bettor)/gameView/page.js"
 }

@@ -10,8 +10,18 @@ const getStream = async () => {
     const streamResponse = axios.post(process.env.NEXT_PUBLIC_API_URL+'/api/bettor/sabong/stream', null, config)
     return streamResponse
 }
+const getExpFights = async () => {
+    const fightsResponse = axios.get(process.env.NEXT_PUBLIC_API_URL+'/api/bettor/sabong/expFights', config)
+    return fightsResponse
+}
+const getGameTrends = async () => {
+    const trendsResponse = axios.get(process.env.NEXT_PUBLIC_API_URL+'/api/bettor/sabong/trends', config)
+    return trendsResponse
+}
 
 export {
     currentGame,
-    getStream
+    getStream,
+    getExpFights,
+    getGameTrends
 }

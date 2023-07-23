@@ -1,22 +1,103 @@
 'use client'
-import { currentGame, getStream } from "@/api/bettor/game"
+import { currentGame, getExpFights, getStream } from "@/api/bettor/game"
 import Game_Model, { initialGameValue } from "@/models/game"
 import Stream_Model, { initialStreamValue } from "@/models/stream"
 import React from "react"
 import MuxPlayer from "@mux/mux-player-react"; 
-import { Button, Grid, Typography } from "@mui/material"
+import { 
+    Button, 
+    Grid, 
+    Typography,
+    AppBar,
+    Card,
+    CardActions,
+    CardContent,
+    CssBaseline,
+    Drawer,
+    makeStyles,
+    Toolbar,
+    useTheme,
+    Slider,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    IconButton, } from "@mui/material"
+import CheckIcon from '@mui/icons-material/Check';
 import { colors } from "@/publicComponents/customStyles"
-import { updateGameResult } from "@/api/declarator/http"
+import { updateGameResult, gameList as gameList_API } from "@/api/declarator/http"
 import CircleIcon from '@mui/icons-material/Circle';
 import socket from "@/utils/webSocket"
+import Swal from "sweetalert2"
 
 export default function Declarator() {
     const [currentGameState, setCurrentGameState] = React.useState<Game_Model>(initialGameValue)
+    const [gameList, setGameList] = React.useState<Game_Model[]>([])
     const [streamData, setStreamData] = React.useState<Stream_Model>(initialStreamValue)
-    type statusType = "OPEN" | "CLOSED" | "MERON" | "WALA" | "CANCELLED" | "FAILED" | "DRAW"
+    const [expFights, setExpFights] = React.useState(0)
+    const fetchExpFights = async () => {
+        const expFightsRepsonse = await getExpFights()
+        if (expFightsRepsonse !== undefined){
+            setExpFights(expFightsRepsonse.data)
+        }
+    }
+    const fetchGameList = async () => {
+        const gameListResponse = await gameList_API()
+        if (gameListResponse !== undefined){
+            setGameList(gameListResponse.data)
+        }
+    }
+    const fetchCurrentStream = async () => {
+        const gameResponse = await getStream()
+        if (gameResponse !== undefined){
+            setStreamData(gameResponse.data)
+        }
+    }
+    const fetchCurrentGame = async () => {
+        const gameResponse = await currentGame()
+        if (gameResponse !== undefined){
+            setCurrentGameState(gameResponse.data)
+        }
+    }
+    type statusType = "OPEN" | "CLOSED" | "MERON" | "WALA" | "CANCELLED" | "FAILED" | "DRAW" | ""
     const handleResult = async (status: statusType) => {
-        await updateGameResult(currentGameState.gameNo, status)
-        setCurrentGameState({...currentGameState, result: status})
+        let titleText
+        let htmlText
+        if(status === "OPEN" || status === "CLOSED") {
+            titleText = "Confirm Betting Status"
+            htmlText = `Confirm betting Status of <b>Fight # ${currentGameState.gameNo}</b> to <b>${status}</b> ?`
+        } else {
+            titleText = "Declare Game Result"
+            htmlText = `Declare Game Result of <b>Fight # ${currentGameState.gameNo}</b> to <b <b style="color: 
+            ${status == "MERON" ? "red" : status == "WALA" ? "blue" : status == "DRAW" ? "green": "gray"}">${status}</b> ?
+            `
+        }
+        Swal.fire({
+            title: titleText,
+            html: htmlText,
+            showCancelButton: true,
+            cancelButtonText: 'NO',
+            confirmButtonText: 'YES',
+            confirmButtonColor: 'gold',
+            reverseButtons: true,
+        }).then(async (result) =>{
+            if(result.isConfirmed){
+                await updateGameResult(currentGameState.id, status)
+                setCurrentGameState({...currentGameState, result: status})
+                if(status === "MERON" || status === "WALA" || status === "DRAW" || status === "FAILED") {
+                    setGameList((prevGameList) => {
+                        let newGames:Game_Model[] = [];
+                        prevGameList.map((game, i) => {
+                            if (i !== 0) {
+                                newGames.push(game);
+                            }
+                        })
+                        return newGames
+                    });
+                    setCurrentGameState(gameList[0])
+                }
+            }
+        })
     }
     React.useEffect(() => {
         // socket.on('sabong_currentDetails-channel:App\\Events\\sabong_currentDetails', (data: any) => {
@@ -30,22 +111,10 @@ export default function Declarator() {
         // };
     }, []);
     React.useEffect(() => {
-        const fetchCurrentGame = async () => {
-            const gameResponse = await currentGame()
-            if (gameResponse !== undefined){
-                setCurrentGameState(gameResponse.data)
-
-            }
-        }
         fetchCurrentGame()
-        const fetchCurrentStream = async () => {
-            const gameResponse = await getStream()
-            if (gameResponse !== undefined){
-                setStreamData(gameResponse.data)
-
-            }
-        }
         fetchCurrentStream()
+        fetchGameList()
+        fetchExpFights()
     }, [])
     const LiveStreamComponent = () => {
         return (
@@ -66,16 +135,16 @@ export default function Declarator() {
         );
     };
     
-    const GameHeader = (
-        {fight_num, bettingStatus, expFights, streamStatus}: 
-        {fight_num: string, bettingStatus: null | "OPEN" | "CLOSED", expFights: string, streamStatus: "Private" | "Public"} ) => {
+    const GameHeader = React.useCallback((
+        {bettingStatus, expFights, streamStatus}: 
+        {bettingStatus: null | "OPEN" | "CLOSED", expFights: number, streamStatus: "Private" | "Public"} ) => {
         return (
             <div>
                 <Grid columns={12} container flexDirection={"row"} justifyContent={'space-between'}>
-                    <Grid item md sm xs>
-                        <Typography sx={{color: 'white'}} variant="h6">Fight #{fight_num}</Typography>
+                    <Grid key={'fight_title'+currentGameState.gameNo} item md sm xs>
+                        <Typography sx={{color: 'white'}} variant="h6">Fight #{currentGameState.gameNo}</Typography>
                     </Grid>
-                    <Grid item md sm xs textAlign={'right'}>
+                    <Grid key={'fight_lastCall'+currentGameState.gameNo} item md sm xs textAlign={'right'}>
                         <Typography sx={{color: 'white', display: 'flex', justifyContent: 'flex-end', alignItems:'center'}}
                         variant="body2">Last Call <CircleIcon style={{color: bettingStatus === "OPEN" ? 'green': bettingStatus === "CLOSED" ?'red':'white', paddingLeft: '10px'}} /></Typography>
                     </Grid>
@@ -83,157 +152,143 @@ export default function Declarator() {
                 <Typography variant="body2" sx={{color: 'white'}}>
                     <Typography variant="caption" sx={{backgroundColor:'red', padding: '5px', borderRadius: '3px', color: 'white'}}>MIRROR</Typography>
                     {streamStatus} Sabong
-                    <Typography variant="caption" sx={{color: 'white'}}>({expFights} exp. fights)</Typography>
+                    <Typography variant="caption" sx={{color: 'white'}}>({expFights} rem. fights)</Typography>
                 </Typography>
             </div>
         )
-    }
-    const BettingControls = () => {
+    }, [currentGameState])
+    
+    const RoundControl = React.useCallback(({gameInfo, isDisabled}:{gameInfo: Game_Model, isDisabled: boolean}) => {
+        const [betStatus, setBetStatus] = React.useState<any>(()=>{
+            switch(gameInfo.result){
+                case "OPEN":
+                    return gameInfo.result
+                case "CLOSED":
+                    return gameInfo.result
+                case null:
+                    return ""
+                case "":
+                    return ""
+                default:
+                    return "CLOSED"
+            }
+        })
+        const [winner, setWinner] = React.useState<any>("")
+        switch(gameInfo.result) {
+            case "DRAW":
+                setBetStatus("CLOSED");
+            case "MERON":
+                setBetStatus("CLOSED");
+            case "WALA":
+                setBetStatus("CLOSED");
+            case "FAILED":
+                setBetStatus("CLOSED");
+        }
         return (
-            <div>
-                <Grid columns={12} container>
-                    <Grid item sm={12} xs={12} md={12} lg={12} xl={12}>
-                        <Typography variant="h4" sx={{fontWeight: 700, color: 'white', textAlign: 'center'}}>Betting Controls</Typography>
-                    </Grid>
-                    <Grid margin={'auto'} item sm={12} xs={12} md={6} lg={6} xl={4}>
-                        <div style={{backgroundColor: '#005700', color: 'white', minWidth: '100%', textAlign:'center', padding: '1em 0em'}}>
-                            OPEN BETTING
-                        </div>
-                        <div style={{backgroundColor: 'green', minWidth: '100%', textAlign:'center', padding: '2em 0em'}}>
-                            <Button style={{
-                                backgroundColor: colors.gold,
-                                color: 'black',
-                                padding: '1em 1em',
-                                fontWeight: 700,
-                                width: '50%'
-                            }}
-                            onClick={() => handleResult('OPEN')}
-                            >OPEN</Button>
-                        </div>
-                    </Grid>
-                    <Grid margin={'auto'} item sm={12} xs={12} md={6} lg={6} xl={4}>
-                        <div style={{backgroundColor: '#535353', color: 'white', minWidth: '100%', textAlign:'center', padding: '1em 0em'}}>
-                            CLOSE BETTING
-                        </div>
-                        <div style={{backgroundColor: 'gray', minWidth: '100%', textAlign:'center', padding: '2em 0em'}}>
-                            <Button style={{
-                                backgroundColor: colors.gold,
-                                color: 'black',
-                                padding: '1em 1em',
-                                fontWeight: 700,
-                                width: '50%'
-                            }}
-                            onClick={() => handleResult('CLOSED')}
-                            >CLOSE</Button>
-                        </div>
-                    </Grid>
-                </Grid>
-            </div>
+            <Grid key={gameInfo.id} margin={'auto'} item sm={6} xs={12} md={4} lg={4} xl={3}>
+                <div style={{width: '100%'}}>
+                    <div style={{backgroundColor: !isDisabled ? 'rgb(255 123 59)' : 'rgb(187 124 94)', fontWeight: 700, color: 'white', textAlign:'center', padding: '1em 0em', borderRadius: '1em 1em 0em 0em'}}>
+                        Fight # {gameInfo.gameNo}
+                    </div>
+                    <div style={{backgroundColor: !isDisabled ? 'white' : '#a3a3a3', 
+                    padding: '1em 2em', 
+                    borderRadius: '0em 0em 1em 1em',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    }}>
+                        <FormControl variant="filled" sx={{ m: 1, width: '80%'}}>
+                            <Typography variant="body2" fontWeight={700}>Betting Status</Typography>
+                            <div style={{display: "flex", alignItems: 'center', justifyContent: 'space-between'}}>
+                                <Select
+                                    value={betStatus}
+                                    sx={{
+                                        width: '80%'
+                                    }}
+                                    disabled={isDisabled?true : false }
+                                    onChange={(event) => setBetStatus(event.target.value)}
+                                >
+                                    <MenuItem value={"OPEN"}>OPEN</MenuItem>
+                                    <MenuItem value={"CLOSED"}>CLOSED</MenuItem>
+                                </Select>
+                                <IconButton size="small" color="success" onClick={() => {
+                                        if(betStatus !== "") {
+                                            handleResult(betStatus)
+                                        } else {
+                                            Swal.fire(
+                                                'Select from the list',
+                                                undefined,
+                                                'warning'
+                                            )
+                                        }
+                                    }}
+                                    disabled={isDisabled?true:false}>
+                                    <CheckIcon fontSize={'large'}/>
+                                </IconButton>
+                            </div>
+                        </FormControl>
+                        <FormControl variant="filled" sx={{ m: 1, width: '80%'}}>
+                            <Typography variant="body2" fontWeight={700}>Declare Winner</Typography>
+                            <div style={{display: "flex", alignItems: 'center', justifyContent: 'space-between'}}>
+                                <Select
+                                    value={winner}
+                                    sx={{
+                                        width: '80%'
+                                    }}
+                                    disabled={isDisabled?true:false}
+                                    onChange={(event) => setWinner(event.target.value)}
+                                >
+                                    <MenuItem value={"MERON"}>MERON</MenuItem>
+                                    <MenuItem value={"WALA"}>WALA</MenuItem>
+                                    <MenuItem value={"FAILED"}>FAILED</MenuItem>
+                                    <MenuItem value={"DRAW"}>DRAW</MenuItem>
+                                </Select>
+                                <IconButton size="small" color="success" onClick={() => {
+                                        if(winner !== "") {
+                                            handleResult(winner)
+                                        } else {
+                                            Swal.fire(
+                                                'Select from the list',
+                                                undefined,
+                                                'warning'
+                                            )
+                                        }
+                                    }}
+                                    disabled={isDisabled?true:false}>
+                                    <CheckIcon fontSize={'large'}/>
+                                </IconButton>
+                            </div>
+                        </FormControl>
+                    </div>
+                </div>
+            </Grid>
         )
-    }
-    const WinnerControls = () => {
-        return (
-            <div>
-                <Grid columns={12} container>
-                    <Grid item sm={12} md={12} xs={12} lg={12} xl={12}>
-                        <Typography variant="h4" sx={{fontWeight: 700, color: 'white', textAlign: 'center'}}>Declare Winner</Typography>
-                    </Grid>
-                    <Grid item sm={6} xs={12} md={6} lg={3} xl={3}>
-                        <div style={{backgroundColor: 'maroon', color: 'white', minWidth: '100%', textAlign:'center', padding: '1em 0em'}}>
-                            MERON
-                        </div>
-                        <div style={{backgroundColor: 'red', minWidth: '100%', textAlign:'center'}}>
-                            <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
-                                {/* 400,000.<Typography sx={{color: 'white'}} variant="caption">00</Typography> */}
-                                0.00
-                            </Typography>
-                            <Button style={{
-                                backgroundColor: colors.gold,
-                                color: 'black',
-                                padding: '1em 1em',
-                                marginBottom: '2rem',
-                                fontWeight: 700,
-                                width: '50%'
-                            }}
-                            onClick={() => handleResult('MERON')}
-                            >MERON</Button>
-                        </div>
-                    </Grid>
-                    <Grid item sm={6} xs={12} md={6} lg={3} xl={3}>
-                        <div style={{backgroundColor: '#0404b1', color: 'white', textAlign:'center', padding: '1em 0em'}}>
-                            WALA
-                        </div>
-                        <div style={{backgroundColor: 'blue', textAlign:'center'}}>
-                            <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
-                                0.00
-                            </Typography>
-                            <Button style={{
-                                backgroundColor: colors.gold,
-                                color: 'black',
-                                padding: '1em 1em',
-                                marginBottom: '2rem',
-                                fontWeight: 700,
-                                width: '50%'
-                            }}
-                            onClick={() => handleResult('WALA')}
-                            >WALA</Button>
-                        </div>
-                    </Grid>
-                    <Grid item sm={6} xs={12} md={6} lg={3} xl={3}>
-                        <div style={{backgroundColor: '#005700', color: 'white', minWidth: '100%', textAlign:'center', padding: '1em 0em'}}>
-                            DRAW
-                        </div>
-                        <div style={{backgroundColor: 'green', minWidth: '100%', textAlign:'center'}}>
-                            <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
-                                {/* 400,000.<Typography sx={{color: 'white'}} variant="caption">00</Typography> */}
-                                0.00
-                            </Typography>
-                            <Button style={{
-                                backgroundColor: colors.gold,
-                                color: 'black',
-                                padding: '1em 1em',
-                                marginBottom: '2rem',
-                                fontWeight: 700,
-                                width: '50%'
-                            }}
-                            onClick={() => handleResult('DRAW')}
-                            >DRAW</Button>
-                        </div>
-                    </Grid>
-                    <Grid item sm={6} xs={12} md={6} lg={3} xl={3}>
-                        <div style={{backgroundColor: '#535353', color: 'white', minWidth: '100%', textAlign:'center', padding: '1em 0em'}}>
-                            CANCELLED
-                        </div>
-                        <div style={{backgroundColor: 'gray', minWidth: '100%', textAlign:'center'}}>
-                            <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
-                                {/* 400,000.<Typography sx={{color: 'white'}} variant="caption">00</Typography> */}
-                                0.00
-                            </Typography>
-                            <Button style={{
-                                backgroundColor: colors.gold,
-                                color: 'black',
-                                padding: '1em 1em',
-                                marginBottom: '2rem',
-                                fontWeight: 700,
-                                width: '50%'
-                            }}
-                            onClick={() => handleResult('FAILED')}
-                            >CANCELLED</Button>
-                        </div>
-                    </Grid>
-                </Grid>
-            </div>
-        )
-    }
+    },[gameList.length])
     return (
         <div>
-            <LiveStreamComponent />
-            <GameHeader fight_num={currentGameState.gameNo}
+            <LiveStreamComponent key={'streamComponent'}/>
+            <GameHeader
                 bettingStatus={currentGameState.result}
-                expFights={streamData.expfights}
-                streamStatus={streamData.viewState} />
-            <BettingControls />
-            <WinnerControls />
+                expFights={expFights}
+                streamStatus={streamData.viewState}
+                key={'gameHeader'} />
+            <Card style={{
+                maxWidth:"90%",
+                backgroundColor: 'transparent',
+                margin: 'auto',
+                maxHeight: '100vh',
+                overflowY: 'auto'
+            }}>
+            <CardContent key={'controls'}>
+                <Grid columns={12} container columnSpacing={3} rowSpacing={3}>
+                    {
+                        gameList.map((val, i) => (
+                            <RoundControl isDisabled={i === 0 ? false: true} gameInfo={val} />
+                        ))
+                    }
+                </Grid>
+            </CardContent>
+            </Card>
         </div>
     )
 }

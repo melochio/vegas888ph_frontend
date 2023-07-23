@@ -30,7 +30,7 @@ switch (level) {
         document.location.href = "/super_admin/dashboard"
         break;
     case "agent":
-        document.location.href = "/agent/dashboard"
+        // document.location.href = "/agent/dashboard"
         break;
     case "super agent":
         document.location.href = "/super_agent/dashboard"

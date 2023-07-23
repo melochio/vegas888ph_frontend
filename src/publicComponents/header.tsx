@@ -35,12 +35,12 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
           document.location.href = "/login"
         }
     }
+    fetchUserData()
     const fetchBalance = async () => {
       const response = await GetMyBalance();
       setWalletBalance(response?.data);
     }
     fetchBalance()
-    fetchUserData()
   }, [])
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
@@ -147,6 +147,11 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
                     variant="outlined"
                     sx={{margin: '0.5em 0em'}}
                     fullWidth
+                    helperText={"Your remaining balance: "+ walletBalance.toLocaleString("en-US", {
+                        style: "decimal",
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    })}
                     // Add necessary event handlers and state for inputs
                   />
                   <TextField
@@ -199,7 +204,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
         borderBottom: 'solid 2px ' + colors.gold,
       }}
     >
-      <Grid item xs={12} sm={4} md lg xl>
+      <Grid item key={'logo'} xs={12} sm={4} md lg xl>
         <Image alt={'Logo'} src={Logo} quality={100} width={120} height={60} onClick={()=> 
             document.location.href = '/dashboard'} style={{
           maxHeight: 60,
@@ -211,7 +216,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
           cursor: 'pointer'
         }} />
       </Grid>
-      <Grid item xs={12} sm={8} md lg xl>
+      <Grid key={'user'} item xs={12} sm={8} md lg xl>
         <Grid container flexDirection={'row'} justifyContent={'flex-end'}>
           <ButtonGroup
             size="small"
@@ -220,7 +225,11 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
           >
             <Card sx={{ maxHeight: '30px', padding: '0rem 1rem' }}>
               <Typography variant="caption" fontWeight={800}>
-                &#8369;{walletBalance.toFixed(2)}
+                &#8369;{walletBalance.toLocaleString("en-US", {
+                                    style: "decimal",
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                })}
               </Typography>
             </Card>
             <Button size={'medium'} variant="contained" onClick={handleWalletModal}>
