@@ -6,10 +6,9 @@ import CardCover from '@mui/joy/CardCover';
 import CardContent from '@mui/joy/CardContent';
 import Typography from '@mui/joy/Typography';
 import TextInput from '@/publicComponents/TextInput'
-import FormInput from '@/publicComponents/FormInput'
 import Model_tranferMoney, { initialUser } from '../../../../models/tranferMoney'
 import { transferWalletApi } from '@/api/agent/wallet'
-import fetchUser from '@/api/agent/users'
+import {fetchUser} from '@/api/agent/users'
 
 import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -66,7 +65,7 @@ export default function Wallet() {
     const fetchData = async () => {
 
         try {
-            const users: [] = await fetchUser();
+            const users: [] = await fetchUser(['admin']);
             console.log(users)
             setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
         } catch (error) {

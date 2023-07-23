@@ -4,12 +4,14 @@
 interface Model_tranferMoney { 
     requestee: number | any,
     amount: number, 
+    receiverId: number | any, 
     transactionDetails: string | any, 
     type: string | any,
     password: string | any
 } 
 const initialUser: Model_tranferMoney = {
     requestee: '',
+    receiverId: 0, 
     amount: 0,
     transactionDetails: '',
     type: '',

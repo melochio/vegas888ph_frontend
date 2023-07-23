@@ -23,7 +23,7 @@ const Form = () => {
         let inputsValid = false
         console.log(formInput)
         if (formInput.receiverId != "" &&
-            formInput.amount != ""
+            formInput.amount != 0
         ) {
             inputsValid = true
         }
@@ -104,8 +104,6 @@ const Form = () => {
                                     disablePortal
                                     id="receiverIdInput"
                                     onChange={handleAutocompleteChange}
-                                    name="receiverId"
-                                    value={receiver}
                                     options={top100Films}
                                     sx={{ width: 300 }}
                                     renderInput={(params) => <TextField {...params} label="Transfer to" />}

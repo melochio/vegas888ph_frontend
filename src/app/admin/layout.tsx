@@ -31,6 +31,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import HomeSharpIcon from '@mui/icons-material/HomeSharp';
 import AccountBoxSharpIcon from '@mui/icons-material/AccountBoxSharp';
 import AssessmentSharpIcon from '@mui/icons-material/AssessmentSharp';
+import userMiddleware from '@/utils/middleware';
 // const drawerWidth = 240;
 const drawerWidth = 240;
 
@@ -87,6 +88,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  React.useEffect(() => {
+    userMiddleware()
+  }, [])
   const router = useRouter();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);

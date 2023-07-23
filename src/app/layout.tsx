@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { colors } from '@/publicComponents/customStyles'
-import bgImg from '@assets/playgame-bg.jpg'
+import React from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -15,9 +14,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  
   return (
     <html lang="en">
-      <body className={inter.className} style={{backgroundImage: "url(/playgame-bg3.jpg) ", height: '100vh', margin: 0}}>{children}</body>
+      <body className={inter.className + "background-image-container"} style={{
+          backgroundImage: "url(/playgame-bg3.png) ", 
+          height: '100vh', 
+          margin: 0, 
+          
+        }}>{children}</body>
       {/* <body className={inter.className}>{children}</body> */}
     </html>
   )

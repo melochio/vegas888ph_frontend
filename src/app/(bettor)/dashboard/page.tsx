@@ -16,7 +16,7 @@ const gameList = [
     {
         title: "Sabong",
         description: "live sabong",
-        imgPath: "/sample6.png",
+        imgPath: "/sample7.jpeg",
         href: "/gameView",
     },
     {

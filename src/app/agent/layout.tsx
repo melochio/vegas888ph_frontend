@@ -35,6 +35,7 @@ import AssessmentSharpIcon from '@mui/icons-material/AssessmentSharp';
 import axios from 'axios';
 import { getWalletSummary } from '@/api/agent/wallet'
 import { GetMyBalance } from '@/api/bettor/wallet';
+import userMiddleware from '@/utils/middleware';
 // const drawerWidth = 240;
 const drawerWidth = 240;
 
@@ -209,6 +210,9 @@ export default function RootLayout({
     }
   }
 
+  React.useEffect(() => {
+    userMiddleware()
+  }, [])
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />

@@ -29,8 +29,12 @@ import { updateGameResult, gameList as gameList_API } from "@/api/declarator/htt
 import CircleIcon from '@mui/icons-material/Circle';
 import socket from "@/utils/webSocket"
 import Swal from "sweetalert2"
+import userMiddleware from "@/utils/middleware"
 
 export default function Declarator() {
+    React.useEffect(() => {
+      userMiddleware()
+    }, [])
     const [currentGameState, setCurrentGameState] = React.useState<Game_Model>(initialGameValue)
     const [gameList, setGameList] = React.useState<Game_Model[]>([])
     const [streamData, setStreamData] = React.useState<Stream_Model>(initialStreamValue)

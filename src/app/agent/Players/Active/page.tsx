@@ -5,7 +5,7 @@ import { Card } from '@mui/joy';
 import { Typography } from '@mui/material';
 
 import Swal from "sweetalert2"
-import fetchUser from '@agentApi/users'
+import {fetchUser} from '@agentApi/users'
 
 
 
@@ -34,7 +34,7 @@ export default function DataTable() {
     React.useEffect(() => {
         const fetchData = async () => {
             try {
-                const users = await fetchUser();
+                const users = await fetchUser(['admin']);
                 setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
             } catch (error) {
                 console.error('Error fetching data:', error);

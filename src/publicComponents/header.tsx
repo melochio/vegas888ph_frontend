@@ -6,7 +6,7 @@ import Image from 'next/image'
 import {colors} from '@pComp/customStyles'
 import { useRouter } from 'next/navigation'
 import MailIcon from '@mui/icons-material/Mail';
-import Logo from './vegas888logo.png'
+import Logo from './logo.png'
 import React, { MouseEventHandler, useState } from 'react'
 import {
     Menu,
@@ -207,13 +207,14 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
       <Grid item key={'logo'} xs={12} sm={4} md lg xl>
         <Image alt={'Logo'} src={Logo} quality={100} width={120} height={60} onClick={()=> 
             document.location.href = '/dashboard'} style={{
-          maxHeight: 60,
-          maxWidth: 120,
-          width: 'auto',
-          height:'auto',
-          minWidth:100,
-          minHeight:40,
-          cursor: 'pointer'
+            maxHeight: 60,
+            maxWidth: 120,
+            width: 'auto',
+            height:'auto',
+            minWidth:100,
+            minHeight:40,
+            cursor: 'pointer',
+            scale: 2.5,
         }} />
       </Grid>
       <Grid key={'user'} item xs={12} sm={8} md lg xl>
@@ -310,15 +311,15 @@ const DeclaratorHeader = () => {
         }}
       >
         <Grid item xs={12} sm={4} md lg xl>
-          <Image alt={'Logo'} src={Logo} quality={100} width={120} height={60} onClick={()=> 
-              document.location.href = '/dashboard'} style={{
-            maxHeight: 60,
-            maxWidth: 120,
-            width: 'auto',
-            height:'auto',
-            minWidth:100,
-            minHeight:40,
-            cursor: 'pointer'
+          <Image alt={'Logo'} src={Logo} quality={100} width={120} height={60} style={{
+                maxHeight: 60,
+                maxWidth: 120,
+                width: 'auto',
+                height:'auto',
+                minWidth:100,
+                minHeight:40,
+                cursor: 'pointer',
+                scale: 2.5,
           }} />
         </Grid>
         <Grid item xs={12} sm={8} md lg xl>
@@ -341,7 +342,6 @@ const DeclaratorHeader = () => {
       </Grid>
   );
 }
-
 export default function Header() {
     const router = useRouter()
     return (
@@ -350,7 +350,15 @@ export default function Header() {
             }}>
             <Grid item sm md lg xl xs={12}>&nbsp;</Grid>
             <Grid item sm md lg xl xs={12} textAlign={'center'}>
-                <Image alt={'Logo'} src={Logo} quality={100} width={180} height={100}/>
+                <Image alt={'Logo'} src={Logo} quality={100} width={180} height={100} style={{
+                  maxHeight: 60,
+                  maxWidth: 120,
+                  width: 'auto',
+                  height:'auto',
+                  minWidth:100,
+                  minHeight:40,
+                  scale: 2.5,
+                }}/>
                 {/* <Button href='/' variant={'text'} sx={{paddingLeft: 6, paddingRight: 6, border: 0, fontSize: 27, color: colors.gold}}>VEGAS 888</Button> */}
             </Grid>
             <Grid item sm md lg xl xs={12}>

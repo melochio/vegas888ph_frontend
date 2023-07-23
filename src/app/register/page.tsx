@@ -12,6 +12,7 @@ import React, { Dispatch } from "react"
 import {register as RegisterAPI} from '@bettorApi/auth'
 import Model_User, { initialUser } from "@/models/users"
 import Swal from "sweetalert2"
+import userMiddleware from "@/utils/middleware"
 
 const Form = () => {
     const [formInput, setFormInput] = React.useState<Model_User>(initialUser)
@@ -169,6 +170,9 @@ const Form = () => {
 }
 
 export default function Register() {
+    React.useEffect(() => {
+      userMiddleware()
+    }, [])
     return (
         <div>
             <Header />

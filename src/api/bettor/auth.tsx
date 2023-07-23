@@ -29,12 +29,7 @@ const logout = async () => {
 
 const fetchUser = async () => {
     try {
-        const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/tokenValue',null, {
-          withCredentials: true,
-          headers: {
-            'Authorization': 'Bearer '+localStorage.getItem('token')
-          }
-        })
+        const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/tokenValue',null, config)
         const userResponse : UserModel_Hidden = response.data
         return userResponse
     } catch(err) {
