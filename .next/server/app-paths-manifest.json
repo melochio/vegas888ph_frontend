@@ -1,7 +1,0 @@
-{
-  "/(bettor)/gameView/page": "app/(bettor)/gameView/page.js",
-  "/admin/Dashboard/page": "app/admin/Dashboard/page.js",
-  "/admin/Setup/Account/page": "app/admin/Setup/Account/page.js",
-  "/admin/LoadingStation/Wallet/page": "app/admin/LoadingStation/Wallet/page.js",
-  "/admin/Setup/Events/page": "app/admin/Setup/Events/page.js"
-}
