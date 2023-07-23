@@ -23,7 +23,7 @@
       "@/*": ["./src/*"],
       "@pComp/*": ["./src/publicComponents/*"],
       "@bettorApi/*": ["./src/api/bettor/*"],
-      "@agentApi/*": ["./src/api/agent*"],
+      "@agentApi/*": ["./src/api/agent/*"],
       "@assets/*": ["./public/*"]
     }
   },

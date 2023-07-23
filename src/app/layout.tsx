@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { colors } from '@/publicComponents/customStyles'
+import bgImg from '@assets/playgame-bg.jpg'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className} style={{backgroundImage: "url(/playgame-bg3.jpg) ", height: '100vh', margin: 0}}>{children}</body>
+      {/* <body className={inter.className}>{children}</body> */}
     </html>
   )
 }

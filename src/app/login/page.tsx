@@ -24,16 +24,16 @@ switch (level) {
         document.location.href = "/declarator"
         break;
     case "admin":
-        document.location.href = "/admin/dashboard"
+        document.location.href = "/admin/Dashboard"
         break;
     case "super admin":
-        document.location.href = "/super_admin/dashboard"
+        document.location.href = "/super_admin/Dashboard"
         break;
     case "agent":
-        // document.location.href = "/agent/dashboard"
+        document.location.href = "/agent/Dashboard"
         break;
-    case "super agent":
-        document.location.href = "/super_agent/dashboard"
+    case "master agent":
+        document.location.href = "/agent/Dashboard"
         break;
     default:
         document.location.href = "/login"
@@ -99,12 +99,12 @@ const Form = () => {
                             </Grid>
                             <Grid item sm={6} md={6} lg={6} xl={6} xs={6}>
                                 <LoadingButton loading={loginState} fullWidth
-                                onClick={handleLogin}
-                                sx={{
-                                    padding: '1rem 3rem', fontWeight: 700, backgroundColor: colors.gold, color: 'black',
-                                    '&:hover':{
-                                        backgroundColor: colors.gold+"99"
-                                    }
+                                    onClick={handleLogin}
+                                    sx={{
+                                        padding: '1rem 3rem', fontWeight: 700, backgroundColor: colors.gold, color: 'black',
+                                        '&:hover':{
+                                            backgroundColor: colors.gold+"99"
+                                        }
                                     }}>
                                     Login
                                 </LoadingButton>

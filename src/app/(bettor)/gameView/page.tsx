@@ -51,41 +51,43 @@ const GameHeader = (
     )
 }
 const Trends = ({winner, textValue}:{winner: "MERON" | "WALA" | "FAILED" | "DRAW", textValue: string[]}) => {
-    const trendColor = ():string => {
-        switch (winner) {
-            case "MERON":
-                return "red"
-            case "WALA":
-                return "blue"
-            case "DRAW":
-                return "green"
-            case "FAILED":
-                return "lightgray"
+    if(winner !== null) {
+        const trendColor = ():string => {
+            switch (winner) {
+                case "MERON":
+                    return "red"
+                case "WALA":
+                    return "blue"
+                case "DRAW":
+                    return "green"
+                case "FAILED":
+                    return "lightgray"
+            }
         }
-    }
-    return textValue.map((val) => (
-        <div style={{
-            border: '1px solid gray',
-            maxWidth: '25px',
-            maxHeight: '25px',
-            minWidth: '25px',
-            minHeight: '25px',
-        }}>
+        return textValue.map((val) => (
             <div style={{
-                backgroundColor: trendColor(), 
-                borderRadius: '50%', 
-                color: 'white', 
-                height: '100%', 
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '12px',
-                }}>
-                {val}
+                border: '1px solid gray',
+                maxWidth: '25px',
+                maxHeight: '25px',
+                minWidth: '25px',
+                minHeight: '25px',
+            }}>
+                <div style={{
+                    backgroundColor: trendColor(), 
+                    borderRadius: '50%', 
+                    color: 'white', 
+                    height: '100%', 
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    }}>
+                    {val}
+                </div>
             </div>
-        </div>
-    ))
+        ))
+    }
 }
 export default function GameView() {
     const [currentGameState, setCurrentGameState] = React.useState<Game_Model>(initialGameValue)
@@ -231,11 +233,12 @@ export default function GameView() {
                         </div>
                         <div style={{backgroundColor: 'red', minWidth: '100%', textAlign:'center'}}>
                             <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
-                                {parseFloat(currentGameState.meron_total_bet).toLocaleString("en-US", {
+                                {!isNaN(parseFloat(currentGameState.meron_total_bet))
+                                ?parseFloat(currentGameState.meron_total_bet).toLocaleString("en-US", {
                                     style: "decimal",
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
-                                })}
+                                }): '0.00'}
                             </Typography>
                             <Button style={{
                                 backgroundColor: colors.gold,
@@ -247,7 +250,7 @@ export default function GameView() {
                             onClick={() => handleClickOpen('MERON')}
                             >CHOOSE MERON</Button>
                             <Typography sx={{color: 'white', padding: '1rem'}} variant="body2">
-                                {parseFloat(currentGameState.meron_odds).toFixed(2)}
+                                {currentGameState.meron_odds !== null ? parseFloat(currentGameState.meron_odds).toFixed(2) : 0.00 }
                             </Typography>
                         </div>
                     </Grid>
@@ -257,11 +260,12 @@ export default function GameView() {
                         </div>
                         <div style={{backgroundColor: 'blue', textAlign:'center'}}>
                             <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
-                                {parseFloat(currentGameState.wala_total_bet).toLocaleString("en-US", {
+                                {!isNaN(parseFloat(currentGameState.wala_total_bet))
+                                ?parseFloat(currentGameState.wala_total_bet).toLocaleString("en-US", {
                                     style: "decimal",
                                     minimumFractionDigits: 2,
                                     maximumFractionDigits: 2,
-                                })}
+                                }): '0.00'}
                             </Typography>
                             <Button style={{
                                 backgroundColor: colors.gold,

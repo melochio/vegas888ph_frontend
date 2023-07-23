@@ -18,6 +18,7 @@
     "@mui/joy": "^5.0.0-alpha.87",
     "@mui/lab": "^5.0.0-alpha.136",
     "@mui/material": "^5.14.0",
+    "@mui/x-data-grid": "^6.10.1",
     "@mux/mux-player-react": "^1.11.4",
     "@types/node": "20.4.2",
     "@types/react": "18.2.15",
@@ -34,5 +35,9 @@
   },
   "devDependencies": {
     "gh-pages": "^5.0.0"
-  }
+  },
+  "description": "This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).",
+  "main": "next.config.js",
+  "author": "",
+  "license": "ISC"
 }

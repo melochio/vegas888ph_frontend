@@ -16,6 +16,17 @@
       "static/chunks/main-app.js",
       "static/chunks/app/register/page.js"
     ],
+    "/(bettor)/gameView/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(bettor)/gameView/page.js"
+    ],
+    "/declarator/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/declarator/layout.css",
+      "static/chunks/app/declarator/layout.js"
+    ],
     "/(bettor)/dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -31,16 +42,70 @@
       "static/chunks/main-app.js",
       "static/chunks/app/page.js"
     ],
-    "/(bettor)/gameView/page": [
+    "/agent/layout": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/(bettor)/gameView/page.js"
+      "static/chunks/app/agent/layout.js"
     ],
-    "/declarator/layout": [
+    "/agent/Dashboard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/declarator/layout.css",
-      "static/chunks/app/declarator/layout.js"
+      "static/chunks/app/agent/Dashboard/page.js"
+    ],
+    "/agent/LoadingStation/Wallet/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/agent/LoadingStation/Wallet/page.js"
+    ],
+    "/admin/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/layout.js"
+    ],
+    "/admin/Dashboard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/Dashboard/page.js"
+    ],
+    "/admin/LoadingStation/Wallet/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/LoadingStation/Wallet/page.js"
+    ],
+    "/agent/LoadingStation/WithdrawalRequests/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/agent/LoadingStation/WithdrawalRequests/page.js"
+    ],
+    "/admin/Setup/Account/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/Setup/Account/page.js"
+    ],
+    "/admin/Setup/Events/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/Setup/Events/page.js"
+    ],
+    "/admin/LoadingStation/WithdrawalRequests/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/LoadingStation/WithdrawalRequests/page.js"
+    ],
+    "/agent/Home/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/agent/Home/page.js"
+    ],
+    "/agent/Players/Active/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/agent/Players/Active/page.js"
+    ],
+    "/agent/LoadingStation/Commision/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/agent/LoadingStation/Commision/page.js"
     ]
   }
 }

@@ -1,8 +1,7 @@
 {
-  "/page": "app/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/login/page": "app/login/page.js",
-  "/(bettor)/dashboard/page": "app/(bettor)/dashboard/page.js",
-  "/declarator/page": "app/declarator/page.js",
-  "/(bettor)/gameView/page": "app/(bettor)/gameView/page.js"
+  "/(bettor)/gameView/page": "app/(bettor)/gameView/page.js",
+  "/admin/Dashboard/page": "app/admin/Dashboard/page.js",
+  "/admin/Setup/Account/page": "app/admin/Setup/Account/page.js",
+  "/admin/LoadingStation/Wallet/page": "app/admin/LoadingStation/Wallet/page.js",
+  "/admin/Setup/Events/page": "app/admin/Setup/Events/page.js"
 }
