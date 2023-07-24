@@ -153,7 +153,7 @@ export default function Wallet() {
                     separator={<NavigateNextIcon fontSize="small" />}
                     aria-label="breadcrumb"
                     color='white'
-                >
+                > 
                     {breadcrumbs}
                 </Breadcrumbs>
             </Stack>
