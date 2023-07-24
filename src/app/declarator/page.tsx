@@ -30,6 +30,8 @@ import CircleIcon from '@mui/icons-material/Circle';
 import socket from "@/utils/webSocket"
 import Swal from "sweetalert2"
 import userMiddleware from "@/utils/middleware"
+import Echo from "laravel-echo"
+import Pusher from "pusher-js"
 
 export default function Declarator() {
     React.useEffect(() => {
@@ -39,6 +41,28 @@ export default function Declarator() {
     const [gameList, setGameList] = React.useState<Game_Model[]>([])
     const [streamData, setStreamData] = React.useState<Stream_Model>(initialStreamValue)
     const [expFights, setExpFights] = React.useState(0)
+    React.useEffect(() => {
+        window.Pusher = Pusher;
+        const echo = new Echo({
+            broadcaster: 'pusher',
+            key: 'local1', // Replace with your Pusher key (PUSHER_APP_KEY)
+            wsHost: '127.0.0.1',
+            wsPort: 6001,
+            cluster: 'ap2', // Set the Pusher cluster here
+            disableStats: true,
+            forceTLS: false,
+            encrypted: false, // Set to true if your WebSocket server uses SSL
+            enabledTransports: ['ws'], // Use only WebSocket transport
+        });
+
+        const channel = echo.channel('counter');
+        channel.listen('sabong_currentDetails', (event: any) => {
+        // Handle the event data here
+            console.log('Received event:', event);
+            setCurrentGameState(event.data)
+            setGameList(event.remainingGames)
+        });
+    }, []);
     const fetchExpFights = async () => {
         const expFightsRepsonse = await getExpFights()
         if (expFightsRepsonse !== undefined){
@@ -87,19 +111,6 @@ export default function Declarator() {
         }).then(async (result) =>{
             if(result.isConfirmed){
                 await updateGameResult(currentGameState.id, status)
-                setCurrentGameState({...currentGameState, result: status})
-                if(status === "MERON" || status === "WALA" || status === "DRAW" || status === "FAILED") {
-                    setGameList((prevGameList) => {
-                        let newGames:Game_Model[] = [];
-                        prevGameList.map((game, i) => {
-                            if (i !== 0) {
-                                newGames.push(game);
-                            }
-                        })
-                        return newGames
-                    });
-                    setCurrentGameState(gameList[0])
-                }
             }
         })
     }

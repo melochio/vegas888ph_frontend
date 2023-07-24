@@ -21,6 +21,7 @@ const login = async (formData: Model_User) => {
 }
 const logout = async () => {
     try {
+        localStorage.removeItem('token')
         const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+'/api/bettor/logout', null, config);
         return response
     } catch {

@@ -8,7 +8,6 @@ export default function Home() {
     <div>
       <Header />
       <div style={{minHeight: '70vh'}}>
-        test
       </div>
       <Footer />
     </div>

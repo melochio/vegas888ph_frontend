@@ -1,6 +1,6 @@
 'use client'
 import { fetchUser, login } from "@/api/bettor/auth"
-import Model_User, { initialUser } from "@/models/users"
+import Model_User, { UserModel_Hidden, initialUser } from "@/models/users"
 import { colors } from "@/publicComponents/customStyles"
 import Footer from "@/publicComponents/footer"
 import Header from "@/publicComponents/header"
@@ -35,6 +35,9 @@ switch (level) {
     case "master agent":
         document.location.href = "/agent/Dashboard"
         break;
+    case "declarator":
+        document.location.href = "/declarator"
+        break;
     default:
         document.location.href = "/login"
         break;
@@ -49,10 +52,18 @@ const Form = () => {
     const handleLogin = async () => {
     setLoginState(true)
       try {
-        const response = await login(formInput);
-        const token = response.token;
+        const loginresponse = await login(formInput);
+        const token = loginresponse.token;
         localStorage.setItem('token', token);
-        const userResponse = await fetchUser();
+        const fetchUserResponse = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/tokenValue',null, {
+            withCredentials: true,
+            headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': 'http://127.0.0.1:3000/',
+            'Authorization': 'Bearer '+ token
+            },
+        })
+        const userResponse : UserModel_Hidden = fetchUserResponse.data
         userValidator(userResponse?.user_level)
       } catch {
         Swal.fire(

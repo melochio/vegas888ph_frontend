@@ -1,4 +1,3 @@
-'use client'
 const config = {
     withCredentials: true,
     headers: {

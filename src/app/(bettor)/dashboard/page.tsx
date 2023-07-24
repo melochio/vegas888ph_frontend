@@ -18,36 +18,42 @@ const gameList = [
         description: "live sabong",
         imgPath: "/sample7.jpeg",
         href: "/gameView",
+        isAvailable: true,
     },
     {
         title: "Bingo",
         description: "Live bingo game",
         imgPath: "/sample5.png",
         href: "#",
+        isAvailable: false,
     },
     {
         title: "Dice",
         description: "Dice game",
         imgPath: "/sample4.png",
         href: "#",
+        isAvailable: false,
     },
     {
         title: "Wheel Spin",
         description: "Spin the wheel game",
         imgPath: "/sample3.png",
         href: "#",
+        isAvailable: false,
     },
     {
         title: "Roulette",
         description: "Roulette game",
         imgPath: "/sample1.png",
         href: "#",
+        isAvailable: false,
     },
     {
         title: "Rocket Up",
         description: "Checkout before the rocket blows up",
         imgPath: "/sample2.png",
         href: "#",
+        isAvailable: false,
     }
 ]
 const categoryList = [
@@ -159,7 +165,7 @@ export default function Dashboard() {
                 }}>
                     <Button sx={{borderRadius: '2em', backgroundColor: colors.gold, fontWeight: 700, padding: '1em 2em'}} variant={'contained'}>View All</Button>
                 </div>
-                <Leaderboards />
+                {/* <Leaderboards /> */}
             </div>
         </div>
     )

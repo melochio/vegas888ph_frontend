@@ -14,6 +14,9 @@ import Stream_Model, { initialStreamValue } from "@/models/stream";
 import socket from "@/utils/webSocket";
 import Swal from "sweetalert2";
 import { GetMyBalance } from "@/api/bettor/wallet";
+import Pusher from "pusher-js";
+import { io } from "socket.io-client";
+import Echo from "laravel-echo";
 
 type Round = {
     winner: "MERON" | "WALA" | "FAILED" | "DRAW";
@@ -45,7 +48,7 @@ const GameHeader = (
             <Typography variant="body2" sx={{color: 'white'}}>
                 <Typography variant="caption" sx={{backgroundColor:'red', padding: '5px', borderRadius: '3px', color: 'white'}}>MIRROR</Typography>
                 {streamStatus} Sabong
-                <Typography variant="caption" sx={{color: 'white'}}>({expFights} exp. fights)</Typography>
+                <Typography variant="caption" sx={{color: 'white'}}>({expFights} rem. fights)</Typography>
             </Typography>
         </div>
     )
@@ -64,8 +67,8 @@ const Trends = ({winner, textValue}:{winner: "MERON" | "WALA" | "FAILED" | "DRAW
                     return "lightgray"
             }
         }
-        return textValue.map((val) => (
-            <div style={{
+        return textValue.map((val, i) => (
+            <div key={'trendCol_'+i} style={{
                 border: '1px solid gray',
                 maxWidth: '25px',
                 maxHeight: '25px',
@@ -89,12 +92,46 @@ const Trends = ({winner, textValue}:{winner: "MERON" | "WALA" | "FAILED" | "DRAW
         ))
     }
 }
-export default function GameView() {
+declare global {
+  interface Window {
+    Pusher: typeof Pusher;
+    io: any; // Add this line to declare io (optional if you're using socket.io-client separately)
+    Echo: typeof Echo;
+  }
+}
+export default function GameView() { 
     const [currentGameState, setCurrentGameState] = React.useState<Game_Model>(initialGameValue)
     const [streamData, setStreamData] = React.useState<Stream_Model>(initialStreamValue)
     const [trendsState, setTrendsState] = React.useState<Round[]>([])
     const [walletBalance, setWalletBalance] = React.useState(0)
     const [expFights, setExpFights] = React.useState(0)
+    React.useEffect(() => {
+        window.Pusher = Pusher;
+        const echo = new Echo({
+            broadcaster: 'pusher',
+            key: 'local1', // Replace with your Pusher key (PUSHER_APP_KEY)
+            wsHost: '127.0.0.1',
+            wsPort: 6001,
+            cluster: 'ap2', // Set the Pusher cluster here
+            disableStats: true,
+            forceTLS: false,
+            encrypted: false, // Set to true if your WebSocket server uses SSL
+            enabledTransports: ['ws'], // Use only WebSocket transport
+        });
+
+        const channel = echo.channel('counter');
+        channel.listen('sabong_currentDetails', (event: any) => {
+        // Handle the event data here
+            console.log('Received event:', event);
+            setCurrentGameState(event.data)
+            const trendsList: Game_Model[] = event.trends
+            let newTrends: Round[] = []
+            trendsList.map((val) => {
+                newTrends.push({winner: val.result, fightNo: val.gameNo})
+            })
+            setTrendsState(newTrends)
+        });
+    }, []);
     const fetchBalance = async () => {
         const response = await GetMyBalance();
         setWalletBalance(response?.data);
@@ -345,8 +382,8 @@ export default function GameView() {
                 {
                     trendCountList.map((val, i) => {
                         return (
-                            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                <Trends key={i} winner={val.winner} textValue={val.textValues} />
+                            <div key={'trendCount_'+i} style={{ display: 'flex', flexDirection: 'column' }}>
+                                <Trends winner={val.winner} textValue={val.textValues} />
                             </div>
                         );
                     })
