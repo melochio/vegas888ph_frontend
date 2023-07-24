@@ -13,12 +13,15 @@ import {register as RegisterAPI} from '@bettorApi/auth'
 import Model_User, { initialUser } from "@/models/users"
 import Swal from "sweetalert2"
 import userMiddleware from "@/utils/middleware"
+import { format, isValid } from 'date-fns';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 const Form = () => {
     const [formInput, setFormInput] = React.useState<Model_User>(initialUser)
     const [confirmpwd, setConfirmpwd] = React.useState('')
     const [passwordValidation, setPasswordValidation] = React.useState(false)
     const [termsCheck, setTermsCheck] = React.useState(false)
+    const [selectedDate, setSelectedDate] = React.useState<Date | null>(null);
     const formSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         let inputsValid = false
         if(formInput.name != "" &&
@@ -72,6 +75,16 @@ const Form = () => {
     const handleTermsCheck = (event: React.ChangeEvent<HTMLInputElement>) => {
         setTermsCheck(event.target.checked);
     };
+    
+  
+    const handleDateChange = (date:string) => {
+        setFormInput({ ...formInput, bday: date });
+    };
+  
+    const isValidDate = (date: Date | null): boolean => {
+      // Check if the date is a valid instance of Date and not in the past
+      return date !== null && isValid(date) && date >= new Date();
+    };
     return (
         <Grid container columns={12} justifyContent={'center'}>
             <Grid item md={5}>
@@ -101,6 +114,20 @@ const Form = () => {
                                 aria-describedby="playernameInput-helper-text" 
                                 helperText="This will be shown on as your ingame name" 
                                 label="Player Name"/>
+                            </FormControl> 
+                        </Grid>
+                        <Grid item sm={8} md={8} lg={8} xl={8} xs={8}>
+                            <FormControl fullWidth>
+                                <TextField
+                                id="bday"
+                                label="Birthday"
+                                type="date"
+                                value={formInput.bday}
+                                onChange={(event) => handleDateChange(event.currentTarget.value)}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                />
                             </FormControl> 
                         </Grid>
                         <Grid item sm={8} md={8} lg={8} xl={8} xs={8}>

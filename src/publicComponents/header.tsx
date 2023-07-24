@@ -198,7 +198,6 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
       pl={'6%'}
       pt={'1%'}
       pb={'1%'}
-      mb={'3%'}
       sx={{
         backgroundColor: 'rgb(40, 42, 48)',
         borderBottom: 'solid 2px ' + colors.gold,

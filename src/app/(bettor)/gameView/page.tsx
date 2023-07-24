@@ -16,6 +16,7 @@ import Swal from "sweetalert2";
 import { GetMyBalance } from "@/api/bettor/wallet";
 import Pusher from "pusher-js";
 import { io } from "socket.io-client";
+import './styles.css'; // Import the CSS file
 import Echo from "laravel-echo";
 
 type Round = {
@@ -325,20 +326,13 @@ export default function GameView() {
     }
     const LiveStreamComponent = () => {
         return (
-          <div style={{
-            minWidth: '100%',
-          }}>
-            <MuxPlayer
-                streamType="ll-live"
-                playbackId={streamData.streamID}
-                autoPlay={true}
-                metadata={{
-                    video_id: "video-id-54321",
-                    video_title: "Test video title",
-                    viewer_user_id: "user-id-007",
-                }}
-            />
-          </div>
+          <Grid container columns={12}>
+            <Grid item xs sm md lg className={'frameContainer'}>
+                <iframe id="ifvideo"style={{minHeight: '100%', minWidth: '99.8%'}} allowFullScreen={true}
+                    src="https://demo.nanocosmos.de/nanoplayer/embed/1.3.1/nanoplayer.html?group.id=cc6af872-ca2e-41a5-b96b-bbd47c316f24&options.adaption.rule=deviationOfMean2&startIndex=0&playback.latencyControlMode=classic">
+                </iframe>
+            </Grid>
+        </Grid>
         );
     };
     let counter = 0;

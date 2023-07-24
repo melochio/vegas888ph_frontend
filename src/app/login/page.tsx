@@ -75,7 +75,7 @@ const Form = () => {
       }
     };
     return (
-        <Grid container columns={12} justifyContent={'center'} minHeight={'63vh'}>
+        <Grid container columns={12} justifyContent={'center'} minHeight={'70vh'}>
             <Grid item md={5}>
                 <Card sx={{padding: '4rem', backgroundColor: colors.silver, borderRadius: '1em'}}>
                     <form action="" method="post">
