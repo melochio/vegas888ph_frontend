@@ -7,8 +7,6 @@ import { Typography } from '@mui/material';
 import Swal from "sweetalert2"
 import {fetchUser} from '@agentApi/users'
 
-
-
 const columns: GridColDef[] = [
     { field: 'PlayerName', headerName: 'Player name', width: 200 },
     { field: 'requestAmount', headerName: 'Request Amount', width: 200 },

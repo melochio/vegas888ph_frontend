@@ -150,7 +150,7 @@ export default function Declarator() {
         );
     };
     
-    const GameHeader = React.useCallback((
+    const GameHeader = (
         {bettingStatus, expFights, streamStatus}: 
         {bettingStatus: null | "OPEN" | "CLOSED", expFights: number, streamStatus: "Private" | "Public"} ) => {
         return (
@@ -171,9 +171,9 @@ export default function Declarator() {
                 </Typography>
             </div>
         )
-    }, [currentGameState])
+    }
     
-    const RoundControl = React.useCallback(({gameInfo, isDisabled}:{gameInfo: Game_Model, isDisabled: boolean}) => {
+    const RoundControl = ({gameInfo, isDisabled}:{gameInfo: Game_Model, isDisabled: boolean}) => {
         const [betStatus, setBetStatus] = React.useState<any>(()=>{
             switch(gameInfo.result){
                 case "OPEN":
@@ -278,7 +278,7 @@ export default function Declarator() {
                 </div>
             </Grid>
         )
-    },[gameList.length])
+    }
     return (
         <div>
             <LiveStreamComponent key={'streamComponent'}/>

@@ -1,9 +1,14 @@
+'use client'
+
+let ISSERVER = typeof window === "undefined";
+let token = typeof window === "undefined" ? '':localStorage.getItem('token');
+
 const config = {
     withCredentials: true,
     headers: {
       'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': 'http://127.0.0.1:3000/',
-      'Authorization': 'Bearer '+ localStorage.getItem('token')
+      'Access-Control-Allow-Origin': '*',
+      'Authorization': 'Bearer ' + token,
     },
 };
 
