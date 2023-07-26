@@ -19,14 +19,7 @@ const UserTable: React.FC = () => {
     const [request, setRequest] = React.useState<User[]>([]);
 
     useEffect(() => {
-        userMiddleware()
-        // Fetch data from the user API endpoint here
-        // Replace 'YOUR_API_ENDPOINT' with the actual API endpoint URL
-        // fetch('YOUR_API_ENDPOINT')
-        //   .then((response) => response.json())
-        //   .then((data) => setUsers(data))
-        //   .catch((error) => console.error('Error fetching users:', error));
-
+        userMiddleware() 
         fetchUser(['bettor'], 'active')
             .then((res) => {
                 setRequest(res)
@@ -61,46 +54,32 @@ const UserTable: React.FC = () => {
         })
     }
     const columns: GridColDef[] = [
-        { field: 'id', headerName: 'ID', flex: 1 },
+        // { field: 'id', headerName: 'ID', flex: 1 },
         { field: 'name', headerName: 'Name', flex: 1 }, 
-        {
-            field: 'isActive',
-            headerName: 'Action',
-            flex: 1,
-            renderCell: (params: { row: { firstName: any; request_amount: any; id: number; userId: string }; }) => {
-                // const userId = params.row.id;
-                const id = params.row.id;
-                const userId = params.row.userId;
-                const firstName = params.row.firstName;
-                const request_amount = params.row.request_amount;
-                return (
-                    <>
-                        <Container>  
-                            <Button size="small" variant="contained" style={{ backgroundColor: 'red', color: 'white' }} onClick={() => handleDeactivateUser(id)}>
-                                Deactivate
-                            </Button>
-                        </Container>
+        { field: 'request_amount', headerName: 'Request Amount', flex: 1 }, 
+        { field: 'status', headerName: 'Status', flex: 1 }, 
+        // {
+        //     field: 'isActive',
+        //     headerName: 'Action',
+        //     flex: 1,
+        //     renderCell: (params: { row: { firstName: any; request_amount: any; id: number; userId: string }; }) => {
+        //         // const userId = params.row.id;
+        //         const id = params.row.id;
+        //         const userId = params.row.userId;
+        //         const firstName = params.row.firstName;
+        //         const request_amount = params.row.request_amount;
+        //         return (
+        //             <>
+        //                 <Container>  
+        //                     <Button size="small" variant="contained" style={{ backgroundColor: 'red', color: 'white' }} onClick={() => handleDeactivateUser(id)}>
+        //                         Deactivate
+        //                     </Button>
+        //                 </Container> 
+        //             </>
 
-                        {/* <MoreVertIcon onClick={() => handleAvatarClick} sx={{ cursor: 'pointer', margin: '0em 1em 0em 1em' }} />
-                        <Popper open={Boolean(anchorEl)} anchorEl={anchorEl}>
-                            <Paper>
-                                <Menu
-                                    anchorEl={anchorEl}
-                                    open={Boolean(anchorEl)}
-                                    onClose={handleAvatarClose}
-                                >
-                                    <MenuItem onClick={handleAvatarClose}>load</MenuItem>
-                                    <MenuItem onClick={handleAvatarClose}>Withdraw Load</MenuItem>
-                                    <MenuItem onClick={() => handleDeactivateAccount(params.row.id)}>Deactivate</MenuItem>
-                                    <MenuItem onClick={handleAvatarClose}>View</MenuItem>
-                                </Menu>
-                            </Paper>
-                        </Popper> */}
-                    </>
-
-                );
-            },
-        },
+        //         );
+        //     },
+        // },
     ];
 
     return (
@@ -108,7 +87,7 @@ const UserTable: React.FC = () => {
 
             <Grid container>
                 <Typography>
-                    Active Players
+                    Withdrawal History
                 </Typography>
 
                 <Grid item xs={0} md={12}>

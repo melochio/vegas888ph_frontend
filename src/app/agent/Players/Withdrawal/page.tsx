@@ -48,7 +48,7 @@ export default function DataTable() {
     React.useEffect(() => {
         const fetchData = async () => {
             try {
-                const users = await fetchUser(['admin']);
+                const users = await fetchUser(['admin'], 'active');
                 setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
             } catch (error) {
                 console.error('Error fetching data:', error);

@@ -64,11 +64,7 @@ export default function Home() {
                         <Typography component="h6" sx={{ color: 'black', fontSize: '14px' }}>https://sww-5.live/register?refid=C2A7756
 
                         </Typography>
-                        <Box>
-                            <Button sx={{ backgroundColor: 'red', color: 'white', }}>
-                                COPY YOUR LINK
-                            </Button>
-                        </Box>
+                     
                     </Container>
                 </Grid>
                 <Grid item xs={12} sm={6} md={6}>

@@ -52,22 +52,18 @@ const Form = () => {
     const handleLogin = async () => {
     setLoginState(true)
       try {
-        // const loginresponse = await login(formInput);
-        // const token = loginresponse.token;
-        // localStorage.setItem('token', token);
-        // const fetchUserResponse = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/tokenValue',null, {
-        //     withCredentials: true,
-        //     headers: {
-        //     'Content-Type': 'application/json',
-        //     'Access-Control-Allow-Origin': 'http://175.41.183.232/',
-        //     'Authorization': 'Bearer '+ token
-        //     },
-        // })
-        // const userResponse : UserModel_Hidden = fetchUserResponse.data
-        const response = await login(formInput);
-        const token = response.token;
+        const loginresponse = await login(formInput);
+        const token = loginresponse.token;
         localStorage.setItem('token', token);
-        const userResponse = await fetchUser();
+        const fetchUserResponse = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/tokenValue',null, {
+            withCredentials: true,
+            headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': 'http://175.41.183.232/',
+            'Authorization': 'Bearer '+ token
+            },
+        })
+        const userResponse : UserModel_Hidden = fetchUserResponse.data
         userValidator(userResponse?.user_level)
       } catch {
         Swal.fire(

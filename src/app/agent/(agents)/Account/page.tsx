@@ -1,13 +1,9 @@
 'use client'
-import { colors } from "@/publicComponents/customStyles"
-import AgentNav from "@/publicComponents/agentNav"
 import Card from '@mui/joy/Card';
-import CardCover from '@mui/joy/CardCover';
-import CardContent from '@mui/joy/CardContent';
 import Typography from '@mui/joy/Typography';
 import TextInput from '@/publicComponents/TextInput'
 import Model_User, { initialUser } from '../../../../models/users'
-import { createUser, fetchUser } from '@/api/agent/users'
+import { createUser, fetchUser, updateCommissionUser } from '@/api/agent/users'
 
 import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -16,21 +12,161 @@ import Container from '@mui/material/Container';
 import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import axios from "axios";
 
-
-const columns: GridColDef[] = [
-    { field: 'date', headerName: 'DATE', width: 200 },
-    { field: 'type', headerName: 'TRANSACTION TYPE	', width: 200 },
-    { field: 'name', headerName: 'AMOUNT', width: 200 },
-    { field: 'name', headerName: 'USER WALLET', width: 200 },
-    { field: 'name', headerName: 'DETAILS', width: 200 },
-    { field: 'name', headerName: 'TRANSACTED BY', width: 200 },
-
-
-];
 export default function Accounts() {
 
     const [formInput, setFormInput] = React.useState<Model_User>(initialUser)
+    const [editUser, setEditUser] = React.useState(false)
+
+
+    const [selectedRowIndex, setSelectedRowIndex] = React.useState<number | null>(null);
+    const [selectedRow, setSelectedRow] = React.useState<Model_User | null>(null);
+
+    const handleEditUser = (id: any) => {
+        setSelectedRowIndex(id)
+        if (selectedRowIndex !== null && selectedRow !== null) {
+            // Create a new data array with the updated row
+
+        }
+        setEditUser(!editUser)
+        // setFormInput(form)
+    }
+    const handleCanceEditUser = () => {
+        setEditUser(!editUser)
+    }
+    const [commissionRate, setCommissionRate] = React.useState('')
+    const handleSaveChangesUser = (userId: any) => {
+        updateCommissionUser(userId, commissionRate)
+            .then((res) => {
+                if (res?.status == 200) {
+                    Swal.fire(
+                        'Success',
+                    )
+                    fetchData();
+
+                    setEditUser(!editUser)
+                } else {
+                    Swal.fire(
+                        'Failed',  
+                    )
+                }
+
+            })
+    }
+    const handleTableInput = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
+        setCommissionRate(event.currentTarget.value)
+    }
+
+    const columns: GridColDef[] = [
+        { field: 'created_at', headerName: 'DATE', width: 200 },
+        { field: 'user_level', headerName: 'TRANSACTION TYPE', width: 200 },
+        { field: 'name', headerName: 'Name', width: 200 },
+        {
+            field: 'commission',
+            headerName: 'Current Commission %',
+            flex: 1,
+            renderCell: (params: { row: { form: any; commission: any; }; }) => {
+                // const userId = params.row.id;
+                const form = params.row;
+                const commission = params.row.commission * 100 + '%';
+
+                return (
+                    <>
+                        <Container>
+                            <Typography>
+                                {commission}
+                            </Typography>
+                        </Container>
+                    </>
+
+                );
+            },
+        },
+
+        {
+            field: 'Newcommission',
+            headerName: 'New Commission %',
+            flex: 1,
+            renderCell: (params: { row: { id: any; form: any; commission: any; }; }) => {
+                // const userId = params.row.id;
+                const form = params.row;
+                const commission = params.row.commission;
+                const index = params.row.id;
+
+                return (
+                    <>
+                        {selectedRowIndex == index ?
+                            <Container>
+                                <select
+                                    className="form-control"
+                                    id="selectInput"
+                                    defaultValue=""
+                                    style={{ padding: '8px', }}
+                                    onChange={(event) => handleTableInput(event)}
+                                    name="commission"
+                                >
+                                    <option value="" disabled>Select an option</option>
+                                    {['8%', '9%'].map((option) => (
+                                        <option key={option} value={option}>
+                                            {option}
+                                        </option>
+                                    ))}
+                                </select>
+                            </Container>
+                            : ''
+                        }
+                    </>
+
+                );
+            },
+        },
+        {
+            field: 'isActive',
+            headerName: 'Action',
+            flex: 1,
+            renderCell: (params: { row: {user_level:any, id: any; form: any; firstName: any; request_amount: any; userId: string }; }) => {
+                // const userId = params.row.id;
+                const form = params.row;
+                const userId = params.row.userId;
+                const index = params.row.id;
+                return (
+                    <>
+                    {
+                        form.user_level != 'bettor' ?  
+                        <Container>
+                            {
+                                editUser && selectedRowIndex == index ?
+                                    <>
+                                        <Button size="small" variant="contained" color='success' style={{ color: 'white' }} onClick={() => handleSaveChangesUser(form.id)}>
+                                            Save
+                                        </Button>
+                                        <Button size="small" variant="contained" style={{ backgroundColor: 'red', color: 'white' }} onClick={() => handleCanceEditUser()}>
+                                            Cancel
+                                        </Button>
+                                    </>
+                                    :
+                                    !editUser ? 
+                                        <Button size="small" variant="contained" style={{ backgroundColor: 'red', color: 'white' }} onClick={() => handleEditUser(index)}>
+                                            Edit
+                                        </Button>
+                                        : ''
+                            }
+
+                        </Container>
+                        :
+                        ''
+                    }
+                        
+                    </>
+
+                );
+            },
+        },
+
+
+    ];
+
     const breadcrumbs = [
         <Link underline="hover" key="1" color="inherit" href="/" sx={{ color: 'black' }}>
             Accounts
@@ -47,8 +183,10 @@ export default function Accounts() {
             setFormInput({ ...formInput, 'name': event.currentTarget.value })
         } else {
             setFormInput({ ...formInput, [event.currentTarget.name]: event.currentTarget.value })
+            console.log(formInput)
         }
     }
+
     const [money, setMoney] = React.useState('');
     const moneyStyle = {
 
@@ -68,18 +206,52 @@ export default function Accounts() {
     const fetchData = async () => {
         setFormInput({ ...formInput, 'isActive': 1 })
         try {
-            const users: [] = await fetchUser(['agent','bettor'],'active');
-            console.log(users)
-            setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
+            if (user?.user_level == 'agent') {
+                const users: [] = await fetchUser(['bettor'], 'active');
+                setUserlist(users);
+            } else {
+                const users: [] = await fetchUser(['bettor', 'agent'], 'active');
+                setUserlist(users);
+            }
+
+            // Assuming `users` is an array of objects with the 'PlayerName' property
         } catch (error) {
             console.error('Error fetching data:', error);
             // setUserList([]); // Set an empty array if there's an error or no data
         }
     };
+    type UserModel = {
+        created_at: any,
+        email: any,
+        email_verified_at: any,
+        id: any,
+        name: any,
+        player_name: any,
+        pp_filepath: any,
+        updated_at: any,
+        user_level: string | any,
+    }
+    const [user, setUser] = React.useState<UserModel>() 
+    const filteredColumns = editUser ? columns : columns.filter((column) => column.field !== 'Newcommission');
     React.useEffect(() => {
+        const fetch = async () => {
+            const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/tokenValue', null, {
+                withCredentials: true,
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                }
+            })
+            if (response === undefined) {
+                document.location.href = '/login'
+            } else {
+                const userResponse: UserModel =  response.data
+                setUser(userResponse)
+            }
+        }
+        fetch()
         fetchData();
     }, []);
-    const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {  
+    const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         let inputsValid = false
         if (formInput.name != "" &&
             formInput.player_name != "" &&
@@ -88,7 +260,7 @@ export default function Accounts() {
             formInput.password != ""
 
         ) {
-            if (formInput.user_level == "declarator") {
+            if (formInput.user_level == "declarator" || formInput.user_level == "admin") {
                 inputsValid = true
             } else {
                 if (formInput.commission != "") {
@@ -103,8 +275,8 @@ export default function Accounts() {
                 Swal.fire(
                     'Success',
                 )
-
-                location.href = '/Dashboard'
+                fetchData();
+                // location.href = '/admin/Setup/Account'
             } else {
                 Swal.fire(
                     'Failed',
@@ -163,7 +335,7 @@ export default function Accounts() {
                             </Grid>
                             <Grid item xs={12} sm={6} md={6}>
                                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
-                                    <label htmlFor="selectInput" className="form-label">User Type</label>
+                                    <label htmlFor="selectInput" className="form-label">User Type {user?.user_level}</label>
                                     <select
                                         className="form-control"
                                         id="selectInput"
@@ -171,13 +343,23 @@ export default function Accounts() {
                                         style={{ padding: '8px', }}
                                         onChange={(event) => handleInput(event)}
                                         name="user_level"
+                                        value={formInput.user_level}
                                     >
                                         <option value="" disabled>Select an option</option>
-                                        {['agent', 'bettor'].map((option) => (
-                                            <option key={option} value={option}>
-                                                {option}
-                                            </option>
-                                        ))}
+                                        {
+                                            user?.user_level == 'master agent' ?
+                                                ['agent', 'bettor'].map((option) => (
+                                                    <option key={option} value={option}>
+                                                        {option}{user?.user_level}
+                                                    </option>
+                                                ))
+                                                :
+                                                ['bettor'].map((option) => (
+                                                    <option key={option} value={option}>
+                                                        {option}
+                                                    </option>
+                                                ))
+                                        }
                                     </select>
                                 </div>
                                 {/* <FormInput label="Transaction Type" placeholder="Enter text here" options={['deposit','withdraw']} type={"select"} /> */}
@@ -236,7 +418,7 @@ export default function Accounts() {
                                 </div>
                             </Grid>
                             {
-                                formInput.user_level != 'declarator' ?
+                                (formInput.user_level != 'declarator' && formInput.user_level != 'admin' && formInput.user_level != 'bettor') ?
                                     <Grid item xs={12} sm={6} md={6}>
                                         <div className="form-group" style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
                                             <label htmlFor="selectInput" className="form-label">Commission %</label>
@@ -258,8 +440,8 @@ export default function Accounts() {
                                         </div>
                                         {/* <FormInput label="Transaction Type" placeholder="Enter text here" options={['deposit','withdraw']} type={"select"} /> */}
                                     </Grid>
-                                : ''
-                            
+                                    : ''
+
                             }
 
                             <Grid item xs={12} sm={12} md={6}>
@@ -292,7 +474,7 @@ export default function Accounts() {
                         </Typography>
                         <DataGrid
                             rows={userlist}
-                            columns={columns}
+                            columns={filteredColumns}
                             initialState={{
                                 pagination: {
                                     paginationModel: { page: 0, pageSize: 5 },

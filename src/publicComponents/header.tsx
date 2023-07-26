@@ -18,12 +18,14 @@ import axios from 'axios';
 import Model_User, { UserModel_Hidden } from '@/models/users';
 import { fetchUser, logout } from '@/api/bettor/auth';
 import { Model_Withdrawal, initialWithdrawalValue } from '@/models/wallet';
-import { GetMyBalance, RequestWithdrawal } from '@/api/bettor/wallet';
+import { GetMyBalance, RequestWithdrawal, TransactionList } from '@/api/bettor/wallet';
 import Swal from 'sweetalert2';
+import { DataGrid } from '@mui/x-data-grid';
 
 interface LoggedHeaderProps {}
 const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
   const [user, setUser] = React.useState<UserModel_Hidden>()
+  const [isProfileViewOpen, setIsProfileViewOpen] = useState(false);
   const [walletBalance, setWalletBalance] = React.useState(0)
   React.useEffect(() => {
     const fetchUserData = async () => {
@@ -188,6 +190,179 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
       </div>
     );
   };
+  
+  interface Transaction {
+    id: number,
+    amount: number,
+    type: string,
+    datetime: string,
+  }
+
+  interface TransactionHistoryModalProps {
+    open: boolean;
+    transactions: Transaction[];
+    onClose: () => void;
+  }
+  const columns = [
+    { field: 'type', headerName: 'Type', width: 150 },
+    { field: 'amount', headerName: 'Amount', width: 150 },
+    { field: 'datetime', headerName: 'Datetime', width: 200 },
+  ];
+  const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = ({ open, transactions, onClose }) => {
+    // const rows = transactions.map((transaction, index) => ({ id: index, ...transaction }));
+  
+    return (
+      <Modal open={open} onClose={onClose}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            minWidth: 500,
+          }}
+        >
+          <DataGrid
+            rows={transactions}
+            columns={columns}
+            autoHeight
+            disableRowSelectionOnClick
+            autoPageSize
+            checkboxSelection={false}
+          />
+          <Button onClick={onClose} variant="contained" color="secondary" sx={{ mt: 2 }}>
+            Close
+          </Button>
+        </Box>
+      </Modal>
+    );
+  };
+  interface ProfileModalProps {
+    open: boolean;
+    onClose: () => void;
+  }
+  
+  const handleOpenProfileView = () => {
+    setIsProfileViewOpen(true);
+  };
+
+  const handleCloseProfileView = () => {
+    setIsProfileViewOpen(false);
+  };
+  const ProfileModal: React.FC<ProfileModalProps> = ({ open, onClose }) => {
+    const [playerName, setPlayerName] = useState('');
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordError, setPasswordError] = useState('');
+  
+    const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setPassword(event.target.value);
+    };
+  
+    const handleConfirmPasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      setConfirmPassword(event.target.value);
+    };
+  
+    const handleSaveProfile = () => {
+      if (password !== confirmPassword) {
+        setPasswordError('Password and Confirm Password do not match');
+      } else {
+        // Save the profile changes here
+        onClose();
+      }
+    };
+  
+    return (
+      <Modal open={open} onClose={onClose}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            minWidth: 300,
+          }}
+        >
+          <Typography variant='h5'>
+            Update Profile
+          </Typography>
+          <TextField
+            fullWidth
+            label="Player Name"
+            value={playerName}
+            onChange={(e) => setPlayerName(e.target.value)}
+            margin="normal"
+            variant="outlined"
+          />
+          <TextField
+            fullWidth
+            label="Current Password"
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            margin="normal"
+            variant="outlined"
+          />
+          <TextField
+            fullWidth
+            label="New Password"
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+            margin="normal"
+            variant="outlined"
+          />
+          <TextField
+            fullWidth
+            label="Confirm Password"
+            type="password"
+            value={confirmPassword}
+            onChange={handleConfirmPasswordChange}
+            margin="normal"
+            variant="outlined"
+            error={password !== confirmPassword}
+            helperText={passwordError}
+          />
+          <Button onClick={handleSaveProfile} variant="contained" color="primary" sx={{ mt: 2 }}>
+            Save
+          </Button>
+          <Button onClick={onClose} variant="contained" color="secondary" sx={{ mt: 2, ml: 2 }}>
+            Cancel
+          </Button>
+        </Box>
+      </Modal>
+    );
+  };
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [transactionsData, setTransactionsData] = useState<Transaction[]>([])
+  const handleOpenModal = () => {
+    const fetch = async () => {
+      const response = await TransactionList();
+      if(response !== undefined) {
+        const responseData= response.data
+        // console.log(responseData)
+        // setTransactionsData(responseData)
+        let list: Transaction[] = []
+        responseData.map((val: any, index: number) => {
+          list.push({id: index, type: val.type, amount: val.amount, datetime: val.created_at})
+        })
+        setTransactionsData(list)
+      }
+    }
+    fetch()
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
   return (
     <Grid
       container
@@ -204,6 +379,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
       }}
     >
       <Grid item key={'logo'} xs={12} sm={4} md lg xl>
+        <ProfileModal open={isProfileViewOpen} onClose={handleCloseProfileView} />
         <Image alt={'Logo'} src={Logo} quality={100} width={120} height={60} onClick={()=> 
             document.location.href = '/dashboard'} style={{
             maxHeight: 60,
@@ -238,6 +414,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
           </ButtonGroup>
           <Avatar onClick={handleAvatarClick} sx={{cursor:'pointer', margin: '0em 1em 0em 1em'}} />
           <Typography variant='body1' style={{color: 'white', display:'flex', alignItems:'center'}}>{user?.player_name}</Typography>
+          <TransactionHistoryModal open={isModalOpen} transactions={transactionsData} onClose={handleCloseModal} />
           <Popper open={Boolean(anchorEl)} anchorEl={anchorEl}>
             <Paper>
               <Menu
@@ -245,8 +422,8 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
                 open={Boolean(anchorEl)}
                 onClose={handleAvatarClose}
               >
-                <MenuItem onClick={handleAvatarClose}>View Profile</MenuItem>
-                <MenuItem onClick={handleAvatarClose}>Transaction History</MenuItem>
+                {/* <MenuItem onClick={handleOpenProfileView}>View Profile</MenuItem> */}
+                <MenuItem onClick={handleOpenModal}>Transaction History</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </Paper>

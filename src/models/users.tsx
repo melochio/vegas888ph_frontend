@@ -16,6 +16,7 @@ interface Model_User {
     commission: Date | any,
     total_wallet_balance: string | any,
     isActive: string | any,
+    mobileNo : string | any,
     
 }
 
@@ -34,6 +35,8 @@ type UserModel_Hidden = {
     commission: any, 
     total_wallet_balance: any,
     isActive: any,
+    mobileNo: any,
+    
 }
 
 const initialUser: Model_User = {
@@ -54,6 +57,7 @@ const initialUser: Model_User = {
     referral_code: '', 
     total_wallet_balance: '0.00', 
     isActive: '', 
+    mobileNo: '', 
 }
 export default Model_User
 

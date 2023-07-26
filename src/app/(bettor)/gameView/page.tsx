@@ -329,7 +329,7 @@ export default function GameView() {
           <Grid container columns={12}>
             <Grid item xs sm md lg className={'frameContainer'}>
                 <iframe id="ifvideo"style={{minHeight: '100%', minWidth: '99.8%'}} allowFullScreen={true}
-                    src="https://demo.nanocosmos.de/nanoplayer/embed/1.3.1/nanoplayer.html?group.id=cc6af872-ca2e-41a5-b96b-bbd47c316f24&options.adaption.rule=deviationOfMean2&startIndex=0&playback.latencyControlMode=classic">
+                    src={streamData.streamID}>
                 </iframe>
             </Grid>
         </Grid>

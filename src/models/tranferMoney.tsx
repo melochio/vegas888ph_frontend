@@ -3,7 +3,7 @@
 // 'type' => 'required'  
 interface Model_tranferMoney { 
     requestee: number | any,
-    amount: number, 
+    amount: string | any, 
     receiverId: number | any, 
     transactionDetails: string | any, 
     type: string | any,

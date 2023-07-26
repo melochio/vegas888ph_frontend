@@ -16,8 +16,15 @@ const GetMyBalance = async () => {
         return response
     } catch{}
 }
+const TransactionList = async () => {
+    try {
+        const response = axios.get(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/wallet/transaction_history', config)
+        return response
+    } catch{}
+}
 
 export {
     RequestWithdrawal,
-    GetMyBalance
+    GetMyBalance,
+    TransactionList
 }
