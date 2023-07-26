@@ -15,6 +15,7 @@ import Swal from "sweetalert2"
 import userMiddleware from "@/utils/middleware"
 import { format, isValid } from 'date-fns';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { useParams, useSearchParams } from "next/navigation"
 
 const Form = () => {
     const [formInput, setFormInput] = React.useState<Model_User>(initialUser)
@@ -92,6 +93,16 @@ const Form = () => {
                     <Typography variant="h4" fontWeight={700} textAlign={'center'}>Play With Us</Typography>
                     <br /> <br />
                     <Grid container columns={12} flexDirection={'row'} justifyContent={'center'} rowSpacing={5}>
+                        <Grid item sm={8} md={8} lg={8} xl={8} xs={8}>
+                            <FormControl fullWidth>
+                                <TextField id="nameInput"
+                                onChange={handleInput} 
+                                name="refCode"
+                                aria-describedby="nameInput-helper-text" 
+                                helperText="Your Referal Code" 
+                                label="Your Name"/>
+                            </FormControl> 
+                        </Grid>
                         <Grid item sm={8} md={8} lg={8} xl={8} xs={8}>
                             <FormControl fullWidth>
                                 <TextField id="nameInput"
@@ -197,8 +208,9 @@ const Form = () => {
 }
 
 export default function Register() {
+    const searchParams = useSearchParams()
     React.useEffect(() => {
-      userMiddleware()
+      userMiddleware() 
     }, [])
     return (
         <div>

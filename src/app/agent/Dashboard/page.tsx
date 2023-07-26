@@ -1,11 +1,6 @@
 'use client'
-import { colors } from "@/publicComponents/customStyles"
-import AgentNav from "@/publicComponents/agentNav"
-import Card from '@mui/joy/Card';
-import CardCover from '@mui/joy/CardCover';
-import CardContent from '@mui/joy/CardContent';
-import Typography from '@mui/joy/Typography';
-import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
+  
+import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography, Typography as TypographyMui } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
 import Container from '@mui/material/Container';
@@ -22,6 +17,7 @@ export default function Dashboard() {
     const [totalEarnings, setTotalEarnings] = React.useState(0)
     const [claimedEarnings, setClaimedEarnings] = React.useState(0)
     const [unclaimedEarnings, setUnclaimedEarnings] = React.useState(0)
+    const [avgEarnings, setAvgEarnings] = React.useState(0)
     useEffect(() => {
         const fetchUserData = async () => {
             const response = await fetchUser()
@@ -39,6 +35,8 @@ export default function Dashboard() {
             setTotalEarnings(totalEarningsResponse.total_earnings)
             setClaimedEarnings(totalEarningsResponse.claimed)
             setUnclaimedEarnings(totalEarningsResponse.unclaimed)
+            setAvgEarnings(totalEarningsResponse.avg)
+            
             } else {
             // document.location.href = "/login"
             }
@@ -70,8 +68,6 @@ export default function Dashboard() {
             </Container>
         )
     }
-
-
     return (
         <Container>
             <Stack spacing={2}>

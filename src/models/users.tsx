@@ -1,4 +1,5 @@
 interface Model_User {
+    referral_code: string | any,
     id: number | any,
     name: string | any,
     user_level: string | any,
@@ -13,9 +14,13 @@ interface Model_User {
     updated_at: Date | any,
     bday: Date | any,
     commission: Date | any,
+    total_wallet_balance: string | any,
+    isActive: string | any,
+    
 }
 
 type UserModel_Hidden = {
+    referral_code:any,
     created_at:any,
     email: any,
     email_verified_at: any,
@@ -26,8 +31,9 @@ type UserModel_Hidden = {
     updated_at: any,
     user_level: any,
     bday: any,
-    commission: any,
-    
+    commission: any, 
+    total_wallet_balance: any,
+    isActive: any,
 }
 
 const initialUser: Model_User = {
@@ -37,14 +43,17 @@ const initialUser: Model_User = {
     player_name: '',
     email: '',
     email_verified_at: '',
-    bday:'',
+    bday: '',
     password: '',
     pp_filepath: '',
     wallet_id: '',
     remember_token: '',
     created_at: '',
     updated_at: '',
-    commission: '',
+    commission: '',  
+    referral_code: '', 
+    total_wallet_balance: '0.00', 
+    isActive: '', 
 }
 export default Model_User
 

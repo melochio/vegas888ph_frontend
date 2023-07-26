@@ -119,6 +119,7 @@ export default function RootLayout({
     const fetchBalance = async () => {
       const response = await GetMyBalance();
       setwalletAmount(response?.data);
+      localStorage.setItem('wallet_amount',response?.data)
     }
     fetchBalance()
     // fetchWallet();
@@ -131,15 +132,15 @@ export default function RootLayout({
     if (target == 'Dashboard') {
       router.push('/agent/Dashboard');
       // window.location.href = '/agent/Dashboard'
-    }
+    } 
     else if (target == 'Wallet') {
       router.push('/agent/LoadingStation/Wallet');
     }
     else if (target == 'Commission') {
-      router.push('/agent/LoadingStation/Wallet');
+      router.push('/agent/LoadingStation/Commission');
     }
-    else if (target == 'Withdrawal Requests') {
-      window.location.href = '/agent/LoadingStation/WithdrawalRequests';
+    else if (target == 'Withdrawal Requests') { 
+      router.push('/agent/LoadingStation/WithdrawalRequests'); 
     }
     else if (target == 'Deposits') {
       window.location.href = '/agent/Players/Deposit';
@@ -148,12 +149,21 @@ export default function RootLayout({
 
       window.location.href = '/agent/Players/Withdrawal';
     }
-    else if (target == 'Active Players') {
-      console.log(target)
-      window.location.href = '/agent/Players/Active';
+    else if (target == 'Active Agent') {  
+      router.push('/agent/Active'); 
+    } 
+    else if (target == 'Deactivated Agent') { 
+      router.push('/agent/InActive'); 
     }
-    else if (target == 'Deactivated') {
-      window.location.href = '/agent/Players/InActive';
+    else if (target == 'Active Players') {  
+      router.push('/agent/Players/Active'); 
+    }
+    else if (target == 'For Approvals') {  
+      router.push('/agent/Players/forApproval'); 
+    }
+    
+    else if (target == 'Deactivated') { 
+      router.push('/agent/Players/InActive'); 
     }
   }
 
@@ -344,6 +354,40 @@ export default function RootLayout({
                 </Typography>
               </ListItemButton>
             </ListItem>
+            <ListItem disablePadding sx={{
+              color: '#989EB3',
+              '&:hover': {
+                backgroundColor: '#31343d',
+                color: 'white',
+                cursor: 'pointer',
+              },
+            }}>
+              <ListItemButton>
+                <ListItemIcon>
+                  <AssessmentSharpIcon style={{ color: 'white' }} />
+                </ListItemIcon>
+                <Typography sx={{ fontSize: '.8rem' }} onClick={() => router.push("/agent/Account")} >
+                  Accounts
+                </Typography>
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{
+              color: '#989EB3',
+              '&:hover': {
+                backgroundColor: '#31343d',
+                color: 'white',
+                cursor: 'pointer',
+              },
+            }}>
+              <ListItemButton>
+                <ListItemIcon>
+                  <AssessmentSharpIcon style={{ color: 'white' }} />
+                </ListItemIcon>
+                <Typography sx={{ fontSize: '.8rem' }} onClick={() => router.push("/agent/CommissionHistory")} >
+                  Commission History
+                </Typography>
+              </ListItemButton>
+            </ListItem>
         </List>
         <Divider />
         <Typography sx={{
@@ -422,7 +466,7 @@ export default function RootLayout({
           // color: 'red',
           // fontSize: '16px',
         }}>
-          {['Active Agent', 'Deactivated'].map((text, index) => (
+          {['Active Agent', 'Deactivated Agent'].map((text, index) => (
             <ListItem key={text} disablePadding sx={{
               color: '#989EB3',
               '&:hover': {

@@ -7,6 +7,8 @@ import { Typography } from '@mui/material';
 import Swal from "sweetalert2"
 import {fetchUser} from '@agentApi/users'
 
+
+
 const columns: GridColDef[] = [
     { field: 'PlayerName', headerName: 'Player name', width: 200 },
     { field: 'requestAmount', headerName: 'Request Amount', width: 200 },
@@ -46,7 +48,7 @@ export default function DataTable() {
     React.useEffect(() => {
         const fetchData = async () => {
             try {
-                const users = await fetchUser(['admin']);
+                const users = await fetchUser(['admin'], '');
                 setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
             } catch (error) {
                 console.error('Error fetching data:', error);

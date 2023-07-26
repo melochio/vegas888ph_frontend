@@ -2,7 +2,7 @@
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import React, { useEffect } from 'react';
 import { getRequestWithdrawal, approvedRequestWithdrawal, declineWithdrawRequest } from '@agentApi/wallet'
-import { fetchUser,deactivateUser, activateUser } from '@/api/agent/users'
+import { fetchUser,deactivateUser } from '@/api/agent/users'
 import { Box, Button, Container, Grid, Menu, MenuItem, Paper, Popper, Typography } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Swal from 'sweetalert2';
@@ -26,27 +26,27 @@ const UserTable: React.FC = () => {
         //   .then((data) => setUsers(data))
         //   .catch((error) => console.error('Error fetching users:', error));
 
-        fetchUser(['bettor'], 'inactive')
+        fetchUser(['agent'], 'active')
             .then((res) => {
                 setRequest(res)
                 console.log(res)
             })
             .catch((error) => console.error('Error fetching users:', error));
     }, []); 
-    const handleActivateUser = (userId:any) => {
+    const handleDeactivateUser = (userId:any) => {
 
         Swal.fire({ 
             icon: 'warning',
-            title: 'Do you want to activate this account ?',
+            title: 'Do you want to deactivate this account ?',
             showCancelButton: true,
             confirmButtonText: 'Yes',
         }).then((result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isConfirmed) {
-                activateUser(userId)
+                deactivateUser(userId)
                     .then((res) => { 
                         Swal.fire('Saved!', '', 'success')
-                        fetchUser(['bettor'], 'inactive')
+                        fetchUser(['bettor'], 'active')
                             .then((res) => {
                                 setRequest(res)
                                 console.log(res)
@@ -75,8 +75,8 @@ const UserTable: React.FC = () => {
                 return (
                     <>
                         <Container>  
-                            <Button size="small" variant="contained" color='primary' style={{ color: 'white' }} onClick={() => handleActivateUser(id)}>
-                                ACTIVATE
+                            <Button size="small" variant="contained" style={{ backgroundColor: 'red', color: 'white' }} onClick={() => handleDeactivateUser(id)}>
+                                Deactivate
                             </Button>
                         </Container>
 
@@ -107,7 +107,7 @@ const UserTable: React.FC = () => {
 
             <Grid container>
                 <Typography>
-                    Active Players
+                    Active Agent
                 </Typography>
 
                 <Grid item xs={0} md={12}>

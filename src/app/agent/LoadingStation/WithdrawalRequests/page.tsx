@@ -1,90 +1,155 @@
 'use client'
-import { colors } from "@/publicComponents/customStyles"
-import AgentNav from "@/publicComponents/agentNav"
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
+import React, { useEffect } from 'react';
+import { getRequestWithdrawal, approvedRequestWithdrawal, declineWithdrawRequest } from '@agentApi/wallet'
+
+import { Box, Button, Container, Grid, Menu, MenuItem, Paper, Popper, Typography } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Swal from 'sweetalert2';
 import Card from '@mui/joy/Card';
-import CardCover from '@mui/joy/CardCover';
-import CardContent from '@mui/joy/CardContent';
-import Typography from '@mui/joy/Typography';
-import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
-import NavigateNextIcon from '@mui/icons-material/NavigateNext';
+import router from 'next/router';
 
-import Container from '@mui/material/Container';
-export default function Dashboard() {
-    const breadcrumbs = [
-        <Link underline="hover" key="1" color="inherit" href="/" sx={{color:'black'}}>
-            Home
-        </Link>,
+interface User {
+    // id: number;
+    name: string;
+    isActive: boolean;
+}
 
+const UserTable: React.FC = () => {
+    const [request, setRequest] = React.useState<User[]>([]);
 
+    useEffect(() => {
+        // Fetch data from the user API endpoint here
+        // Replace 'YOUR_API_ENDPOINT' with the actual API endpoint URL
+        // fetch('YOUR_API_ENDPOINT')
+        //   .then((response) => response.json())
+        //   .then((data) => setUsers(data))
+        //   .catch((error) => console.error('Error fetching users:', error)); 
+        getRequestWithdrawal(['bettor','agent'])
+            .then((res) => {
+                setRequest(res)
+                console.log(res)
+            })
+            .catch((error) => console.error('Error fetching users:', error));
+    }, []);
+    const handleApproveRequest = (requestId: any, requesteeId: any, amount: any, name: any) => {
+        Swal.fire({
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            title: 'Do you want to send ' + amount + ' load  to ' + name + '? ',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                approvedRequestWithdrawal({ requestId: requestId, requesteeId: requesteeId, amount: amount })
+                    .then((res) => {
+                        res.data
+                        Swal.fire('Saved!', '', 'success')
+                        location.href = '/agent/LoadingStation/WithdrawalRequests'
+                        getRequestWithdrawal(['bettor'])
+                            .then((res) => {
+                                setRequest(res)
+                                console.log(res)
+                            })
+                            .catch((error) => console.error('Error fetching users:', error));
+                    })
+            } else if (result.isDenied) {
+                Swal.fire('Changes are not saved', '', 'info')
+            }
+        })
+    }
+    const handleDeclinetRequest = (requestId: any, requesteeId: any, amount: any, name: any) => {
+
+        Swal.fire({
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            title: 'Do you want to decline this request from ' + name + '? ',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+        }).then((result) => {
+            /* Read more about isConfirmed, isDenied below */
+            if (result.isConfirmed) {
+                declineWithdrawRequest({ requestId: requestId, requesteeId: requesteeId, amount: amount })
+                    .then((res) => {
+                        res.data
+                        Swal.fire('Saved!', '', 'success')
+                        getRequestWithdrawal(['bettor'])
+                            .then((res) => {
+                                setRequest(res)
+                                console.log(res)
+                            })
+                            .catch((error) => console.error('Error fetching users:', error));
+
+                    })
+            } else if (result.isDenied) {
+                Swal.fire('Changes are not saved', '', 'info')
+            }
+        })
+    }
+    const columns: GridColDef[] = [
+        { field: 'id', headerName: 'ID', flex: 1 },
+        { field: 'firstName', headerName: 'Name', flex: 1 },
+        { field: 'request_amount', headerName: 'Request Amount', flex: 1 },
+        {
+            field: 'isActive',
+            headerName: 'Action',
+            flex: 1,
+            renderCell: (params: { row: { firstName: any; request_amount: any; id: number; userId: string }; }) => {
+                // const userId = params.row.id;
+                const id = params.row.id;
+                const userId = params.row.userId;
+                const firstName = params.row.firstName;
+                const request_amount = params.row.request_amount;
+                return (
+                    <>
+                        <Container>
+                            <Button size="small" variant="contained" onClick={() => handleApproveRequest(id, userId, request_amount, firstName)}>
+                                Approve
+                            </Button>
+                            <Button size="small" variant="contained" style={{ backgroundColor: 'red', color: 'white' }} onClick={() => handleDeclinetRequest(id, userId, request_amount, firstName)}>
+                                Decline
+                            </Button>
+                        </Container>
+
+                        {/* <MoreVertIcon onClick={() => handleAvatarClick} sx={{ cursor: 'pointer', margin: '0em 1em 0em 1em' }} />
+                        <Popper open={Boolean(anchorEl)} anchorEl={anchorEl}>
+                            <Paper>
+                                <Menu
+                                    anchorEl={anchorEl}
+                                    open={Boolean(anchorEl)}
+                                    onClose={handleAvatarClose}
+                                >
+                                    <MenuItem onClick={handleAvatarClose}>load</MenuItem>
+                                    <MenuItem onClick={handleAvatarClose}>Withdraw Load</MenuItem>
+                                    <MenuItem onClick={() => handleDeactivateAccount(params.row.id)}>Deactivate</MenuItem>
+                                    <MenuItem onClick={handleAvatarClose}>View</MenuItem>
+                                </Menu>
+                            </Paper>
+                        </Popper> */}
+                    </>
+
+                );
+            },
+        },
     ];
 
-    const containerStyle = {
-        marginLeft: '240px',
-        margin: 'auto',
-        // backgroundColor: 'white', 
-        height: '20vh',
-
-    };
-
     return (
-        <div>
-            <Stack spacing={2}>
+        <Card>
 
-                <Breadcrumbs
-                    separator={<NavigateNextIcon fontSize="small" />}
-                    aria-label="breadcrumb"
-                    color='white'
-                >
-                    {breadcrumbs}
-                </Breadcrumbs>
-            </Stack>
-            <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={12}>
+            <Grid container>
+                <Typography>
+                    Withdral Request
+                </Typography>
 
-                    <Container style={containerStyle} sx={{ borderTop: '6px solid red', backgroundColor: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-                        <Typography component="p" sx={{ color: 'black', fontSize: '14px', marginTop: '10px' }}>PLEASE TAKE NOTE OF YOUR REFFERAL LINK BELOW, ALL PLAYERS THAT WILL REGISTER UNDER THIS LINK WILL ATOMATICALLY BE UNDER YOUR ACCOUNT.
-
-                        </Typography>
-                        <Typography component="h6" sx={{ color: 'black', fontSize: '14px' }}>https://sww-5.live/register?refid=C2A7756
-
-                        </Typography>
-                        <Box>
-                            <Button sx={{ backgroundColor: 'red', color: 'white', }}>
-                                COPY YOUR LINK
-                            </Button>
-                        </Box>
-                    </Container>
+                <Grid item xs={0} md={12}>
+                    <DataGrid rows={request} columns={columns} />
                 </Grid>
-                <Grid item xs={12} sm={6} md={6}>
-                    <Container style={containerStyle} sx={{ backgroundColor: '#141444', display: 'flex', padding: '10px', justifyContent: 'space-between', alignItems: 'left', flexDirection: 'column' }}>
-                        <Typography component="h1" sx={{ color: 'white', fontSize: '20px', marginTop: '10px' }}>TOTAL WALLET
-
-
-                        </Typography>
-
-                        <Box>
-                            <Typography sx={{ color: 'white', fontSize: '20px' }}>Your points:
-
-                            </Typography>
-                            <Typography component="h1" sx={{ color: 'white', fontSize: '30px' }}>0.00
-
-                            </Typography>
-                        </Box>
-                    </Container>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6}>
-                    <Container style={containerStyle} sx={{ backgroundColor: '#0c6a0c', display: 'flex', padding: '10px', justifyContent: 'space-between', alignItems: 'left', flexDirection: 'column' }}>
-                        <Typography component="h1" sx={{ color: 'white', fontSize: '20px', marginTop: '10px' }}>TOTAL COMMISSION (3%)</Typography> 
-                        <Box>
-                            <Typography sx={{ color: 'white', fontSize: '20px' }}>Your points: 
-                            </Typography>
-                            <Typography component="h1" sx={{ color: 'white', fontSize: '30px' }}>0.00 
-                            </Typography>
-                        </Box>
-                    </Container>
-                </Grid>
-
             </Grid>
-        </div>
-    )
-}
+        </Card>
+        // <Container sx={{backgroundColor:'white',padding:'10px'}}> 
+        // </Container>
+    );
+};
+
+export default UserTable;

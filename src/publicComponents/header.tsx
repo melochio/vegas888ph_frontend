@@ -32,7 +32,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
           const userResponse: UserModel_Hidden = response
           setUser(userResponse)
         } else {
-          // document.location.href = "/login"
+          document.location.href = "/login"
         }
     }
     fetchUserData()
@@ -264,13 +264,13 @@ const DeclaratorHeader = () => {
       try {
           const response = await fetchUser()
           if(response === undefined) {
-            // document.location.href = '/login'
+            document.location.href = '/login'
           } else {
             const userResponse: UserModel_Hidden = response
             setUser(userResponse)
           }
       } catch(err) {
-        // document.location.href = '/login'
+        document.location.href = '/login'
       }
     }
     fetchUserData()

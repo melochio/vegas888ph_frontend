@@ -26,7 +26,7 @@ const UserTable: React.FC = () => {
         //   .then((data) => setUsers(data))
         //   .catch((error) => console.error('Error fetching users:', error));
 
-        fetchUser(['bettor'], 'inactive')
+        fetchUser(['bettor'], 'Inactive')
             .then((res) => {
                 setRequest(res)
                 console.log(res)
@@ -103,8 +103,7 @@ const UserTable: React.FC = () => {
     ];
 
     return (
-        <Card>
-
+        <Card> 
             <Grid container>
                 <Typography>
                     Active Players

@@ -4,12 +4,13 @@ import config from "../config/headers"
 interface betResponseModel {
   responseMessage: string,
 }
-const fetchUser = async (userType: string[]) => {
+const fetchUser = async (userType: string[],status:string) => {
   try {
     const response = await axios.get(process.env.NEXT_PUBLIC_API_URL + '/api/agentUser/fetchUser', {
       withCredentials: true,
       params:{
-        userType:userType
+        userType:userType,
+        status:status
       },
       headers: {
         'Authorization': 'Bearer ' + localStorage.getItem('token')
@@ -22,7 +23,7 @@ const fetchUser = async (userType: string[]) => {
   }
 }
 const createUser = async (data: any): Promise<string | any> => { 
-  const tokenResponse = await fetchUser(['bettor']) 
+  const tokenResponse = await fetchUser(['bettor'],'active') 
   let userDetails = null
   if (tokenResponse !== undefined) {
       userDetails = tokenResponse;
@@ -40,12 +41,35 @@ const createUser = async (data: any): Promise<string | any> => {
       password: data.password, 
       commission: data.commission,
       bday: data.bday, 
+      isActive: data.isActive, 
   }, config) 
   return transferResponse 
+}
+const deactivateUser = async (id: number | string) => {
+  try {
+    const responseData = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/agentUser/deactivateUserById', { 
+      userId:id 
+    }, config)
+    console.log('return',responseData.data) 
+  } catch (err) {
+    console.log(err)
+  } 
+}
+const activateUser = async (id: number | string) => {
+  try {
+    const responseData = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/agentUser/approvedUserById', { 
+      userId:id 
+    }, config)
+    console.log('return',responseData.data) 
+  } catch (err) {
+    console.log(err)
+  } 
 }
 
 // export default fetchUser
 export {
   fetchUser,
-  createUser
+  createUser,
+  deactivateUser,
+  activateUser
 }

@@ -26,7 +26,7 @@ const UserTable: React.FC = () => {
         //   .then((data) => setUsers(data))
         //   .catch((error) => console.error('Error fetching users:', error));
 
-        fetchUser(['bettor'], 'inactive')
+        fetchUser(['agent'], 'inactive')
             .then((res) => {
                 setRequest(res)
                 console.log(res)
@@ -46,7 +46,7 @@ const UserTable: React.FC = () => {
                 activateUser(userId)
                     .then((res) => { 
                         Swal.fire('Saved!', '', 'success')
-                        fetchUser(['bettor'], 'inactive')
+                        fetchUser(['agent'], 'inactive')
                             .then((res) => {
                                 setRequest(res)
                                 console.log(res)

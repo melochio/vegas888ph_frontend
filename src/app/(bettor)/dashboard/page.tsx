@@ -4,7 +4,7 @@ import Card from '@mui/joy/Card';
 import CardCover from '@mui/joy/CardCover';
 import CardContent from '@mui/joy/CardContent';
 import Typography from '@mui/joy/Typography';
-import {Typography as TypographyMui} from '@mui/material';
+import {Container, Typography as TypographyMui} from '@mui/material';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 import { Button, Grid } from "@mui/material";
 import StarRateIcon from '@mui/icons-material/StarRate';
@@ -143,14 +143,12 @@ export default function Dashboard() {
     return (
         <div>
             <LoggedHeader />
-            <div style={{
-                margin: '0rem 10rem'
-            }}>
+            <Container>
                 <Categories /><br /><br />
                 <Card sx={{backgroundColor: colors.silver}}>
                     <Grid container columns={12} flexDirection={'row'} rowSpacing={3} columnSpacing={3}>
                         {gameList.map((val, index) => (
-                            <Grid key={index} item sm={12} md={6} lg={4} xl={4} xs={12}>
+                            <Grid key={index} item sm md={6} lg={4} xl={4} xs={12}>
                                 <a href={val.href}>
                                     <GameCard {...val}/>
                                 </a>
@@ -166,7 +164,7 @@ export default function Dashboard() {
                     <Button sx={{borderRadius: '2em', backgroundColor: colors.gold, fontWeight: 700, padding: '1em 2em'}} variant={'contained'}>View All</Button>
                 </div>
                 {/* <Leaderboards /> */}
-            </div>
+            </Container>
         </div>
     )
 }
