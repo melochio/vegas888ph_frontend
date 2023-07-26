@@ -10,6 +10,7 @@ import Model_tranferMoney, { initialUser } from '../../../../models/tranferMoney
 import { transferWalletApi } from '@/api/agent/wallet'
 import {fetchUser} from '@/api/agent/users'
 
+import userMiddleware from '@/utils/middleware';
 import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
@@ -74,6 +75,7 @@ export default function Wallet() {
         }
     };
     React.useEffect(() => {
+        userMiddleware()
         fetchData();
     }, []);
     const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

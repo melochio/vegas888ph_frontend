@@ -23,7 +23,7 @@ import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import { colors } from '@pComp/customStyles'
 import { Avatar, Button, ButtonGroup, Card, Container, Grid, Menu, MenuItem, Paper, Popper } from '@mui/material';
-import Logo from './vegas888logo.png'
+import Logo from '@/publicComponents/logo.png'
 import Image from 'next/image'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { useRouter } from 'next/navigation';
@@ -243,7 +243,7 @@ export default function RootLayout({
             <MenuIcon />
           </IconButton>
           <Grid item sm md lg xl xs={12}>
-            <Image alt={'Logo'} src={Logo} quality={100} width={90} height={70} style={{ margin: '5px' }} />
+          <Image alt={'Logo'} src={Logo} quality={100} width={120} height={100} style={{ margin: '5px' }} />
             {/* <Button href='/' variant={'text'} sx={{paddingLeft: 6, paddingRight: 6, border: 0, fontSize: 27, color: colors.gold}}>VEGAS 888</Button> */}
           </Grid>
           <Grid item xs={12} sm={8} md lg xl>
@@ -264,11 +264,11 @@ export default function RootLayout({
                                 })}
                       </Typography>
                     </Card>
-                    <Button size={'medium'} variant="contained">
+                    <Button size={'medium'} variant="contained" onClick={()=>router.push('/agent/RequestFormWithdrawal')} >
                       <AccountBalanceWalletIcon />
                     </Button>
                   </ButtonGroup>
-                  <Avatar onClick={handleAvatarClick} sx={{ cursor: 'pointer', margin: '0em 1em 0em 1em' }} />
+                  <Avatar   onClick={handleAvatarClick} sx={{ cursor: 'pointer', margin: '0em 1em 0em 1em' }} />
                 </Box>
                 {/* <Typography variant='body1' style={{ color: 'white', display: 'flex', alignItems: 'center' }}>{user?.player_name}</Typography> */}
               </Box>
@@ -279,8 +279,10 @@ export default function RootLayout({
                     open={Boolean(anchorEl)}
                     onClose={handleAvatarClose}
                   >
-                    <MenuItem onClick={handleAvatarClose}>View Profile</MenuItem>
-                    <MenuItem onClick={handleAvatarClose}>Transaction History</MenuItem>
+                    <MenuItem onClick={()=>router.push('/agent/Profile')} >View Profile</MenuItem>
+                    <MenuItem onClick={()=>router.push('/agent/WithdrawalHistory')} >Withdrawal History</MenuItem>
+                    <MenuItem onClick={()=>router.push('/agent/WalletHistory')} >Wallet History</MenuItem>  
+                    <MenuItem onClick={()=>router.push('/agent/ChangePassword')} >Change password</MenuItem>  
                     <MenuItem onClick={handleLogout}>Logout</MenuItem>
                   </Menu>
                 </Paper>
@@ -308,8 +310,8 @@ export default function RootLayout({
         open={open}
       >
         <DrawerHeader>
-          <span></span>
-          <Image alt={'Logo'} src={Logo} quality={100} width={90} height={70} style={{ marginTop: '20px' }} />
+          <span></span>  
+          <Image alt={'Logo'} src={Logo} quality={100} width={120} height={100} style={{ margin: '5px' }} />
           <IconButton onClick={handleDrawerClose} sx={{ alignItems: 'right' }}>
             <ArrowBackIcon style={{ color: 'white' }} />
           </IconButton>
@@ -371,7 +373,7 @@ export default function RootLayout({
                 </Typography>
               </ListItemButton>
             </ListItem>
-            <ListItem disablePadding sx={{
+            {/* <ListItem disablePadding sx={{
               color: '#989EB3',
               '&:hover': {
                 backgroundColor: '#31343d',
@@ -387,7 +389,7 @@ export default function RootLayout({
                   Commission History
                 </Typography>
               </ListItemButton>
-            </ListItem>
+            </ListItem> */}
         </List>
         <Divider />
         <Typography sx={{

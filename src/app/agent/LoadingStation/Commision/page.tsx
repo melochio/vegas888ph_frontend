@@ -12,7 +12,7 @@ import Model_user, { initialUser as initUser } from '../../../../models/users'
 import { transferWalletApi, getWalletHistory } from '@/api/agent/wallet'
 import { fetchUser } from '@/api/agent/users'
 import MoneyFormat from "@/publicComponents/MoneyFormat";
-
+import userMiddleware from '@/utils/middleware';
 import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
@@ -107,6 +107,7 @@ export default function Wallet() {
     }
     const [wallet_amount, setWallet_amount] = React.useState<Number | any>(0)
     React.useEffect(() => { 
+        userMiddleware()
         fetchWalletHistory()
         fetchData();
         setWallet_amount(Number(localStorage.getItem('wallet_amount')));

@@ -8,7 +8,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Swal from 'sweetalert2';
 import Card from '@mui/joy/Card';
 import router from 'next/router';
-
+import userMiddleware from '@/utils/middleware';
 interface User {
     // id: number;
     name: string;
@@ -19,6 +19,7 @@ const UserTable: React.FC = () => {
     const [request, setRequest] = React.useState<User[]>([]);
 
     useEffect(() => {
+        userMiddleware()
         // Fetch data from the user API endpoint here
         // Replace 'YOUR_API_ENDPOINT' with the actual API endpoint URL
         // fetch('YOUR_API_ENDPOINT')

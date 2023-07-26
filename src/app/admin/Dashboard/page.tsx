@@ -8,8 +8,10 @@ import Typography from '@mui/joy/Typography';
 import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
+import userMiddleware from '@/utils/middleware';
 import Container from '@mui/material/Container';
 import { Height } from "@mui/icons-material";
+import { useEffect } from "react";
 export default function Dashboard() {
     const breadcrumbs = [
         <Link underline="hover" key="1" color="inherit" href="/" sx={{ color: 'black' }}>
@@ -17,7 +19,11 @@ export default function Dashboard() {
         </Link>,
 
 
-    ];
+    ]; 
+    useEffect(() => {
+        userMiddleware() 
+    }, []);
+
 
     const Cards = (title: string, value: string, color: string) => {
         return (

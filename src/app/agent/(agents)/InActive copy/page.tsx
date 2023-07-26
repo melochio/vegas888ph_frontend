@@ -1,15 +1,11 @@
 'use client'
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import React, { useEffect } from 'react';
-import { getRequestWithdrawal, approvedRequestWithdrawal, declineWithdrawRequest } from '@agentApi/wallet'
-
-import { Box, Button, Container, Grid, Menu, MenuItem, Paper, Popper, Typography } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import React, { useEffect } from 'react'; 
+import { fetchUser, activateUser } from '@/api/agent/users'
+import { Box, Button, Container, Grid, Typography } from '@mui/material'; 
 import Swal from 'sweetalert2';
-import Card from '@mui/joy/Card';
-import router from 'next/router';
+import Card from '@mui/joy/Card'; 
 
-import userMiddleware from '@/utils/middleware';
 interface User {
     // id: number;
     name: string;
@@ -20,57 +16,34 @@ const UserTable: React.FC = () => {
     const [request, setRequest] = React.useState<User[]>([]);
 
     useEffect(() => {
-        userMiddleware() 
-        getRequestWithdrawal(['bettor','agent'])
+        // Fetch data from the user API endpoint here
+        // Replace 'YOUR_API_ENDPOINT' with the actual API endpoint URL
+        // fetch('YOUR_API_ENDPOINT')
+        //   .then((response) => response.json())
+        //   .then((data) => setUsers(data))
+        //   .catch((error) => console.error('Error fetching users:', error));
+
+        fetchUser(['bettor'], 'inactive')
             .then((res) => {
                 setRequest(res)
                 console.log(res)
             })
             .catch((error) => console.error('Error fetching users:', error));
-    }, []);
-    const handleApproveRequest = (requestId: any, requesteeId: any, amount: any, name: any) => {
-        Swal.fire({
-            text: "You won't be able to revert this!",
-            icon: 'warning',
-            title: 'Do you want to send ' + amount + ' load  to ' + name + '? ',
-            showCancelButton: true,
-            confirmButtonText: 'Yes',
-        }).then((result) => {
-            /* Read more about isConfirmed, isDenied below */
-            if (result.isConfirmed) {
-                approvedRequestWithdrawal({ requestId: requestId, requesteeId: requesteeId, amount: amount })
-                    .then((res) => {
-                        res.data
-                        Swal.fire('Saved!', '', 'success')
-                        location.href = '/admin/LoadingStation/WithdrawalRequests'
-                        getRequestWithdrawal(['master agent'])
-                            .then((res) => {
-                                setRequest(res)
-                                console.log(res)
-                            })
-                            .catch((error) => console.error('Error fetching users:', error));
-                    })
-            } else if (result.isDenied) {
-                Swal.fire('Changes are not saved', '', 'info')
-            }
-        })
-    }
-    const handleDeclinetRequest = (requestId: any, requesteeId: any, amount: any, name: any) => {
+    }, []); 
+    const handleActivateUser = (userId:any) => {
 
-        Swal.fire({
-            text: "You won't be able to revert this!",
+        Swal.fire({ 
             icon: 'warning',
-            title: 'Do you want to decline this request from ' + name + '? ',
+            title: 'Do you want to activate this account ?',
             showCancelButton: true,
             confirmButtonText: 'Yes',
         }).then((result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isConfirmed) {
-                declineWithdrawRequest({ requestId: requestId, requesteeId: requesteeId, amount: amount })
-                    .then((res) => {
-                        res.data
+                activateUser(userId)
+                    .then((res) => { 
                         Swal.fire('Saved!', '', 'success')
-                        getRequestWithdrawal(['bettor'])
+                        fetchUser(['bettor'], 'inactive')
                             .then((res) => {
                                 setRequest(res)
                                 console.log(res)
@@ -85,8 +58,7 @@ const UserTable: React.FC = () => {
     }
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'ID', flex: 1 },
-        { field: 'firstName', headerName: 'Name', flex: 1 },
-        { field: 'request_amount', headerName: 'Request Amount', flex: 1 },
+        { field: 'name', headerName: 'Name', flex: 1 }, 
         {
             field: 'isActive',
             headerName: 'Action',
@@ -99,12 +71,9 @@ const UserTable: React.FC = () => {
                 const request_amount = params.row.request_amount;
                 return (
                     <>
-                        <Container>
-                            <Button size="small" variant="contained" onClick={() => handleApproveRequest(id, userId, request_amount, firstName)}>
-                                Approve
-                            </Button>
-                            <Button size="small" variant="contained" style={{ backgroundColor: 'red', color: 'white' }} onClick={() => handleDeclinetRequest(id, userId, request_amount, firstName)}>
-                                Decline
+                        <Container>  
+                            <Button size="small" variant="contained" color='primary' style={{ color: 'white' }} onClick={() => handleActivateUser(id)}>
+                                ACTIVATE
                             </Button>
                         </Container>
 
@@ -135,7 +104,7 @@ const UserTable: React.FC = () => {
 
             <Grid container>
                 <Typography>
-                    Withdral Request
+                    Active Players
                 </Typography>
 
                 <Grid item xs={0} md={12}>

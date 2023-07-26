@@ -6,10 +6,13 @@ import CardCover from '@mui/joy/CardCover';
 import CardContent from '@mui/joy/CardContent';
 import Typography from '@mui/joy/Typography';
 import TextInput from '@/publicComponents/TextInput'
+import FormInput from '@/publicComponents/FormInput'
 import Model_tranferMoney, { initialUser } from '../../../../models/tranferMoney'
-import { transferWalletApi } from '@/api/agent/wallet'
-import {fetchUser} from '@/api/agent/users'
-
+import Model_user, { initialUser as initUser } from '../../../../models/users'
+import { transferWalletApi, getWalletHistory } from '@/api/agent/wallet'
+import { fetchUser } from '@/api/agent/users'
+import MoneyFormat from "@/publicComponents/MoneyFormat";
+import userMiddleware from '@/utils/middleware';
 import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
@@ -17,20 +20,31 @@ import Container from '@mui/material/Container';
 import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import Model_User from "../../../../models/users";
 
 
 const columns: GridColDef[] = [
-    { field: 'date', headerName: 'DATE', width: 200 },
+    { field: 'created_at', headerName: 'DATE', width: 200 },
     { field: 'type', headerName: 'TRANSACTION TYPE	', width: 200 },
-    { field: 'name', headerName: 'AMOUNT', width: 200 },
+    { field: 'amount', headerName: 'AMOUNT', width: 200 },
     { field: 'name', headerName: 'USER WALLET', width: 200 },
-    { field: 'name', headerName: 'DETAILS', width: 200 },
-    { field: 'name', headerName: 'TRANSACTED BY', width: 200 },
+    { field: 'remarks', headerName: 'DETAILS', width: 200 },
+    // { field: 'name5', headerName: 'TRANSACTED BY', width: 200 },
 
 
 ];
-export default function Wallet() {
 
+export default function Wallet() {
+    interface members {
+        player_name: string,
+        name: String | any,
+        total_wallet_balance: number
+    }
+    const [memberDetails, setMemberDetails] = React.useState<members | any>({
+        player_name: '',
+        name: '',
+        total_wallet_balance: 0
+    })
     const [formInput, setFormInput] = React.useState<Model_tranferMoney>(initialUser)
     const breadcrumbs = [
         <Link underline="hover" key="1" color="inherit" href="/" sx={{ color: 'black' }}>
@@ -44,6 +58,14 @@ export default function Wallet() {
 
     // const getUser()
     const handleInput = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
+        if (event.currentTarget.name == 'requestee') {
+            const data = userlist.find((user) => user.name === event.currentTarget.value);
+            const _player_name = data?.player_name
+            const _name = data?.name
+            const _total_wallet_balance = data?.total_wallet_balance
+            const memberData = { player_name: _player_name, name: _name, total_wallet_balance: _total_wallet_balance };
+            setMemberDetails(memberData);
+        }
         setFormInput({ ...formInput, [event.currentTarget.name]: event.currentTarget.value })
     }
     const [money, setMoney] = React.useState('');
@@ -57,30 +79,45 @@ export default function Wallet() {
 
         // Format the numeric value as money (e.g., 1234.56 -> $1,234.56)
         const formattedValue = new Intl.NumberFormat('en-US').format(parseFloat(numericValue));
-        setFormInput({ ...formInput, [event.currentTarget.name]: event.currentTarget.value })
+        setFormInput({ ...formInput, [event.currentTarget.name]: value.replace(/[^0-9.]/g, '')})
         setMoney(formattedValue)
     }
 
-    const [userlist, setUserlist] = React.useState([])
+    const [userlist, setUserlist] = React.useState<Model_user[]>([]);
     const fetchData = async () => {
-
         try {
-            const users: [] = await fetchUser(['super agent']);
-            console.log(users)
+            const users: Model_User[] = await fetchUser(['master agent'], 'active');
             setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
+            // const userlist: Model_user[] = users
         } catch (error) {
             console.error('Error fetching data:', error);
             // setUserList([]); // Set an empty array if there's an error or no data
         }
     };
-    React.useEffect(() => {
+
+    const [walletHistory, setWalletHistory] = React.useState([])
+    const fetchWalletHistory = async () => {
+        try { 
+            const data = await getWalletHistory(['master agent']); 
+            setWalletHistory(data); // Assuming `users` is an array of objects with the 'PlayerName' property
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            // setUserList([]); // Set an empty array if there's an error or no data
+        }
+    }
+    const [wallet_amount, setWallet_amount] = React.useState<Number | any>(0)
+    React.useEffect(() => { 
+        userMiddleware()
+        fetchWalletHistory()
         fetchData();
+        setWallet_amount(Number(localStorage.getItem('wallet_amount')));
     }, []);
     const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         console.log(formInput)
+        alert(formInput.amount.replace(",", ""))
         let inputsValid = false
         if (formInput.type != "" &&
-            formInput.amount > 0 &&
+           Number(formInput.amount.replace(" ", "")) > 0 &&
             formInput.requestee != "" &&
             formInput.password != ""
         ) {
@@ -92,9 +129,8 @@ export default function Wallet() {
             if (response.status == 200) {
                 Swal.fire(
                     'Success',
-                )
-
-                location.href = '/AgentDashboard'
+                ) 
+                location.href = '/admin/LoadingStation/Wallet'
             } else {
                 Swal.fire(
                     'Failed',
@@ -118,14 +154,14 @@ export default function Wallet() {
                     separator={<NavigateNextIcon fontSize="small" />}
                     aria-label="breadcrumb"
                     color='white'
-                >
+                > 
                     {breadcrumbs}
                 </Breadcrumbs>
             </Stack>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={8}>
                     <Box sx={{ display: 'flex', justifyContent: 'start', padding: '20px', backgroundColor: "black" }}>
-                        <Typography component="h1" sx={{ color: 'white', fontSize: '20px', marginTop: '10px' }}>Current Wallet : 100,000.00</Typography>
+                        {/* <Typography component="h1" sx={{ color: 'white', fontSize: '20px', marginTop: '10px' }}>Current Wallet : {'₱ ' + wallet_amount.toFixed(2)} </Typography> */}
                     </Box>
                     <Container style={containerStyle} sx={{ borderTop: '6px solid red', backgroundColor: 'white' }}>
                         <Typography component="h1" sx={{ color: 'black', fontSize: '15px', marginTop: '10px' }}>Wallet Management</Typography>
@@ -166,7 +202,7 @@ export default function Wallet() {
                                         <option value="" disabled>Select an option</option>
                                         {userlist.map((option: any) => (
                                             <option key={option.id} value={option.name}>
-                                                {option.name}
+                                                {option.name} ({option.user_level})
                                             </option>
                                         ))}
                                     </select>
@@ -197,8 +233,7 @@ export default function Wallet() {
                                         onChange={(event) => handleInput(event)}
                                         type={'text'}
                                         value={formInput.transactionDetails}
-                                        style={{
-                                            textAlign: 'right',
+                                        style={{ 
                                             padding: '8px',
                                         }}
                                         className="form-control"
@@ -236,11 +271,11 @@ export default function Wallet() {
                         <Typography component="h1" sx={{ fontSize: '15px', marginTop: '10px' }}>Member Details </Typography>
                         <hr />
                         <Box>
-                            <Typography sx={{ fontSize: '15px' }}>Username :
+                            <Typography sx={{ fontSize: '15px' }}>Name : {memberDetails.name}
                             </Typography>
-                            <Typography sx={{ fontSize: '15px' }}>Username:
+                            <Typography sx={{ fontSize: '15px' }}>Username: {memberDetails.player_name}
                             </Typography>
-                            <Typography sx={{ fontSize: '15px' }}>Current Wallet:
+                            <Typography sx={{ fontSize: '15px' }}>Current Wallet: {'₱ ' + memberDetails.total_wallet_balance.toFixed(2)}
                             </Typography>
                         </Box>
                     </Container>
@@ -251,7 +286,7 @@ export default function Wallet() {
                             List of Transactions
                         </Typography>
                         <DataGrid
-                            rows={userlist}
+                            rows={walletHistory}
                             columns={columns}
                             initialState={{
                                 pagination: {

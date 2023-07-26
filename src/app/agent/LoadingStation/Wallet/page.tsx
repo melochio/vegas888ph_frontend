@@ -12,7 +12,7 @@ import Model_user, { initialUser as initUser } from '../../../../models/users'
 import { transferWalletApi, getWalletHistory } from '@/api/agent/wallet'
 import { fetchUser } from '@/api/agent/users'
 import MoneyFormat from "@/publicComponents/MoneyFormat";
-
+import userMiddleware from '@/utils/middleware';
 import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 
@@ -79,7 +79,7 @@ export default function Wallet() {
 
         // Format the numeric value as money (e.g., 1234.56 -> $1,234.56)
         const formattedValue = new Intl.NumberFormat('en-US').format(parseFloat(numericValue));
-        setFormInput({ ...formInput, [event.currentTarget.name]: event.currentTarget.value })
+        setFormInput({ ...formInput, [event.currentTarget.name]: value.replace(/[^0-9.]/g, '')})
         setMoney(formattedValue)
     }
 
@@ -107,6 +107,7 @@ export default function Wallet() {
     }
     const [wallet_amount, setWallet_amount] = React.useState<Number | any>(0)
     React.useEffect(() => { 
+        userMiddleware()
         fetchWalletHistory()
         fetchData();
         setWallet_amount(Number(localStorage.getItem('wallet_amount')));
@@ -115,7 +116,7 @@ export default function Wallet() {
         console.log(formInput)
         let inputsValid = false
         if (formInput.type != "" &&
-            formInput.amount > 0 &&
+            Number(formInput.amount) > 0 &&
             formInput.requestee != "" &&
             formInput.password != ""
         ) {
@@ -127,9 +128,8 @@ export default function Wallet() {
             if (response.status == 200) {
                 Swal.fire(
                     'Success',
-                )
-
-                location.href = '/Dashboard'
+                ) 
+                location.href = '/agent/LoadingStation/Wallet'
             } else {
                 Swal.fire(
                     'Failed',
@@ -232,8 +232,7 @@ export default function Wallet() {
                                         onChange={(event) => handleInput(event)}
                                         type={'text'}
                                         value={formInput.transactionDetails}
-                                        style={{
-                                            textAlign: 'right',
+                                        style={{ 
                                             padding: '8px',
                                         }}
                                         className="form-control"

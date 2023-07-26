@@ -16,15 +16,14 @@ import Container from '@mui/material/Container';
 import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import axios from "axios";
 
 
 const columns: GridColDef[] = [
-    { field: 'date', headerName: 'DATE', width: 200 },
-    { field: 'type', headerName: 'TRANSACTION TYPE	', width: 200 },
-    { field: 'name', headerName: 'AMOUNT', width: 200 },
-    { field: 'name', headerName: 'USER WALLET', width: 200 },
-    { field: 'name', headerName: 'DETAILS', width: 200 },
-    { field: 'name', headerName: 'TRANSACTED BY', width: 200 },
+    { field: 'created_at', headerName: 'DATE', width: 200 },
+    { field: 'user_level', headerName: 'TRANSACTION TYPE', width: 200 }, 
+    { field: 'name', headerName: 'Name', width: 200 }, 
+    { field: 'commission', headerName: 'Commission %', width: 200 }, 
 
 
 ];
@@ -76,7 +75,35 @@ export default function Accounts() {
             // setUserList([]); // Set an empty array if there's an error or no data
         }
     };
+    type UserModel = {
+        created_at: any,
+        email: any,
+        email_verified_at: any,
+        id: any,
+        name: any,
+        player_name: any,
+        pp_filepath: any,
+        updated_at: any,
+        user_level: string | any,
+      }
+    const [user, setUser] = React.useState<UserModel>() 
     React.useEffect(() => {
+        try {
+            const response =  axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/tokenValue', null, {
+              withCredentials: true,
+              headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+              }
+            })
+            const userResponse: UserModel = response.data
+            if (response === undefined) {
+              document.location.href = '/login'
+            } else {
+              setUser(userResponse)
+            }
+          } catch (err) {
+            document.location.href = '/login'
+          }
         fetchData();
     }, []);
     const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {  
@@ -88,7 +115,7 @@ export default function Accounts() {
             formInput.password != ""
 
         ) {
-            if (formInput.user_level == "declarator") {
+            if (formInput.user_level == "bettor") {
                 inputsValid = true
             } else {
                 if (formInput.commission != "") {
@@ -104,7 +131,7 @@ export default function Accounts() {
                     'Success',
                 )
 
-                location.href = '/Dashboard'
+                location.href = '/agent/Dashboard'
             } else {
                 Swal.fire(
                     'Failed',
@@ -173,11 +200,20 @@ export default function Accounts() {
                                         name="user_level"
                                     >
                                         <option value="" disabled>Select an option</option>
-                                        {['agent', 'bettor'].map((option) => (
-                                            <option key={option} value={option}>
-                                                {option}
-                                            </option>
-                                        ))}
+                                        {
+                                            user?.user_level === 'master agent' ? 
+                                            ['agent', 'bettor'].map((option) => (
+                                                <option key={option} value={option}>
+                                                    {option}
+                                                </option>
+                                            ))
+                                            : 
+                                            ['bettor'].map((option) => (
+                                                <option key={option} value={option}>
+                                                    {option}
+                                                </option>
+                                            ))
+                                        }
                                     </select>
                                 </div>
                                 {/* <FormInput label="Transaction Type" placeholder="Enter text here" options={['deposit','withdraw']} type={"select"} /> */}
@@ -236,7 +272,7 @@ export default function Accounts() {
                                 </div>
                             </Grid>
                             {
-                                formInput.user_level != 'declarator' ?
+                                formInput.user_level != 'bettor' ?
                                     <Grid item xs={12} sm={6} md={6}>
                                         <div className="form-group" style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
                                             <label htmlFor="selectInput" className="form-label">Commission %</label>

@@ -17,7 +17,7 @@ import Container from '@mui/material/Container';
 import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-
+import userMiddleware from '@/utils/middleware';
 
 const columns: GridColDef[] = [
     { field: 'date', headerName: 'DATE', width: 200 },
@@ -74,6 +74,7 @@ export default function Wallet() {
         }
     };
     React.useEffect(() => {
+        userMiddleware()
         fetchData();
     }, []);
     const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

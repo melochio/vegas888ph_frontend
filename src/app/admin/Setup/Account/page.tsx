@@ -68,7 +68,7 @@ export default function Accounts() {
     const fetchData = async () => {
 
         try {
-            const users: [] = await fetchUser(['super agent','agent','admin','declarator']);
+            const users: [] = await fetchUser(['super agent','agent','admin','declarator'],'active');
             console.log(users)
             setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
         } catch (error) {

@@ -21,8 +21,8 @@ import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import { colors } from '@pComp/customStyles'
-import { Avatar, Button, ButtonGroup, Card, Container, Grid } from '@mui/material';
-import Logo from './vegas888logo.png'
+import { Avatar, Button, ButtonGroup, Card, Container, Grid, Menu, MenuItem, Paper, Popper } from '@mui/material';
+import Logo from '@/publicComponents/logo.png'
 import Image from 'next/image'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { useRouter } from 'next/navigation';
@@ -113,8 +113,15 @@ export default function RootLayout({
     else if (target == 'Withdrawal Requests') {
       window.location.href = '/admin/LoadingStation/WithdrawalRequests';
     }
-  }
+  } 
+  const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null);
+  const handleAvatarClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
 
+  const handleAvatarClose = () => {
+    setAnchorEl(null);
+  };
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -122,6 +129,21 @@ export default function RootLayout({
   const handleDrawerClose = () => {
     setOpen(false);
   };
+  const handleLogout = async () => {
+    setAnchorEl(null);
+    try {
+      const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/logout', null, {
+        withCredentials: true,
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      });
+      if (response) {
+        document.location.href = '/login'
+      }
+    } catch (err) {
+    }
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -143,26 +165,31 @@ export default function RootLayout({
             <MenuIcon />
           </IconButton>
           <Grid item sm md lg xl xs={12}>
-            <Image alt={'Logo'} src={Logo} quality={100} width={90} height={70} style={{ margin: '5px' }} />
+          <Image alt={'Logo'} src={Logo} quality={100} width={120} height={100} style={{ margin: '5px' }} />
             {/* <Button href='/' variant={'text'} sx={{paddingLeft: 6, paddingRight: 6, border: 0, fontSize: 27, color: colors.gold}}>VEGAS 888</Button> */}
           </Grid>
           <Grid item xs={12} sm={8} md lg xl>
             <Grid container flexDirection={'row'} justifyContent={'flex-end'}>
-              <ButtonGroup
+              {/* <ButtonGroup
                 size="small"
                 aria-label="small button group"
                 sx={{ alignItems: 'center' }}
-              >
-                <Card sx={{ maxHeight: '30px', padding: '0rem 1rem' }}>
-                  <Typography variant="caption" fontWeight={800}>
-                    &#8369;0.00
-                  </Typography>
-                </Card>
-                <Button size={'medium'} variant="contained">
-                  <AccountBalanceWalletIcon />
-                </Button>
-              </ButtonGroup>
-              <Avatar sx={{ cursor: 'pointer', margin: '0em 1em 0em 1em' }} />
+              > 
+              </ButtonGroup> */}
+              <Avatar   onClick={handleAvatarClick} sx={{ cursor: 'pointer', margin: '0em 1em 0em 1em' }} />
+              <Popper open={Boolean(anchorEl)} anchorEl={anchorEl}>
+                <Paper>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleAvatarClose}
+                  >
+                    <MenuItem onClick={()=>router.push('/agent/Profile')} >View Profile</MenuItem>
+                    <MenuItem onClick={()=>router.push('/agent/ChangePassword')} >Change password</MenuItem> 
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                  </Menu>
+                </Paper>
+              </Popper> 
               <Typography variant='body1' style={{ color: 'white', display: 'flex', alignItems: 'center' }}></Typography>
             </Grid>
           </Grid>
@@ -186,8 +213,9 @@ export default function RootLayout({
         open={open}
       >
         <DrawerHeader>
-          <span></span>
-          <Image alt={'Logo'} src={Logo} quality={100} width={90} height={70} style={{ margin: '5px' }} />
+          <span></span> 
+          
+          <Image alt={'Logo'} src={Logo} quality={100} width={120} height={100} style={{ margin: '5px' }} />
           <IconButton onClick={handleDrawerClose} sx={{ alignItems: 'right' }}>
             <ArrowBackIcon  style={{ color: 'white' }} />
           </IconButton>
@@ -264,7 +292,7 @@ export default function RootLayout({
         </List>
       </Drawer>
 
-      <Main open={open} sx={{ backgroundColor: '#eaf1f7', minHeight: '100vh' }} >
+      <Main open={open} sx={{ backgroundColor: '#eaf1f7', minHeight: '100vh',marginTop:'10px' }} >
         <DrawerHeader sx={{ backgroundColor: '#31343d' }} />
         <Container sx={{ margin: 'auto', marginTop: '50px' }} >
           {children}
