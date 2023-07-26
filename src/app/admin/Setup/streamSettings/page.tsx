@@ -7,7 +7,7 @@ import { getStreamList } from "@/api/admin/stream";
 
 const breadcrumbs = [
     <Link underline="hover" key="1" color="inherit" href="/" sx={{ color: 'black' }}>
-        Events
+        Streaming
     </Link>,
 ];
 const containerStyle = {

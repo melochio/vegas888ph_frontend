@@ -43,7 +43,7 @@ export default function Dashboard() {
             <Stack spacing={2}>
 
                 <Breadcrumbs
-                    separator={<NavigateNextIcon fontSize="small" />}
+                    separator={<NavigateNextIcon   />}
                     aria-label="breadcrumb"
                     color='white'
                 >

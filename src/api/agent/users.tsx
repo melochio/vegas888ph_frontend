@@ -99,7 +99,17 @@ const activateUser = async (id: number | string) => {
     console.log(err)
   } 
 }
-
+const updateCommissionUser = async (id: string  | any ,commission:any) => {
+  try { 
+    const responseData = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/agentUser/updateCommission', { 
+      userId:id,
+      commission:commission 
+    }, config)  
+    return responseData
+  } catch (err) {
+    console.log(err)
+  } 
+}
 // export default fetchUser
 export {
   fetchUser,
@@ -107,5 +117,6 @@ export {
   deactivateUser,
   activateUser,
   updateUser,
-  changePassword
+  changePassword,
+  updateCommissionUser
 }

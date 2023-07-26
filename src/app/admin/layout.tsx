@@ -32,6 +32,7 @@ import HomeSharpIcon from '@mui/icons-material/HomeSharp';
 import AccountBoxSharpIcon from '@mui/icons-material/AccountBoxSharp';
 import AssessmentSharpIcon from '@mui/icons-material/AssessmentSharp';
 import userMiddleware from '@/utils/middleware';
+import axios from 'axios';
 // const drawerWidth = 240;
 const drawerWidth = 240;
 
@@ -240,7 +241,7 @@ export default function RootLayout({
         </Typography>
         <List
         >
-          {['Events','Accounts','Commission','Game Settings'].map((text, index) => (
+          {['Events','Accounts','Game Settings'].map((text, index) => (
             <ListItem key={text} disablePadding sx={{
               color: '#989EB3',
               '&:hover': {
