@@ -77,13 +77,13 @@ const Form = () => {
     };
     return (
         <Grid container columns={12} justifyContent={'center'} minHeight={'70vh'}>
-            <Grid item md={5}>
-                <Card sx={{padding: '4rem', backgroundColor: colors.silver, borderRadius: '1em'}}>
+            <Grid item xs={10} sm={8} md={8} lg={6}>
+                <Card sx={{backgroundColor: colors.silver, borderRadius: '1em', padding: '3em 0em'}}>
                     <form action="" method="post">
                         <Typography variant="h4" fontWeight={700} textAlign={'center'}>Login</Typography>
                         <br /> <br />
                         <Grid container columns={12} flexDirection={'row'} justifyContent={'center'} rowSpacing={2}>
-                            <Grid item sm={8} md={8} lg={8} xl={8} xs={8}>
+                            <Grid item sm={10} md={8} lg={8} xl={8} xs={10}>
                                 <FormControl fullWidth>
                                     <TextField id="emailInput"
                                     name="email"
@@ -94,7 +94,7 @@ const Form = () => {
                                     label="Email address"/>
                                 </FormControl> 
                             </Grid>
-                            <Grid item sm={8} md={8} lg={8} xl={8} xs={8}>
+                            <Grid item sm={10} md={8} lg={8} xl={8} xs={10}>
                                 <FormControl fullWidth>
                                     <TextField id="passwordInput"
                                     name="password"
@@ -106,10 +106,10 @@ const Form = () => {
                                     label="Password"/>
                                 </FormControl> 
                             </Grid>
-                            <Grid item sm={8} md={8} lg={8} xl={8} xs={8} textAlign={'center'}>
+                            <Grid item sm={10} md={8} lg={8} xl={8} xs={10} textAlign={'center'}>
                                 <FormControlLabel control={<Checkbox />} label="Remember Me" />
                             </Grid>
-                            <Grid item sm={6} md={6} lg={6} xl={6} xs={6}>
+                            <Grid item sm={10} md={6} lg={6} xl={6} xs={10}>
                                 <LoadingButton loading={loginState} fullWidth
                                     onClick={handleLogin}
                                     sx={{

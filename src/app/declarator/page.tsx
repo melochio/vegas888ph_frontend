@@ -27,66 +27,19 @@ import CheckIcon from '@mui/icons-material/Check';
 import { colors } from "@/publicComponents/customStyles"
 import { updateGameResult, gameList as gameList_API } from "@/api/declarator/http"
 import CircleIcon from '@mui/icons-material/Circle';
-import socket from "@/utils/webSocket"
 import Swal from "sweetalert2"
 import userMiddleware from "@/utils/middleware"
-import Echo from "laravel-echo"
-import Pusher from "pusher-js"
+import SBAPI from '@utils/supabase'
+import './styles.css'; // Import the CSS file
 
 export default function Declarator() {
     React.useEffect(() => {
-      userMiddleware()
+    //   userMiddleware()
     }, [])
     const [currentGameState, setCurrentGameState] = React.useState<Game_Model>(initialGameValue)
     const [gameList, setGameList] = React.useState<Game_Model[]>([])
     const [streamData, setStreamData] = React.useState<Stream_Model>(initialStreamValue)
     const [expFights, setExpFights] = React.useState(0)
-    React.useEffect(() => {
-        window.Pusher = Pusher;
-        const echo = new Echo({
-            broadcaster: 'pusher',
-            key: 'local1', // Replace with your Pusher key (PUSHER_APP_KEY)
-            wsHost: '127.0.0.1',
-            wsPort: 6001,
-            cluster: 'ap2', // Set the Pusher cluster here
-            disableStats: true,
-            forceTLS: false,
-            encrypted: false, // Set to true if your WebSocket server uses SSL
-            enabledTransports: ['ws'], // Use only WebSocket transport
-        });
-
-        const channel = echo.channel('counter');
-        channel.listen('sabong_currentDetails', (event: any) => {
-        // Handle the event data here
-            console.log('Received event:', event);
-            setCurrentGameState(event.data)
-            setGameList(event.remainingGames)
-        });
-    }, []);
-    const fetchExpFights = async () => {
-        const expFightsRepsonse = await getExpFights()
-        if (expFightsRepsonse !== undefined){
-            setExpFights(expFightsRepsonse.data)
-        }
-    }
-    const fetchGameList = async () => {
-        const gameListResponse = await gameList_API()
-        if (gameListResponse !== undefined){
-            setGameList(gameListResponse.data)
-        }
-    }
-    const fetchCurrentStream = async () => {
-        const gameResponse = await getStream()
-        if (gameResponse !== undefined){
-            setStreamData(gameResponse.data)
-        }
-    }
-    const fetchCurrentGame = async () => {
-        const gameResponse = await currentGame()
-        if (gameResponse !== undefined){
-            setCurrentGameState(gameResponse.data)
-        }
-    }
     type statusType = "OPEN" | "CLOSED" | "MERON" | "WALA" | "CANCELLED" | "FAILED" | "DRAW" | ""
     const handleResult = async (status: statusType) => {
         let titleText
@@ -115,38 +68,89 @@ export default function Declarator() {
         })
     }
     React.useEffect(() => {
-        // socket.on('sabong_currentDetails-channel:App\\Events\\sabong_currentDetails', (data: any) => {
-        //   // Handle the received users data
-        //   console.log(data)
-        // });
-    
-        // Clean up the event listener when the component is unmounted
-        // return () => {
-        //   socket.off('sabong_currentDetails-channel:App\\Events\\sabong_currentDetails');
-        // };
-    }, []);
-    React.useEffect(() => {
+        const fetchExpFights = async () => {
+            let { data: expData, error } = await SBAPI
+              .from('sabong_histories')
+              .select('*')
+              .is('result', null)
+            if (expData !== null){
+                setExpFights(expData?.length)
+            }
+        }
+        const fetchGameList = async () => {
+            const { data, error } = await SBAPI.from('sabong_histories').select('*').order('id', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  let hasReachedFirst = false;
+  let newGamelist = [];
+
+  data.forEach((val) => {
+    if (val.result !== null) {
+      if (!hasReachedFirst) {
+        newGamelist.push(val);
+      }
+
+      if (val.gameNo === 1) {
+        hasReachedFirst = true;
+      }
+    } else {
+      if (val.gameNo === 1) {
+        hasReachedFirst = true;
+      }
+    }
+  });
+        }
+        const fetchCurrentStream = async () => {
+            const { data, error } = await SBAPI
+            .from('sabong_histories')
+            .select('*')
+            .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
+            .order('id', { ascending: true })
+            if(data !== null) {
+                setStreamData(data[0])
+            }
+        }
+        const fetchCurrentGame = async () => {
+            const { data, error } = await SBAPI
+            .from('sabong_histories')
+            .select('*')
+            .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
+            .order('id', { ascending: true })
+            if(data !== null) {
+                setCurrentGameState(data[0])
+            }
+        }
         fetchCurrentGame()
         fetchCurrentStream()
         fetchGameList()
         fetchExpFights()
+        
+        SBAPI.channel('custom-all-channel')
+        .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'sabong_histories' },
+            (payload) => {
+                fetchCurrentGame()
+                fetchCurrentStream()
+                fetchGameList()
+                fetchExpFights()
+            }
+        )
+        .subscribe()
     }, [])
     const LiveStreamComponent = () => {
         return (
-          <div style={{
-            minWidth: '100%',
-          }}>
-            <MuxPlayer
-                streamType="ll-live"
-                playbackId={streamData.streamID}
-                autoPlay={true}
-                metadata={{
-                    video_id: "video-id-54321",
-                    video_title: "Test video title",
-                    viewer_user_id: "user-id-007",
-                }}
-            />
-          </div>
+            <Grid container columns={12}>
+              <Grid item xs sm md lg className={'frameContainer'}>
+                  <iframe id="ifvideo"style={{minHeight: '100%', minWidth: '99.8%'}} allowFullScreen={true}
+                      src="">
+                  </iframe>
+                  {/* <ReactPlayer url={streamData.streamID} controls style={{minHeight: '100%', minWidth: '99.8%'}} /> */}
+              </Grid>
+          </Grid>
         );
     };
     

@@ -28,6 +28,17 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
   const [user, setUser] = React.useState<UserModel_Hidden>()
   const [isProfileViewOpen, setIsProfileViewOpen] = useState(false);
   const [walletBalance, setWalletBalance] = React.useState(0)
+  const fetchBalance = async () => {
+    if (user?.id !== undefined) {
+      let { data: getwalletbalance, error } = await SBAPI
+      .from('getwalletbalance')
+      .select('*')
+      .eq('id', user.id)
+      if(getwalletbalance !== null) {
+          setWalletBalance(getwalletbalance[0].wallet_amount)
+      }
+    }
+  }
   React.useEffect(() => {
     const fetchUserData = async () => {
         const response = await fetchUser()
@@ -39,10 +50,6 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
         }
     }
     fetchUserData()
-    const fetchBalance = async () => {
-      const response = await GetMyBalance();
-      setWalletBalance(response?.data);
-    }
     fetchBalance()
     SBAPI.channel('custom-all-channel')
     .on(
@@ -54,6 +61,11 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
     )
     .subscribe()
   }, [])
+  React.useEffect(() => {
+    if(user !== undefined){
+      fetchBalance()
+    }
+  }, [user])
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
   const handleAvatarClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -118,7 +130,8 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              width: 400,
+              width: '70%',
+              maxWidth: '320px',
               bgcolor: '#f4f4f4',
               border: '2px solid #000',
               boxShadow: 24,
@@ -176,7 +189,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
                     // Add necessary event handlers and state for inputs
                   />
                   <TextField
-                    label="Phone Number"
+                    label="GCASH Number"
                     name='phoneNo'
                     variant="outlined"
                     sx={{margin: '0.5em 0em'}}

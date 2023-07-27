@@ -20,6 +20,8 @@ import './styles.css'; // Import the CSS file
 import Echo from "laravel-echo";
 import SBAPI from '@utils/supabase'
 import { equal } from "assert";
+import { UserModel_Hidden } from "@/models/users";
+import { fetchUser } from "@/api/bettor/auth";
 
 type Round = {
     winner: "MERON" | "WALA" | "FAILED" | "DRAW";
@@ -103,12 +105,42 @@ declare global {
   }
 }
 export default function GameView() { 
+    const [user, setUser] = React.useState<UserModel_Hidden>()
     const [currentGameState, setCurrentGameState] = React.useState<Game_Model>(initialGameValue)
     const [streamData, setStreamData] = React.useState<Stream_Model>(initialStreamValue)
     const [trendsState, setTrendsState] = React.useState<Round[]>([])
     const [walletBalance, setWalletBalance] = React.useState(0)
     const [expFights, setExpFights] = React.useState<any>(0)
+    const fetchBalance = async () => {
+        if (user?.id !== undefined) {
+            let { data: getwalletbalance, error } = await SBAPI
+            .from('getwalletbalance')
+            .select('*')
+            .eq('id', user.id)
+            if(getwalletbalance !== null) {
+                setWalletBalance(getwalletbalance[0].wallet_amount)
+            }
+        }
+    }
+    React.useEffect(()=>{
+        if(user !== undefined) {
+            fetchBalance()
+        }
+
+    }, [user])
     React.useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await fetchUser()
+                if(response === undefined) {
+                  document.location.href = '/login'
+                } else {
+                  const userResponse: UserModel_Hidden = response
+                  setUser(userResponse)
+                }
+            } catch(err) {
+            }
+        }
         const fetchExpFights = async () => {
             let { data: expData, error } = await SBAPI
               .from('sabong_histories')
@@ -118,50 +150,32 @@ export default function GameView() {
                 setExpFights(expData?.length)
             }
         }
-        const fetchBalance = async () => {
-            const response = await GetMyBalance();
-            setWalletBalance(response?.data);
-        }
         const fetchTrends = async () => {
             let { data: gamelist, error } = await SBAPI
                 .from('sabong_histories')
                 .select('*')
-                .gte('gameNo', 1)
                 .order('id', { ascending: false })
-                // .gte('id', (query:any) => {
-                //     query
-                //     .select('MAX(gameNo)')
-                //     .from('sabong_histories')
-                //     .eq('gameNo', 1)
-                //     // .count('gameNo', { distinct: true })
-                //     // .then((result:any) => result - 1); // Equivalent to MAX(gameNo) - COUNT(DISTINCT gameNo) + 1
-                // });
-            let newGamelist = []
+            let newGamelist: Game_Model[] = []
             let hasReachedFirst = false
-            // for (let index = 0; index < array.length; index++) {
-            //     const element = array[index];
-            //     for
-            // }
             gamelist?.map((val: Game_Model) => {
                 if(val.result !== null) {
-                    newGamelist.push(val)
+                    if(!hasReachedFirst) {
+                        newGamelist.push(val)
+                    } 
                     if(val.gameNo === 1) {
                         hasReachedFirst = true;
                     }
+                } else {
+                    if (val.gameNo === 1) {
+                        hasReachedFirst = true
+                    }
                 }
             })
-            // setTrendsState(gamelist)
-
-
-            // const trendsRepsonse = await getGameTrends()
-            // if (trendsRepsonse !== undefined){
-            //     const trendsList: Game_Model[] = trendsRepsonse.data
-            //     let newTrends: Round[] = []
-            //     trendsList.map((val) => {
-            //         newTrends.push({winner: val.result, fightNo: val.gameNo})
-            //     })
-            //     setTrendsState(newTrends)
-            // }
+            let newTrends: Round[] = []
+            newGamelist.reverse().map((val) => {
+                newTrends.push({winner: val.result, fightNo: val.gameNo})
+            })
+            setTrendsState(newTrends)
         }
         const fetchCurrentGame = async () => {
             const { data, error } = await SBAPI
@@ -169,9 +183,6 @@ export default function GameView() {
             .select('*')
             .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
             .order('id', { ascending: true })
-            // // .eq('result', 'CLOSED')
-            // .eq('result', 'OPEN')
-            // .is('result', null)
             if(data !== null) {
                 setCurrentGameState(data[0])
             }
@@ -185,8 +196,8 @@ export default function GameView() {
                 setStreamData(stream_configuration[0])
             }
         }
+        fetchUserData()
         fetchCurrentStream()  
-        fetchBalance()
         fetchCurrentGame()
         fetchTrends()
         fetchExpFights()
