@@ -100,7 +100,8 @@ const Form = () => {
                                 name="refCode"
                                 aria-describedby="nameInput-helper-text" 
                                 helperText="Your Referal Code" 
-                                label="Your Name"/>
+                                required
+                                label="Referral Code"/>
                             </FormControl> 
                         </Grid>
                         <Grid item sm={8} md={8} lg={8} xl={8} xs={8}>

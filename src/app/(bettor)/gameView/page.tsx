@@ -18,6 +18,8 @@ import Pusher from "pusher-js";
 import { io } from "socket.io-client";
 import './styles.css'; // Import the CSS file
 import Echo from "laravel-echo";
+import SBAPI from '@utils/supabase'
+import { equal } from "assert";
 
 type Round = {
     winner: "MERON" | "WALA" | "FAILED" | "DRAW";
@@ -105,75 +107,104 @@ export default function GameView() {
     const [streamData, setStreamData] = React.useState<Stream_Model>(initialStreamValue)
     const [trendsState, setTrendsState] = React.useState<Round[]>([])
     const [walletBalance, setWalletBalance] = React.useState(0)
-    const [expFights, setExpFights] = React.useState(0)
+    const [expFights, setExpFights] = React.useState<any>(0)
     React.useEffect(() => {
-        window.Pusher = Pusher;
-        const echo = new Echo({
-            broadcaster: 'pusher',
-            key: 'local1', // Replace with your Pusher key (PUSHER_APP_KEY)
-            wsHost: '127.0.0.1',
-            wsPort: 6001,
-            cluster: 'ap2', // Set the Pusher cluster here
-            disableStats: true,
-            forceTLS: false,
-            encrypted: false, // Set to true if your WebSocket server uses SSL
-            enabledTransports: ['ws'], // Use only WebSocket transport
-        });
+        const fetchExpFights = async () => {
+            let { data: expData, error } = await SBAPI
+              .from('sabong_histories')
+              .select('*')
+              .is('result', null)
+            if (expData !== null){
+                setExpFights(expData?.length)
+            }
+        }
+        const fetchBalance = async () => {
+            const response = await GetMyBalance();
+            setWalletBalance(response?.data);
+        }
+        const fetchTrends = async () => {
+            let { data: gamelist, error } = await SBAPI
+                .from('sabong_histories')
+                .select('*')
+                .gte('gameNo', 1)
+                .order('id', { ascending: false })
+                // .gte('id', (query:any) => {
+                //     query
+                //     .select('MAX(gameNo)')
+                //     .from('sabong_histories')
+                //     .eq('gameNo', 1)
+                //     // .count('gameNo', { distinct: true })
+                //     // .then((result:any) => result - 1); // Equivalent to MAX(gameNo) - COUNT(DISTINCT gameNo) + 1
+                // });
+            let newGamelist = []
+            let hasReachedFirst = false
+            // for (let index = 0; index < array.length; index++) {
+            //     const element = array[index];
+            //     for
+            // }
+            gamelist?.map((val: Game_Model) => {
+                if(val.result !== null) {
+                    newGamelist.push(val)
+                    if(val.gameNo === 1) {
+                        hasReachedFirst = true;
+                    }
+                }
+            })
+            // setTrendsState(gamelist)
 
-        const channel = echo.channel('counter');
-        channel.listen('sabong_currentDetails', (event: any) => {
-        // Handle the event data here
-            console.log('Received event:', event);
-            setCurrentGameState(event.data)
-            const trendsList: Game_Model[] = event.trends
-            let newTrends: Round[] = []
-            trendsList.map((val) => {
-                newTrends.push({winner: val.result, fightNo: val.gameNo})
-            })
-            setTrendsState(newTrends)
-        });
-    }, []);
-    const fetchBalance = async () => {
-        const response = await GetMyBalance();
-        setWalletBalance(response?.data);
-    }
-    const fetchTrends = async () => {
-        const trendsRepsonse = await getGameTrends()
-        if (trendsRepsonse !== undefined){
-            const trendsList: Game_Model[] = trendsRepsonse.data
-            let newTrends: Round[] = []
-            trendsList.map((val) => {
-                newTrends.push({winner: val.result, fightNo: val.gameNo})
-            })
-            setTrendsState(newTrends)
+
+            // const trendsRepsonse = await getGameTrends()
+            // if (trendsRepsonse !== undefined){
+            //     const trendsList: Game_Model[] = trendsRepsonse.data
+            //     let newTrends: Round[] = []
+            //     trendsList.map((val) => {
+            //         newTrends.push({winner: val.result, fightNo: val.gameNo})
+            //     })
+            //     setTrendsState(newTrends)
+            // }
         }
-    }
-    const fetchExpFights = async () => {
-        const expFightsRepsonse = await getExpFights()
-        if (expFightsRepsonse !== undefined){
-            setExpFights(expFightsRepsonse.data)
+        const fetchCurrentGame = async () => {
+            const { data, error } = await SBAPI
+            .from('sabong_histories')
+            .select('*')
+            .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
+            .order('id', { ascending: true })
+            // // .eq('result', 'CLOSED')
+            // .eq('result', 'OPEN')
+            // .is('result', null)
+            if(data !== null) {
+                setCurrentGameState(data[0])
+            }
         }
-    }
-    const fetchCurrentGame = async () => {
-        const gameResponse = await currentGame()
-        if (gameResponse !== undefined){
-            setCurrentGameState(gameResponse.data)
+        const fetchCurrentStream = async () => {
+            let { data: stream_configuration, error } = await SBAPI
+            .from('stream_configuration')
+            .select("*")
+            .eq('gameTitle', 'SABONG')
+            if(stream_configuration !== null) {
+                setStreamData(stream_configuration[0])
+            }
         }
-    }
-    const fetchCurrentStream = async () => {
-        const gameResponse = await getStream()
-        if (gameResponse !== undefined){
-            setStreamData(gameResponse.data)
-        }
-    }
-    React.useEffect(() => {
         fetchCurrentStream()  
+        fetchBalance()
+        fetchCurrentGame()
+        fetchTrends()
+        fetchExpFights()
+        SBAPI.channel('custom-all-channel')
+        .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'sabong_histories' },
+            (payload) => {
+                fetchExpFights()
+                fetchCurrentStream()  
+                fetchBalance()
+                fetchCurrentGame()
+                fetchTrends()
+            }
+        )
+        .subscribe()
     }, [])
     React.useEffect(() => {
-            fetchBalance()
-            fetchCurrentGame()
-            fetchExpFights()
-            fetchTrends()
     }, [])
     const handleBet = async (side: string, amount: string) => {
         if(side === "") {
@@ -271,7 +302,7 @@ export default function GameView() {
                         </div>
                         <div style={{backgroundColor: 'red', minWidth: '100%', textAlign:'center'}}>
                             <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
-                                {!isNaN(parseFloat(currentGameState.meron_total_bet))
+                                {currentGameState !== undefined && !isNaN(parseFloat(currentGameState.meron_total_bet))
                                 ?parseFloat(currentGameState.meron_total_bet).toLocaleString("en-US", {
                                     style: "decimal",
                                     minimumFractionDigits: 2,
@@ -282,13 +313,13 @@ export default function GameView() {
                                 backgroundColor: colors.gold,
                                 color: 'black',
                                 padding: '1em 1em',
-                                opacity: currentGameState.result === "OPEN" ? '1':'0.7'
+                                opacity: currentGameState !== undefined && currentGameState.result === "OPEN" ? '1':'0.7'
                             }}
-                            disabled={currentGameState.result === "OPEN" ? false:true}
+                            disabled={currentGameState !== undefined && currentGameState.result === "OPEN" ? false:true}
                             onClick={() => handleClickOpen('MERON')}
                             >CHOOSE MERON</Button>
                             <Typography sx={{color: 'white', padding: '1rem'}} variant="body2">
-                                {currentGameState.meron_odds !== null ? parseFloat(currentGameState.meron_odds).toFixed(2) : 0.00 }
+                                {currentGameState !== undefined && currentGameState.meron_odds !== null ? parseFloat(currentGameState.meron_odds).toFixed(2) : 0.00 }
                             </Typography>
                         </div>
                     </Grid>
@@ -298,7 +329,7 @@ export default function GameView() {
                         </div>
                         <div style={{backgroundColor: 'blue', textAlign:'center'}}>
                             <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
-                                {!isNaN(parseFloat(currentGameState.wala_total_bet))
+                                {currentGameState !== undefined && !isNaN(parseFloat(currentGameState.wala_total_bet))
                                 ?parseFloat(currentGameState.wala_total_bet).toLocaleString("en-US", {
                                     style: "decimal",
                                     minimumFractionDigits: 2,
@@ -309,13 +340,13 @@ export default function GameView() {
                                 backgroundColor: colors.gold,
                                 color: 'black',
                                 padding: '1em 1em',
-                                opacity: currentGameState.result === "OPEN" ? '1':'0.7'
+                                opacity: currentGameState !== undefined && currentGameState.result === "OPEN" ? '1':'0.7'
                             }}
-                            disabled={currentGameState.result === "OPEN" ? false:true}
+                            disabled={currentGameState !== undefined && currentGameState.result === "OPEN" ? false:true}
                             onClick={() => handleClickOpen('WALA')}
                             >CHOOSE WALA</Button>
                             <Typography sx={{color: 'white', padding: '1rem'}} variant="body2">
-                                {currentGameState.wala_odds !== null ? parseFloat(currentGameState.wala_odds).toFixed(2) : 0.00 }
+                                {currentGameState !== undefined && currentGameState.wala_odds !== null ? parseFloat(currentGameState.wala_odds).toFixed(2) : 0.00 }
                             </Typography>
                         </div>
                     </Grid>
@@ -329,8 +360,9 @@ export default function GameView() {
           <Grid container columns={12}>
             <Grid item xs sm md lg className={'frameContainer'}>
                 <iframe id="ifvideo"style={{minHeight: '100%', minWidth: '99.8%'}} allowFullScreen={true}
-                    src={streamData.streamID}>
+                    src="">
                 </iframe>
+                {/* <ReactPlayer url={streamData.streamID} controls style={{minHeight: '100%', minWidth: '99.8%'}} /> */}
             </Grid>
         </Grid>
         );
@@ -362,10 +394,10 @@ export default function GameView() {
         <div>
             <LoggedHeader key={'header'}/>
             <LiveStreamComponent key={'liveStream'}/>
-            <GameHeader fight_num={currentGameState.gameNo}
-                bettingStatus={currentGameState.result}
+            <GameHeader fight_num={currentGameState !== undefined?currentGameState.gameNo:'' }
+                bettingStatus={currentGameState !== undefined ? currentGameState.result:null}
                 expFights={expFights}
-                streamStatus={streamData.viewState} 
+                streamStatus={streamData!== undefined?streamData.viewState:''} 
                 key={'gameHeader'}
                 />
             <BetButtons key={'buttons'}/>
@@ -381,17 +413,6 @@ export default function GameView() {
                             </div>
                         );
                     })
-                    // trendCountList.map((val, i) => {
-                    //     return (
-                    //     <div key={'column'+i} style={{ display: 'flex', flexDirection: 'column' }}>
-                    //         {Array.from({ length: val.count }).map((_, index) => {
-                    //         return (
-                    //             <Trends key={i + index} winner={val.winner} textValue={trendsState[i + index].fightNo} />
-                    //         );
-                    //         })}
-                    //     </div>
-                    //     );
-                    // })
                 }
                 </div>
             </div>

@@ -1,29 +1,36 @@
+'use client'
 import { fetchUser } from "@/api/bettor/auth";
 
 const userMiddleware = async () => {
     const response = await fetchUser()
+    const currentUrl = window.location.href;
     switch (response?.user_level) {
         case "bettor":
-            document.location.href = "/dashboard"
+            if(!currentUrl.includes('/bettor')){
+                document.location.href = "/dashboard"
+            }
             break;
         case "declarator":
             document.location.href = "/declarator"
             break;
         case "admin":
-            document.location.href = "/admin/Dashboard"
+            if(!currentUrl.includes('/admin')){
+                document.location.href = "/admin/Dashboard"
+            }
             break;
         case "super admin":
             document.location.href = "/super_admin/Dashboard"
             break;
         case "agent":
-            document.location.href = "/agent/Dashboard"
+            if(!currentUrl.includes('/agent')){
+                document.location.href = "/agent/Dashboard"
+            }
             break;
         case "master agent":
-            document.location.href = "/agent/Dashboard"
+            if(!currentUrl.includes('/agent')){
+                document.location.href = "/agent/Dashboard"
+            }
             break;
-      default:
-          document.location.href = "/login"
-          break;
     }
 }
 export default userMiddleware;

@@ -21,6 +21,7 @@ import { Model_Withdrawal, initialWithdrawalValue } from '@/models/wallet';
 import { GetMyBalance, RequestWithdrawal, TransactionList } from '@/api/bettor/wallet';
 import Swal from 'sweetalert2';
 import { DataGrid } from '@mui/x-data-grid';
+import SBAPI from '@utils/supabase'
 
 interface LoggedHeaderProps {}
 const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
@@ -43,6 +44,15 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
       setWalletBalance(response?.data);
     }
     fetchBalance()
+    SBAPI.channel('custom-all-channel')
+    .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'wallets' },
+        (payload) => {
+          fetchBalance()
+        }
+    )
+    .subscribe()
   }, [])
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 

@@ -14,6 +14,7 @@ import axios from "axios"
 import Error from "next/error"
 import React from "react"
 import Swal from "sweetalert2"
+import SBAPI from '@utils/supabase'
 
 const userValidator = (level: string | any) => {
 switch (level) {
