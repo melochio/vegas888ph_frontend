@@ -16,34 +16,6 @@ import React from "react"
 import Swal from "sweetalert2"
 import SBAPI from '@utils/supabase'
 
-const userValidator = (level: string | any) => {
-switch (level) {
-    case "bettor":
-        document.location.href = "/dashboard"
-        break;
-    case "declarator":
-        document.location.href = "/declarator"
-        break;
-    case "admin":
-        document.location.href = "/admin/Dashboard"
-        break;
-    case "super admin":
-        document.location.href = "/super_admin/Dashboard"
-        break;
-    case "agent":
-        document.location.href = "/agent/Dashboard"
-        break;
-    case "master agent":
-        document.location.href = "/agent/Dashboard"
-        break;
-    case "declarator":
-        document.location.href = "/declarator"
-        break;
-    default:
-        document.location.href = "/login"
-        break;
-    }
-}
 const Form = () => {
     const [formInput, setFormInput] = React.useState<Model_User>(initialUser)
     const [loginState, setLoginState] = React.useState(false)
@@ -51,29 +23,22 @@ const Form = () => {
         setFormInput({...formInput, [event.currentTarget.name] : event.currentTarget.value})
     }
     const handleLogin = async () => {
-    setLoginState(true)
-      try {
-        const loginresponse = await login(formInput);
-        const token = loginresponse.token;
-        localStorage.setItem('token', token);
-        const fetchUserResponse = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/tokenValue',null, {
-            withCredentials: true,
-            headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': 'http://175.41.183.232/',
-            'Authorization': 'Bearer '+ token
-            },
+        setLoginState(true)
+        let { data, error } = await SBAPI.auth.signInWithPassword({
+            email: formInput.email,
+            password: formInput.password
         })
-        const userResponse : UserModel_Hidden = fetchUserResponse.data
-        userValidator(userResponse?.user_level)
-      } catch {
-        Swal.fire(
-            'Failed',
-            'Account does not exist',
-            'error'
-        )
+        if(error !== null) {
+            Swal.fire(
+                'Failed',
+                error?.message,
+                'error'
+            )
+        }
+        if(data.user !== null) {
+            document.location.reload()
+        }
         setLoginState(false)
-      }
     };
     return (
         <Grid container columns={12} justifyContent={'center'} minHeight={'70vh'}>

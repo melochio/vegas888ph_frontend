@@ -22,9 +22,13 @@ import { GetMyBalance, RequestWithdrawal, TransactionList } from '@/api/bettor/w
 import Swal from 'sweetalert2';
 import { DataGrid } from '@mui/x-data-grid';
 import SBAPI from '@utils/supabase'
+import userMiddleware from '@/utils/middleware';
 
 interface LoggedHeaderProps {}
 const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
+  React.useEffect(() => {
+    userMiddleware()
+  })
   const [user, setUser] = React.useState<UserModel_Hidden>()
   const [isProfileViewOpen, setIsProfileViewOpen] = useState(false);
   const [walletBalance, setWalletBalance] = React.useState(0)
@@ -35,18 +39,19 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
       .select('*')
       .eq('id', user.id)
       if(getwalletbalance !== null) {
-          setWalletBalance(getwalletbalance[0].wallet_amount)
+          setWalletBalance(getwalletbalance[0].wallet_amount !== null ? getwalletbalance[0].wallet_amount : 0.00)
       }
     }
   }
   React.useEffect(() => {
     const fetchUserData = async () => {
-        const response = await fetchUser()
-        if(response !== undefined) {
-          const userResponse: UserModel_Hidden = response
-          setUser(userResponse)
-        } else {
-          document.location.href = "/login"
+      const { data: { user } } = await SBAPI.auth.getUser()
+      let { data: users, error } = await SBAPI
+        .from('users')
+        .select('*')
+        .eq('email', user?.email)
+        if(users !== null) {
+          setUser(users[0])
         }
     }
     fetchUserData()
@@ -76,14 +81,8 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
     setAnchorEl(null);
   };
   const handleLogout = async () => {
-    setAnchorEl(null);
-    try {
-      const response = await logout()
-      if (response) {
-        document.location.href = '/login'
-      }
-    } catch (err) {
-    }
+    let { error } = await SBAPI.auth.signOut()
+    document.location.href = "/login"
   }
   const [open, setOpen] = useState(false);
   const handleWalletModal = () => {
@@ -543,6 +542,9 @@ const DeclaratorHeader = () => {
 }
 export default function Header() {
     const router = useRouter()
+    React.useEffect(() => {
+      userMiddleware()
+    })
     return (
         <Grid container flexDirection={'row'} alignItems={'center'} columns={12} pr={10} pl={10} pt={3} pb={3} mb={6} sx={{
                 backgroundColor: 'rgb(40, 42, 48)', borderBottom: 'solid 2px ' + colors.gold

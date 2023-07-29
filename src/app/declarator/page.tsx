@@ -78,30 +78,34 @@ export default function Declarator() {
             }
         }
         const fetchGameList = async () => {
-            const { data, error } = await SBAPI.from('sabong_histories').select('*').order('id', { ascending: false });
+            let { data, error } = await SBAPI
+            .rpc('getgamelist')
+            // setGameList(data)
+            // const { data, error } = await SBAPI.from('sabong_histories').select('*').order('id', { ascending: false });
 
-  if (error) {
-    throw error;
-  }
+            // if (error) {  
+            //     throw error;
+            // }
 
-  let hasReachedFirst = false;
-  let newGamelist = [];
+            // let hasReachedFirst = false;
+            // let newGamelist = [];
 
-  data.forEach((val) => {
-    if (val.result !== null) {
-      if (!hasReachedFirst) {
-        newGamelist.push(val);
-      }
+            // data.forEach((val) => {
+            //     if (val.result !== null) {
+            //     if (!hasReachedFirst) {
+            //         newGamelist.push(val);
+            //     }
 
-      if (val.gameNo === 1) {
-        hasReachedFirst = true;
-      }
-    } else {
-      if (val.gameNo === 1) {
-        hasReachedFirst = true;
-      }
-    }
-  });
+            //     if (val.gameNo === 1) {
+            //         hasReachedFirst = true;
+            //     }
+            //     } else {
+            //     if (val.gameNo === 1) {
+            //         hasReachedFirst = true;
+            //     }
+            //     }
+            // });
+            // console.log(data)
         }
         const fetchCurrentStream = async () => {
             const { data, error } = await SBAPI

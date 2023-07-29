@@ -1,25 +1,16 @@
 'use client'
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, Typography } from "@mui/material"
+import { Button, Card, CardContent, Grid, Typography } from "@mui/material"
 import CircleIcon from '@mui/icons-material/Circle';
 import { colors } from "@/publicComponents/customStyles";
 import EastIcon from '@mui/icons-material/East';
 import React from "react";
-import { isJsxElement } from "typescript";
 import { LoggedHeader } from "@/publicComponents/header";
-import MuxPlayer from "@mux/mux-player-react"; 
 import { bet_api } from "@/api/bettor/bet";
-import { currentGame, getExpFights, getGameTrends, getStream } from "@/api/bettor/game";
 import Game_Model, { initialGameValue } from "@/models/game";
 import Stream_Model, { initialStreamValue } from "@/models/stream";
-import socket from "@/utils/webSocket";
 import Swal from "sweetalert2";
-import { GetMyBalance } from "@/api/bettor/wallet";
-import Pusher from "pusher-js";
-import { io } from "socket.io-client";
 import './styles.css'; // Import the CSS file
-import Echo from "laravel-echo";
 import SBAPI from '@utils/supabase'
-import { equal } from "assert";
 import { UserModel_Hidden } from "@/models/users";
 import { fetchUser } from "@/api/bettor/auth";
 
@@ -27,13 +18,6 @@ type Round = {
     winner: "MERON" | "WALA" | "FAILED" | "DRAW";
     fightNo: string;
 };
-  
-const rounds: Round[] = [
-    {fightNo: '1', winner: 'FAILED'},
-    {fightNo: '2', winner: 'DRAW'},
-    {fightNo: '3', winner: 'MERON'},
-    {fightNo: '4', winner: 'MERON'},
-]
 const GameHeader = (
     {fight_num, bettingStatus, expFights, streamStatus}: 
     {fight_num: string, bettingStatus: null | "OPEN" | "CLOSED", expFights: number, streamStatus: "Private" | "Public"} ) => {
@@ -97,13 +81,6 @@ const Trends = ({winner, textValue}:{winner: "MERON" | "WALA" | "FAILED" | "DRAW
         ))
     }
 }
-declare global {
-  interface Window {
-    Pusher: typeof Pusher;
-    io: any; // Add this line to declare io (optional if you're using socket.io-client separately)
-    Echo: typeof Echo;
-  }
-}
 export default function GameView() { 
     const [user, setUser] = React.useState<UserModel_Hidden>()
     const [currentGameState, setCurrentGameState] = React.useState<Game_Model>(initialGameValue)
@@ -126,20 +103,14 @@ export default function GameView() {
         if(user !== undefined) {
             fetchBalance()
         }
-
     }, [user])
     React.useEffect(() => {
         const fetchUserData = async () => {
-            try {
-                const response = await fetchUser()
-                if(response === undefined) {
-                  document.location.href = '/login'
-                } else {
-                  const userResponse: UserModel_Hidden = response
-                  setUser(userResponse)
-                }
-            } catch(err) {
-            }
+            const { data: { user } } = await SBAPI.auth.getUser()
+            let { data: users, error } = await SBAPI
+            .from('users')
+            .select('user_level')
+            .eq('email', user?.email)
         }
         const fetchExpFights = async () => {
             let { data: expData, error } = await SBAPI
@@ -208,9 +179,17 @@ export default function GameView() {
             (payload) => {
                 fetchExpFights()
                 fetchCurrentStream()  
-                fetchBalance()
                 fetchCurrentGame()
                 fetchTrends()
+            }
+        )
+        .subscribe()
+        SBAPI.channel('custom-all-channel')
+        .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'wallets' },
+            (payload) => {
+                fetchBalance()
             }
         )
         .subscribe()
@@ -246,70 +225,30 @@ export default function GameView() {
     }
     const BetButtons = () => {
         const [selectedSide, setSelectedSide] = React.useState<"MERON" | "WALA" | "">("");
+        const [totalBet, setTotalBet] = React.useState(0)
         const [isOpen, setIsOpen] = React.useState(false);
         const handleClickOpen = (side: "MERON" | "WALA") => {
             setSelectedSide(side)
             setIsOpen(true);
         };
-        const elementRef = React.useRef();
-        const BetModal = () => {
-            const handleClose = () => {
-                setIsOpen(false);
-            };
-            const betAmounts = [
-                {amount: '1'},
-                {amount: '10'},
-                {amount: '50'},
-                {amount: '100'},
-                {amount: '500'},
-                {amount: '1000'},
-                {amount: '5000'},
-                {amount: '10000'},
-                {amount: '50000'},
-                {amount: walletBalance.toString()}
-            ]
-            return (
-                <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="xs" sx={{zIndex: 1000}}>
-                    <DialogTitle textAlign={'center'}>Select an Amount</DialogTitle>
-                    <DialogContent>
-                        <Grid container columns={12}>
-                            <Grid key={'betAmountList'} item xs sm md lg xl>
-                                <Typography variant="h6" textAlign={'center'} sx={{color: selectedSide === 'MERON' ? 'red': 'blue'}}>{selectedSide}</Typography>
-                                <Grid container columns={12} columnSpacing={3} rowSpacing={3} justifyContent={'center'}>
-                                    {
-                                        betAmounts.map((val, i) => (
-                                            <Grid item key={"betAmountItem_"+val.amount}>
-                                                <Button variant={'contained'}
-                                                    sx={{backgroundColor: colors.gold, color: 'black'}}
-                                                    onClick={() => handleBet(selectedSide, val.amount)}>
-                                                    {i !== betAmounts.length-1 ? parseFloat(val.amount).toLocaleString():"ALL IN" }
-                                                </Button>
-                                            </Grid>
-                                        ))
-                                    }
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                    </DialogContent>
-                    <DialogActions sx={{justifyContent: 'space-between'}}>
-                        <Typography variant="caption">Remaining Balance: {walletBalance.toLocaleString("en-US", {
-                                style: "decimal",
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                            })}</Typography>
-                        <Button onClick={handleClose} color="primary">
-                            Cancel
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-            )
-        }
+        const betAmounts = [
+            {amount: '1'},
+            {amount: '10'},
+            {amount: '50'},
+            {amount: '100'},
+            {amount: '500'},
+            {amount: '1000'},
+            {amount: '5000'},
+            {amount: '10000'},
+            {amount: '50000'},
+            {amount: walletBalance.toString()}
+        ]
         return (
             <div>
                 <Grid columns={12} container>
-                    <Grid key={'meron'} item sm md xs lg xl>
-                        <div style={{backgroundColor: 'maroon', color: 'white', minWidth: '100%', textAlign:'center'}}>
-                            MERON
+                    <Grid key={'meron'} item sm={6} md={6} lg={6}>
+                        <div style={{backgroundColor: 'maroon', color: 'white', minWidth: '100%', textAlign:'center', padding: '1em 0em'}}>
+                            <Typography variant="h6">MERON</Typography>
                         </div>
                         <div style={{backgroundColor: 'red', minWidth: '100%', textAlign:'center'}}>
                             <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
@@ -334,9 +273,9 @@ export default function GameView() {
                             </Typography>
                         </div>
                     </Grid>
-                    <Grid key={'wala'} item sm md xs lg xl>
-                        <div style={{backgroundColor: '#0404b1', color: 'white', textAlign:'center'}}>
-                            WALA
+                    <Grid key={'wala'} item sm={6} md={6} lg={6}>
+                        <div style={{backgroundColor: '#0404b1', color: 'white', textAlign:'center', padding: '1em 0em'}}>
+                            <Typography variant="h6">WALA</Typography>
                         </div>
                         <div style={{backgroundColor: 'blue', textAlign:'center'}}>
                             <Typography sx={{color: 'white', padding: '1rem'}} variant="h6">
@@ -361,8 +300,52 @@ export default function GameView() {
                             </Typography>
                         </div>
                     </Grid>
+                    <Grid key={'betList'} item sm={12} md={12} lg={12}>
+                        <Card>
+                            <CardContent>
+                                <Grid container columns={12} columnSpacing={3} rowSpacing={3} justifyContent={'center'}>
+                                    <Grid item sm={12} md={12} lg={12}>
+                                        <Typography variant="h6" display={'flex'}>
+                                            Your Balance: <b style={{color: "green"}}>{walletBalance.toLocaleString("en-US", {
+                                            style: "decimal",
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}</b>
+                                        </Typography>
+                                        <Typography variant="h6">
+                                            You are about to bet: {totalBet.toLocaleString("en-US", {
+                                            style: "decimal",
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2,
+                                        })}
+                                        </Typography>
+                                    </Grid>
+                                    {
+                                        betAmounts.map((val, i) => (
+                                            <Grid item key={"betAmountItem_"+val.amount}>
+                                                <Button variant={'contained'}
+                                                    sx={{backgroundColor: colors.gold, color: 'black'}}
+                                                    onClick={() => {
+                                                        if(walletBalance >= (parseFloat(val.amount)+totalBet)){
+                                                            if(i === betAmounts.length-1) {
+                                                                setTotalBet(parseFloat(val.amount))
+                                                            } else {
+                                                                setTotalBet(parseFloat(val.amount)+totalBet)
+                                                            }
+                                                        } else {
+                                                            setTotalBet(walletBalance)
+                                                        }
+                                                    }}>
+                                                    {i !== betAmounts.length-1 ? parseFloat(val.amount).toLocaleString():"ALL IN" }
+                                                </Button>
+                                            </Grid>
+                                        ))
+                                    }
+                                </Grid>
+                            </CardContent>
+                        </Card>
+                    </Grid>
                 </Grid>
-                <BetModal />
             </div>
         )
     }
@@ -370,7 +353,7 @@ export default function GameView() {
         return (
           <Grid container columns={12}>
             <Grid item xs sm md lg className={'frameContainer'}>
-                <iframe id="ifvideo"style={{minHeight: '100%', minWidth: '99.8%'}} allowFullScreen={true}
+                <iframe id="ifvideo"style={{minHeight: '80%', minWidth: '99.8%'}} allowFullScreen={true}
                     src="">
                 </iframe>
                 {/* <ReactPlayer url={streamData.streamID} controls style={{minHeight: '100%', minWidth: '99.8%'}} /> */}
@@ -404,29 +387,41 @@ export default function GameView() {
     return (
         <div>
             <LoggedHeader key={'header'}/>
-            <LiveStreamComponent key={'liveStream'}/>
-            <GameHeader fight_num={currentGameState !== undefined?currentGameState.gameNo:'' }
-                bettingStatus={currentGameState !== undefined ? currentGameState.result:null}
-                expFights={expFights}
-                streamStatus={streamData!== undefined?streamData.viewState:''} 
-                key={'gameHeader'}
-                />
-            <BetButtons key={'buttons'}/>
-            <br />
-            <div >
-                <Typography key={'trends'} variant="h6" sx={{color: "white"}}>Trends <EastIcon /></Typography>
-                <div style={{ display: 'flex', maxWidth: '100vw', minHeight: '20vh', padding: '2em 0em', overflowX: 'auto' }}>
-                {
-                    trendCountList.map((val, i) => {
-                        return (
-                            <div key={'trendCount_'+i} style={{ display: 'flex', flexDirection: 'column' }}>
-                                <Trends winner={val.winner} textValue={val.textValues} />
-                            </div>
-                        );
-                    })
-                }
-                </div>
-            </div>
+            <Grid container columns={12}>
+                <Grid item md={6}>
+                    <LiveStreamComponent key={'liveStream'}/>
+                </Grid>
+                <Grid item md={6}>
+                    <GameHeader fight_num={currentGameState !== undefined?currentGameState.gameNo:'' }
+                        bettingStatus={currentGameState !== undefined ? currentGameState.result:null}
+                        expFights={expFights}
+                        streamStatus={streamData!== undefined?streamData.viewState:''} 
+                        key={'gameHeader'}
+                        />
+                    <BetButtons key={'buttons'}/>
+                    <Typography key={'trends'} variant="h6" sx={{color: "white", display: 'flex', alignItems: 'center'}}>Trends <EastIcon /></Typography>
+                    <div style={{
+                        display: 'flex',
+                        minHeight: '20vh',
+                        padding: '1em',
+                        maxWidth: '95%',
+                        maxHeight: '20vh',
+                        overflow: 'auto',
+                        }}>
+                    {
+                        trendCountList.map((val, i) => {
+                            return (
+                                <div key={'trendCount_'+i} style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <Trends winner={val.winner} textValue={val.textValues} />
+                                </div>
+                            );
+                        })
+                    }
+                    </div>
+                </Grid>
+                <Grid item md={12}>
+                </Grid>
+            </Grid>
         </div>
     )
 }

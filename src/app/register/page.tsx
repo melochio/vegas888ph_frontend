@@ -12,10 +12,8 @@ import React, { Dispatch } from "react"
 import {register as RegisterAPI} from '@bettorApi/auth'
 import Model_User, { initialUser } from "@/models/users"
 import Swal from "sweetalert2"
-import userMiddleware from "@/utils/middleware"
-import { format, isValid } from 'date-fns';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { useParams, useSearchParams } from "next/navigation"
+import supabase from '@utils/supabase'
+import { useSearchParams } from "next/navigation"
 
 const Form = () => {
     const [formInput, setFormInput] = React.useState<Model_User>(initialUser)
@@ -36,6 +34,7 @@ const Form = () => {
             inputsValid = true
         }
         if (inputsValid) {
+            registerPOST()
             const response = await RegisterAPI(formInput)
             if(response.status == 200) {
                 Swal.fire(
@@ -77,15 +76,24 @@ const Form = () => {
         setTermsCheck(event.target.checked);
     };
     
-  
+    const registerPOST = async () => {
+        let { data, error } = await supabase.auth.signUp({
+            email: formInput.email,
+            password: formInput.password,
+        })
+        
+    }
     const handleDateChange = (date:string) => {
         setFormInput({ ...formInput, bday: date });
     };
-  
-    const isValidDate = (date: Date | null): boolean => {
-      // Check if the date is a valid instance of Date and not in the past
-      return date !== null && isValid(date) && date >= new Date();
-    };
+
+    React.useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const refCodeParam = urlParams.get('refCode');
+        if (refCodeParam) {
+            setFormInput({...formInput, referral_code: refCodeParam});
+        }
+    })
     return (
         <Grid container columns={12} justifyContent={'center'}>
             <Grid item xs={10} sm={10} md={8} lg={6}>
@@ -98,11 +106,12 @@ const Form = () => {
                                 <FormControl fullWidth>
                                     <TextField id="nameInput"
                                     onChange={handleInput} 
-                                    name="refCode"
+                                    value={formInput.referral_code}
+                                    name="referral_code"
                                     aria-describedby="nameInput-helper-text" 
                                     helperText="Your Referal Code" 
-                                    required
-                                    inputProps={{style:{backgroundColor: 'white'}}}
+                                    aria-readonly
+                                    inputProps={{style:{backgroundColor: 'lightgray', cursor: 'not-allowed'}}}
                                     label="Referral Code"/>
                                 </FormControl> 
                             </Grid>
@@ -218,10 +227,6 @@ const Form = () => {
 }
 
 export default function Register() {
-    const searchParams = useSearchParams()
-    React.useEffect(() => {
-      userMiddleware() 
-    }, [])
     return (
         <div>
             <Header />
