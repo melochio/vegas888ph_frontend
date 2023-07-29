@@ -24,6 +24,9 @@ const Form = () => {
     }
     const handleLogin = async () => {
         setLoginState(true)
+        const loginresponse = await login(formInput);
+        const token = loginresponse.token;
+        localStorage.setItem('token', token);
         let { data, error } = await SBAPI.auth.signInWithPassword({
             email: formInput.email,
             password: formInput.password

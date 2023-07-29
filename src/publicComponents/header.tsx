@@ -38,6 +38,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
       .from('getwalletbalance')
       .select('*')
       .eq('id', user.id)
+      console.log(getwalletbalance)
       if(getwalletbalance !== null) {
           setWalletBalance(getwalletbalance[0].wallet_amount !== null ? getwalletbalance[0].wallet_amount : 0.00)
       }
@@ -81,6 +82,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
     setAnchorEl(null);
   };
   const handleLogout = async () => {
+    await logout()
     let { error } = await SBAPI.auth.signOut()
     document.location.href = "/login"
   }
