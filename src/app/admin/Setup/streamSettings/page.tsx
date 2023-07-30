@@ -4,6 +4,7 @@ import { Box, Breadcrumbs, Button, Container, Grid, Link, Stack, Typography } fr
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import React from "react"
 import { getStreamList } from "@/api/admin/stream";
+import { SBselectedStream, SBstreamList } from "@/api/supabaseAPI";
 
 const breadcrumbs = [
     <Link underline="hover" key="1" color="inherit" href="/" sx={{ color: 'black' }}>
@@ -15,17 +16,28 @@ const containerStyle = {
     margin: 'auto',
 };
 export default function StreamSettings() {
-    const [streamData, setStreamData] = React.useState<Stream_Model[]>([initialStreamValue])
     const [formInput, setFormInput] = React.useState<Stream_Model>(initialStreamValue)
-    
-    const fetchCurrentStream = async () => {
-        const gameResponse = await getStreamList()
-        if (gameResponse !== undefined){
-            setStreamData(gameResponse.data)
+    const [streamList, setStreamList] = React.useState<Stream_Model[]>([])
+
+
+    const fetchStreamList = async () => {
+        const gameResponse = await SBstreamList()
+        if (gameResponse !== null){
+            setStreamList(gameResponse)
+        }
+    }
+    const fetchSelectedStream = async (title: string) => {
+        if(title !== ""){
+            const response = await SBselectedStream(title)
+            if(response !== null) {
+                setFormInput(response[0])
+            }
+        } else {
+            setFormInput(initialStreamValue)
         }
     }
     React.useEffect(() => {
-        fetchCurrentStream()
+        fetchStreamList()
     }, [])
     
     const handleInput = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
@@ -56,17 +68,20 @@ export default function StreamSettings() {
                         <Grid item xs={12} sm={12} md={12} container>
                             <Grid item xs={12} sm={12} md={6}>
                                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
-                                    <label htmlFor="selectInput" className="form-label">Plasada %</label>
+                                    <label htmlFor="selectInput" className="form-label">Select Game Stream %</label>
                                     <select
                                         className="form-control"
                                         id="selectInput"
                                         defaultValue=""
                                         style={{ padding: '8px', }}
-                                        onChange={(event) => setFormInput(streamData[parseInt(event.currentTarget.value)])}
+                                        onChange={(event) => fetchSelectedStream(event.target.value)}
                                     >
-                                        {streamData.map((val, i) => (
+                                        <option value={''}>
+                                            Select A Game
+                                        </option>
+                                        {streamList.map((val, i) => (
                                             <option key={i} value={val.title}>
-                                                {i}
+                                                {val.title}
                                             </option>
                                         ))}
                                     </select>
@@ -95,7 +110,7 @@ export default function StreamSettings() {
                                     <input
                                         onChange={(event) => handleInput(event)}
                                         type={'text'}
-                                        value={formInput.streamID}
+                                        value={formInput.title}
                                         style={{
                                             padding: '8px',
                                         }}

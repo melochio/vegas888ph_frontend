@@ -1,6 +1,7 @@
 import axios from "axios"
 import config from "../config/headers"
 import Model_User, {UserModel_Hidden} from "@/models/users"
+import supabase from "@/utils/supabase"
 
 const register = async (formData: Model_User):Promise<any> => {
     const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+'/api/bettor/users', formData, config)
@@ -36,9 +37,10 @@ const fetchUser = async () => {
     } catch(err) {
     }
 }
+
 export {
     register,
     fetchUser,
     login,
-    logout
+    logout,
 }

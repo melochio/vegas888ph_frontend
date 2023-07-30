@@ -33,6 +33,8 @@ import AccountBoxSharpIcon from '@mui/icons-material/AccountBoxSharp';
 import AssessmentSharpIcon from '@mui/icons-material/AssessmentSharp';
 import userMiddleware from '@/utils/middleware';
 import axios from 'axios';
+import { logout } from '@/api/bettor/auth';
+import supabase from '@utils/supabase'
 // const drawerWidth = 240;
 const drawerWidth = 240;
 
@@ -114,6 +116,9 @@ export default function RootLayout({
     else if (target == 'Withdrawal Requests') {
       window.location.href = '/admin/LoadingStation/WithdrawalRequests';
     }
+    else if (target == 'Game Settings') {
+      window.location.href = '/admin/Setup/streamSettings';
+    }
   } 
   const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null);
   const handleAvatarClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -132,18 +137,21 @@ export default function RootLayout({
   };
   const handleLogout = async () => {
     setAnchorEl(null);
-    try {
-      const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/logout', null, {
-        withCredentials: true,
-        headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
-        }
-      });
-      if (response) {
-        document.location.href = '/login'
-      }
-    } catch (err) {
-    }
+    
+    await logout()
+    let { error } = await supabase.auth.signOut()
+    // try {
+    //   const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/logout', null, {
+    //     withCredentials: true,
+    //     headers: {
+    //       'Authorization': 'Bearer ' + localStorage.getItem('token')
+    //     }
+    //   });
+    //   if (response) {
+    //     document.location.href = '/login'
+    //   }
+    // } catch (err) {
+    // }
   }
 
   return (

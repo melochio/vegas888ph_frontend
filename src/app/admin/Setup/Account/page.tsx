@@ -13,12 +13,23 @@ import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import axios from "axios";
+import supabase from '@/utils/supabase';
+import { SBregisterPOST, accountRegisterType, initial_Register } from '@/api/supabaseAPI';
 
 export default function Accounts() {
-
-    const [formInput, setFormInput] = React.useState<Model_User>(initialUser)
+    const [formInput, setFormInput] = React.useState<accountRegisterType>(initial_Register)
     const [editUser, setEditUser] = React.useState(false)
-
+    const commissionList = [
+        {value: '0.6', text: '6%'},
+        {value: '0.065', text: '6.5%'},
+        {value: '0.07', text: '7%'},
+        {value: '0.075', text: '7.5%'},
+        {value: '0.08', text: '8%'},
+        {value: '0.085', text: '8.5%'},
+        {value: '0.09', text: '9%'},
+        {value: '0.095', text: '9.5%'},
+        {value: '0.1', text: '10%'},
+    ]
 
     const [selectedRowIndex, setSelectedRowIndex] = React.useState<number | null>(null);
     const [selectedRow, setSelectedRow] = React.useState<Model_User | null>(null);
@@ -200,13 +211,17 @@ export default function Accounts() {
         setMoney(formattedValue)
     }
 
-    const [userlist, setUserlist] = React.useState([])
+    const [userlist, setUserlist] = React.useState<any[]>([])
     const fetchData = async () => {
         setFormInput({ ...formInput, 'isActive': 1 })
         try {
-            const users: [] = await fetchUser(['master agent', 'admin', 'declarator'], 'active');
-            console.log(users)
-            setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
+            let { data: users, error } = await supabase
+              .from('users')
+              .select('*')
+              .in('user_level', ['master agent', 'admin', 'declarator'])            
+            // const users: [] = await fetchUser(['master agent', 'admin', 'declarator'], 'active');
+            // console.log(users)
+            setUserlist(users !== null ? users : []); // Assuming `users` is an array of objects with the 'PlayerName' property
         } catch (error) {
             console.error('Error fetching data:', error);
             // setUserList([]); // Set an empty array if there's an error or no data
@@ -260,18 +275,17 @@ export default function Accounts() {
             }
         }
         if (inputsValid) {
-            const response = await createUser(formInput)
-            console.log('response', response)
-            if (response.status == 200) {
+            const err = await SBregisterPOST(formInput)
+            if (err === null) {
+                fetchData();
                 Swal.fire(
                     'Success',
                 )
-                fetchData();
                 // location.href = '/admin/Setup/Account'
             } else {
                 Swal.fire(
                     'Failed',
-                    response.data,
+                    err,
                     'error'
                 )
             }
@@ -415,14 +429,13 @@ export default function Accounts() {
                                                 name="commission"
                                             >
                                                 <option value="" disabled>Select an option</option>
-                                                {['8%', '9%'].map((option) => (
-                                                    <option key={option} value={option}>
-                                                        {option}
+                                                {commissionList.map((option) => (
+                                                    <option key={option.value} value={option.value}>
+                                                        {option.text}
                                                     </option>
                                                 ))}
                                             </select>
                                         </div>
-                                        {/* <FormInput label="Transaction Type" placeholder="Enter text here" options={['deposit','withdraw']} type={"select"} /> */}
                                     </Grid>
                                     : ''
 

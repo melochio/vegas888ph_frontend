@@ -36,6 +36,8 @@ import axios from 'axios';
 import { getWalletSummary } from '@/api/agent/wallet'
 import { GetMyBalance } from '@/api/bettor/wallet';
 import userMiddleware from '@/utils/middleware';
+import { logout } from '@/api/bettor/auth';
+import supabase from '@utils/supabase'
 // const drawerWidth = 240;
 const drawerWidth = 240;
 
@@ -205,19 +207,9 @@ export default function RootLayout({
     setOpen(false);
   };
   const handleLogout = async () => {
-    setAnchorEl(null);
-    try {
-      const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/logout', null, {
-        withCredentials: true,
-        headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
-        }
-      });
-      if (response) {
-        document.location.href = '/login'
-      }
-    } catch (err) {
-    }
+    await logout()
+    let { error } = await supabase.auth.signOut()
+    document.location.href = "/login" 
   }
 
   React.useEffect(() => {

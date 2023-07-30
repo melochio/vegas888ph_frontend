@@ -81,7 +81,6 @@ const Form = () => {
             email: formInput.email,
             password: formInput.password,
         })
-        
     }
     const handleDateChange = (date:string) => {
         setFormInput({ ...formInput, bday: date });
@@ -105,8 +104,8 @@ const Form = () => {
                             <Grid item sm={8} md={8} lg={8} xl={8} xs={8}>
                                 <FormControl fullWidth>
                                     <TextField id="nameInput"
-                                    onChange={handleInput} 
                                     value={formInput.referral_code}
+                                    size={'small'}
                                     name="referral_code"
                                     aria-describedby="nameInput-helper-text" 
                                     helperText="Your Referal Code" 
@@ -121,6 +120,7 @@ const Form = () => {
                                     onChange={handleInput}
                                     value={formInput.name}
                                     required
+                                    size={'small'}
                                     name="name"
                                     aria-describedby="nameInput-helper-text" 
                                     helperText="Your identity will be kept hidden from public" 
@@ -134,6 +134,7 @@ const Form = () => {
                                     onChange={handleInput}
                                     value={formInput.player_name}
                                     required
+                                    size={'small'}
                                     name="player_name"
                                     aria-describedby="playernameInput-helper-text" 
                                     helperText="This will be shown on as your ingame name" 
@@ -146,6 +147,7 @@ const Form = () => {
                                     <TextField
                                     id="bday"
                                     label="Birthday"
+                                    size={'small'}
                                     type="date"
                                     value={formInput.bday}
                                     onChange={(event) => handleDateChange(event.currentTarget.value)}
@@ -163,6 +165,7 @@ const Form = () => {
                                     onKeyUp={() => setEmailValidation(validateEmail(formInput.email))}
                                     type="email"
                                     value={formInput.email}
+                                    size={'small'}
                                     required
                                     name="email"
                                     aria-describedby="emailInput-helper-text" 
@@ -179,6 +182,7 @@ const Form = () => {
                                     onChange={handleInput}
                                     onKeyUp={(event) => validatePassword(event)}
                                     value={formInput.password}
+                                    size={'small'}
                                     required
                                     type="password"
                                     name="password"
@@ -197,6 +201,7 @@ const Form = () => {
                                         setConfirmpwd(event.currentTarget.value)
                                     }}
                                     value={confirmpwd}
+                                    size={'small'}
                                     required
                                     type="password"
                                     name="cpassword"

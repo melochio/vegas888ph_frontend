@@ -29,6 +29,9 @@ interface Model_Withdrawal {
     phoneNo: string | any,
     request_amount: string | any,
     approvedById: string | any,
+    transaction_type: string | any,
+    address: string | any,
+
 }
 const initialWithdrawalValue: Model_Withdrawal = {
     id: '',
@@ -41,6 +44,8 @@ const initialWithdrawalValue: Model_Withdrawal = {
     phoneNo: '',
     request_amount: '',
     approvedById: '',
+    transaction_type: '',
+    address: '',
 }
 
 export default Wallet_Model;

@@ -2,7 +2,7 @@
 import { currentGame, getExpFights, getStream } from "@/api/bettor/game"
 import Game_Model, { initialGameValue } from "@/models/game"
 import Stream_Model, { initialStreamValue } from "@/models/stream"
-import React from "react"
+import React, { memo } from "react"
 import MuxPlayer from "@mux/mux-player-react"; 
 import { 
     Button, 
@@ -34,7 +34,7 @@ import './styles.css'; // Import the CSS file
 
 export default function Declarator() {
     React.useEffect(() => {
-    //   userMiddleware()
+      userMiddleware()
     }, [])
     const [currentGameState, setCurrentGameState] = React.useState<Game_Model>(initialGameValue)
     const [gameList, setGameList] = React.useState<Game_Model[]>([])
@@ -67,66 +67,42 @@ export default function Declarator() {
             }
         })
     }
+    const fetchExpFights = async () => {
+        let { data: expData, error } = await SBAPI
+          .from('sabong_histories')
+          .select('*')
+          .is('result', null)
+        if (expData !== null){
+            setExpFights(expData?.length)
+        }
+    }
+    const fetchGameList = async () => {
+        let { data: gameListResponse, error } = await SBAPI
+        .rpc('getgamelist')
+        .order('id', { ascending: true })
+        setGameList(gameListResponse)
+    }
+    const fetchCurrentStream = async () => {
+        const { data, error } = await SBAPI
+        .from('sabong_histories')
+        .select('*')
+        .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
+        .order('id', { ascending: true })
+        if(data !== null) {
+            setStreamData(data[0])
+        }
+    }
+    const fetchCurrentGame = async () => {
+        const { data, error } = await SBAPI
+        .from('sabong_histories')
+        .select('*')
+        .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
+        .order('id', { ascending: true })
+        if(data !== null) {
+            setCurrentGameState(data[0])
+        }
+    }
     React.useEffect(() => {
-        const fetchExpFights = async () => {
-            let { data: expData, error } = await SBAPI
-              .from('sabong_histories')
-              .select('*')
-              .is('result', null)
-            if (expData !== null){
-                setExpFights(expData?.length)
-            }
-        }
-        const fetchGameList = async () => {
-            let { data, error } = await SBAPI
-            .rpc('getgamelist')
-            // setGameList(data)
-            // const { data, error } = await SBAPI.from('sabong_histories').select('*').order('id', { ascending: false });
-
-            // if (error) {  
-            //     throw error;
-            // }
-
-            // let hasReachedFirst = false;
-            // let newGamelist = [];
-
-            // data.forEach((val) => {
-            //     if (val.result !== null) {
-            //     if (!hasReachedFirst) {
-            //         newGamelist.push(val);
-            //     }
-
-            //     if (val.gameNo === 1) {
-            //         hasReachedFirst = true;
-            //     }
-            //     } else {
-            //     if (val.gameNo === 1) {
-            //         hasReachedFirst = true;
-            //     }
-            //     }
-            // });
-            // console.log(data)
-        }
-        const fetchCurrentStream = async () => {
-            const { data, error } = await SBAPI
-            .from('sabong_histories')
-            .select('*')
-            .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
-            .order('id', { ascending: true })
-            if(data !== null) {
-                setStreamData(data[0])
-            }
-        }
-        const fetchCurrentGame = async () => {
-            const { data, error } = await SBAPI
-            .from('sabong_histories')
-            .select('*')
-            .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
-            .order('id', { ascending: true })
-            if(data !== null) {
-                setCurrentGameState(data[0])
-            }
-        }
         fetchCurrentGame()
         fetchCurrentStream()
         fetchGameList()
@@ -181,7 +157,7 @@ export default function Declarator() {
         )
     }
     
-    const RoundControl = ({gameInfo, isDisabled}:{gameInfo: Game_Model, isDisabled: boolean}) => {
+    const RoundControl = memo(({gameInfo, isDisabled}:{gameInfo: Game_Model, isDisabled: boolean}) => {
         const [betStatus, setBetStatus] = React.useState<any>(()=>{
             switch(gameInfo.result){
                 case "OPEN":
@@ -197,18 +173,26 @@ export default function Declarator() {
             }
         })
         const [winner, setWinner] = React.useState<any>("")
-        switch(gameInfo.result) {
+        React.useEffect(() => {
+          switch (gameInfo.result) {
             case "DRAW":
-                setBetStatus("CLOSED");
+                setWinner("DRAW")
+                break;
             case "MERON":
-                setBetStatus("CLOSED");
+                setWinner("MERON")
+                break;
             case "WALA":
-                setBetStatus("CLOSED");
+                setWinner("WALA")
+                break;
             case "FAILED":
-                setBetStatus("CLOSED");
-        }
+              setWinner("FAILED")
+              break;
+            default:
+              setBetStatus(gameInfo.result || "");
+          }
+        }, [gameInfo.result]);
         return (
-            <Grid key={gameInfo.id} margin={'auto'} item sm={6} xs={12} md={4} lg={4} xl={3}>
+            <Grid margin={'auto'} item sm={6} xs={12} md={4} lg={4} xl={3}>
                 <div style={{width: '100%'}}>
                     <div style={{backgroundColor: !isDisabled ? 'rgb(255 123 59)' : 'rgb(187 124 94)', fontWeight: 700, color: 'white', textAlign:'center', padding: '1em 0em', borderRadius: '1em 1em 0em 0em'}}>
                         Fight # {gameInfo.gameNo}
@@ -254,7 +238,7 @@ export default function Declarator() {
                             <Typography variant="body2" fontWeight={700}>Declare Winner</Typography>
                             <div style={{display: "flex", alignItems: 'center', justifyContent: 'space-between'}}>
                                 <Select
-                                    value={winner}
+                                    value={gameInfo.result}
                                     sx={{
                                         width: '80%'
                                     }}
@@ -286,7 +270,7 @@ export default function Declarator() {
                 </div>
             </Grid>
         )
-    }
+    })
     return (
         <div>
             <LiveStreamComponent key={'streamComponent'}/>
@@ -306,7 +290,11 @@ export default function Declarator() {
                 <Grid columns={12} container columnSpacing={3} rowSpacing={3}>
                     {
                         gameList.map((val, i) => (
-                            <RoundControl isDisabled={i === 0 ? false: true} gameInfo={val} />
+                            <RoundControl
+                            isDisabled={val.result === "CLOSED" || val.result ===  "OPEN" || val.result === null 
+                            ? false:
+                            true} 
+                            gameInfo={val} />
                         ))
                     }
                 </Grid>

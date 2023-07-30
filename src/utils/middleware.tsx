@@ -4,11 +4,12 @@ import supabase from "./supabase";
 const userMiddleware = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     let { data: users, error } = await supabase
-      .from('users')
-      .select('user_level')
-      .eq('email', user?.email)
+        .from('users')
+        .select('user_level')
+        .eq('email', user?.email)
     const currentUrl = window.location.href;
     if(user === null) {
+        let { error } = await supabase.auth.signOut()
         if(currentUrl.includes('/gameView')){
             document.location.href = "/login"
         }
@@ -25,6 +26,8 @@ const userMiddleware = async () => {
             document.location.href = "/login"
         }
     }
+    console.log(user)
+    console.log(users)
     if(user !== null && users !== null) {
         switch (users[0].user_level) {
             case "bettor":
@@ -33,7 +36,7 @@ const userMiddleware = async () => {
                 }
                 break;
             case "declarator":
-                if(!currentUrl.includes('/')){
+                if(window.location.pathname !== '/declarator'){
                     document.location.href = "/declarator"
                 }
                 break;

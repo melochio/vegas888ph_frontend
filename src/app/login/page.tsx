@@ -50,7 +50,7 @@ const Form = () => {
                     <form action="" method="post">
                         <Typography variant="h4" fontWeight={700} textAlign={'center'}>Login</Typography>
                         <br /> <br />
-                        <Grid container columns={12} flexDirection={'row'} justifyContent={'center'} rowSpacing={2}>
+                        <Grid container columns={12} flexDirection={'row'} justifyContent={'center'} rowSpacing={1}>
                             <Grid item sm={10} md={8} lg={8} xl={8} xs={10}>
                                 <FormControl fullWidth>
                                     <TextField id="emailInput"
@@ -59,6 +59,7 @@ const Form = () => {
                                     onChange={(event)=>handleInput(event)}
                                     aria-describedby="emailInput-helper-text" 
                                     helperText=" " 
+                                    size={'small'}
                                     label="Email address"/>
                                 </FormControl> 
                             </Grid>
@@ -70,6 +71,7 @@ const Form = () => {
                                     onChange={(event)=>handleInput(event)}
                                     aria-describedby="passwordInput-helper-text"
                                     helperText=" " 
+                                    size={'small'}
                                     type="password"
                                     label="Password"/>
                                 </FormControl> 

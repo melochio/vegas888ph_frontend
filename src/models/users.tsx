@@ -17,6 +17,7 @@ interface Model_User {
     total_wallet_balance: string | any,
     isActive: string | any,
     mobileNo : string | any,
+    user_origin: string | any,
     
 }
 
@@ -36,6 +37,7 @@ type UserModel_Hidden = {
     total_wallet_balance: any,
     isActive: any,
     mobileNo: any,
+    user_origin: string | any,
     
 }
 
@@ -58,6 +60,7 @@ const initialUser: Model_User = {
     total_wallet_balance: '0.00', 
     isActive: '', 
     mobileNo: '', 
+    user_origin: '',
 }
 export default Model_User
 

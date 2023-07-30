@@ -1,5 +1,5 @@
 'use client'
-import {Grid, Button, Avatar, IconButton, ButtonGroup, Typography, Card, Modal, Box, TextField} from '@mui/material'
+import {Grid, Button, Avatar, IconButton, ButtonGroup, Typography, Card, Modal, Box, TextField, Select, Fab, ListItem, ListItemText, Container, Input, List} from '@mui/material'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import Image from 'next/image'
@@ -7,7 +7,7 @@ import {colors} from '@pComp/customStyles'
 import { useRouter } from 'next/navigation'
 import MailIcon from '@mui/icons-material/Mail';
 import Logo from './logo.png'
-import React, { MouseEventHandler, useState } from 'react'
+import React, { MouseEventHandler, memo, useMemo, useState } from 'react'
 import {
     Menu,
     MenuItem,
@@ -25,53 +25,74 @@ import SBAPI from '@utils/supabase'
 import userMiddleware from '@/utils/middleware';
 
 interface LoggedHeaderProps {}
-const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
+const LoggedHeader = ({walletAmount}: {walletAmount: number}) => {
   React.useEffect(() => {
     userMiddleware()
   })
   const [user, setUser] = React.useState<UserModel_Hidden>()
   const [isProfileViewOpen, setIsProfileViewOpen] = useState(false);
   const [walletBalance, setWalletBalance] = React.useState(0)
-  const fetchBalance = async () => {
-    if (user?.id !== undefined) {
-      let { data: getwalletbalance, error } = await SBAPI
-      .from('getwalletbalance')
-      .select('*')
-      .eq('id', user.id)
-      console.log(getwalletbalance)
-      if(getwalletbalance !== null) {
-          setWalletBalance(getwalletbalance[0].wallet_amount !== null ? getwalletbalance[0].wallet_amount : 0.00)
-      }
-    }
+  const [messages, setMessages] = useState<messagesType[]>([])
+  const [chatOpen, setChatOpen] = useState(false)
+  
+  type messagesType = {
+    id: number,
+    text: string,
+    sender: string, //userId
+    recepient: string, //userId
   }
   React.useEffect(() => {
-    const fetchUserData = async () => {
-      const { data: { user } } = await SBAPI.auth.getUser()
-      let { data: users, error } = await SBAPI
-        .from('users')
+    const fetchUserData = async (): Promise <UserModel_Hidden| undefined> => {
+      try {
+        const { data: { user } } = await SBAPI.auth.getUser()
+        let { data: users, error } = await SBAPI
+          .from('users')
+          .select('*')
+          .eq('email', user?.email)
+          if(users !== null) {
+            setUser(users[0])
+            return users[0]
+          }
+      } catch {
+      }
+    }
+    const fetchMessages = async () => {
+      if(fetchUserData !== undefined) {
+        let { data: chats, error } = await SBAPI
+        .from('chats')
         .select('*')
-        .eq('email', user?.email)
-        if(users !== null) {
-          setUser(users[0])
+        if(chats !== null) {
+          setMessages(chats)
         }
+      }
+    }
+    const fetchBalance = async () => {
+      const currentuser = await fetchUserData();
+      if (currentuser !== undefined) {
+        let { data: getwalletbalance, error } = await SBAPI
+        .from('getwalletbalance')
+        .select('*')
+        .eq('id', currentuser.id)
+        // console.log(getwalletbalance)
+        if(getwalletbalance !== null) {
+            setWalletBalance(getwalletbalance[0].wallet_amount !== null ? getwalletbalance[0].wallet_amount : 0.00)
+        }
+      }
     }
     fetchUserData()
     fetchBalance()
+    fetchMessages()
+    
     SBAPI.channel('custom-all-channel')
     .on(
         'postgres_changes',
-        { event: '*', schema: 'public', table: 'wallets' },
+        { event: '*', schema: 'public', table: 'chats' },
         (payload) => {
-          fetchBalance()
+          fetchMessages()
         }
     )
     .subscribe()
   }, [])
-  React.useEffect(() => {
-    if(user !== undefined){
-      fetchBalance()
-    }
-  }, [user])
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
   const handleAvatarClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -82,9 +103,8 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
     setAnchorEl(null);
   };
   const handleLogout = async () => {
-    await logout()
     let { error } = await SBAPI.auth.signOut()
-    document.location.href = "/login"
+    document.location.href = "/login" 
   }
   const [open, setOpen] = useState(false);
   const handleWalletModal = () => {
@@ -95,6 +115,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
     setOpen(false);
   };
   const formRef = React.useRef<HTMLFormElement | null>(null);
+  const [cashout, setCashout] = React.useState<string>("")
   const handleSubmitWithdrawal = async (event: React.FormEvent) => {
     event.preventDefault();
     const formElement = formRef.current;
@@ -107,14 +128,224 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
       formInput.request_amount = formData.get('request_amount');
       formInput.email = formData.get('email');
       formInput.phoneNo = formData.get('phoneNo');
-      const response = await RequestWithdrawal(formInput)
-      if(response !== undefined) {
+      formInput.address = formData.get('address');
+      formInput.transaction_type = cashout === "GCASH" ? cashout : cashout === "PERA_PADALA" ? cashout : formData.get('transaction_type');
+      // const response = await RequestWithdrawal(formInput)
+
+        const { data: { user } } = await SBAPI.auth.getUser()
+        let { data: users, error } = await SBAPI
+          .from('users')
+          .select('*')
+          .eq('email', user?.email)
+          if(users !== null) {
+            const { data:withdraw_data, error: withdraw_error } = await SBAPI
+            .from('withdraw_requests')
+            .insert({
+              status: "REQUEST",
+              userId: users[0].id,
+              firstName: formInput.firstName,
+              email: formInput.email,
+              phoneNo: formInput.phoneNo,
+              request_amount: formInput.request_amount,
+            })
+            const { data:deposit_to_data, error: deposit_to_error } = await SBAPI
+            .from('wallets')
+            .insert({
+              amount: formInput.request_amount * -1,
+              createdById: users[0].id, 
+              userId: users[0].id,
+              sentTo: users[0].user_origin,
+              remarks: '', 
+              type: "DEPOSIT"
+            })
+            const { data:receivedfrom_data, error: receivedfrom_error } = await SBAPI
+            .from('wallets')
+            .insert({
+              amount: formInput.request_amount,
+              createdById: users[0].id, 
+              userId: users[0].user_origin,
+              receivedFrom: users[0].id,
+              remarks: '', 
+              type: "RECEIVED",
+            })
+            
+          }
+      if(error !== null) {
         Swal.fire('Success', 'Your withdrawal request has been successfully sent to your agent', 'success')
       } else {
         Swal.fire('Failed', 'Something went wrong while submitting your withdrawal request, Please try again after refreshing the page.', 'error')
       }
+      console.log(formInput)
       handleClose()
     }
+  }
+  const BankComponent = () => {
+    return (
+      <div>
+          <h2 id="modal-title">Bank Transfer Form</h2>
+          <form onSubmit={handleSubmitWithdrawal} ref={formRef}>
+            <div id="modal-description">
+                <TextField
+                  label="Bank Name"
+                  name='transaction_type'
+                  variant="outlined"
+                  sx={{margin: '0.5em 0em'}}
+                  size={'small'}
+                  fullWidth
+                  // Add necessary event handlers and state for inputs
+                />
+                <TextField
+                  label="Account Holder"
+                  name='firstname'
+                  variant="outlined"
+                  size={'small'}
+                  sx={{margin: '0.5em 0em'}}
+                  fullWidth
+                  // Add necessary event handlers and state for inputs
+                />
+                <TextField
+                  label="Account Number"
+                  name='phoneNo'
+                  variant="outlined"
+                  size={'small'}
+                  sx={{margin: '0.5em 0em'}}
+                  fullWidth
+                  // Add necessary event handlers and state for inputs
+                />
+                <TextField
+                  label="Amount"
+                  name='request_amount'
+                  type='number'
+                  variant="outlined"
+                  sx={{margin: '0.5em 0em'}}
+                  size={'small'}
+                  fullWidth
+                  helperText={"Your remaining balance: "+ walletAmount === undefined ? walletBalance :walletAmount}
+                  // Add necessary event handlers and state for inputs
+                />
+                <Button type="submit" variant="contained" sx={{
+                    backgroundColor: colors.gold,
+                    color: 'black',
+                    float:'right',
+                    fontWeight: 700,
+                  }}
+                  onClick={handleSubmitWithdrawal}
+                  >
+                  Submit
+                </Button>
+            </div>
+          </form>
+      </div>
+    )
+  }
+  const PadalaComponent = () => {
+    return (
+      <div>
+          <h2 id="modal-title">Bank Transfer Form</h2>
+          <form onSubmit={handleSubmitWithdrawal} ref={formRef}>
+            <div id="modal-description">
+                <TextField
+                  label="Name"
+                  name='firstname'
+                  variant="outlined"
+                  sx={{margin: '0.5em 0em'}}
+                  size={'small'}
+                  fullWidth
+                  // Add necessary event handlers and state for inputs
+                />
+                <TextField
+                  label="Address"
+                  name='address'
+                  variant="outlined"
+                  sx={{margin: '0.5em 0em'}}
+                  size={'small'}
+                  fullWidth
+                  // Add necessary event handlers and state for inputs
+                />
+                <TextField
+                  label="Phone Number"
+                  name='phoneNo'
+                  variant="outlined"
+                  sx={{margin: '0.5em 0em'}}
+                  size={'small'}
+                  fullWidth
+                  // Add necessary event handlers and state for inputs
+                />
+                <TextField
+                  label="Amount"
+                  name='request_amount'
+                  type='number'
+                  variant="outlined"
+                  sx={{margin: '0.5em 0em'}}
+                  size={'small'}
+                  fullWidth
+                  helperText={"Your remaining balance: "+ walletAmount === undefined ? walletBalance :walletAmount}
+                  // Add necessary event handlers and state for inputs
+                />
+                <Button type="submit" variant="contained" sx={{
+                    backgroundColor: colors.gold,
+                    color: 'black',
+                    float:'right',
+                    fontWeight: 700,
+                  }}
+                  onClick={handleSubmitWithdrawal}
+                  >
+                  Submit
+                </Button>
+            </div>
+          </form>
+      </div>
+    )
+  }
+  const GcashComponent = () => {
+    return (
+      <div>
+          <h2 id="modal-title">Bank Transfer Form</h2>
+          <form onSubmit={handleSubmitWithdrawal} ref={formRef}>
+            <div id="modal-description">
+                <TextField
+                  label="GCASH Name"
+                  name='firstname'
+                  variant="outlined"
+                  sx={{margin: '0.5em 0em'}}
+                  size={'small'}
+                  fullWidth
+                  // Add necessary event handlers and state for inputs
+                />
+                <TextField
+                  label="GCASH Number"
+                  name='phoneNo'
+                  variant="outlined"
+                  sx={{margin: '0.5em 0em'}}
+                  size={'small'}
+                  fullWidth
+                  // Add necessary event handlers and state for inputs
+                />
+                <TextField
+                  label="Amount"
+                  name='request_amount'
+                  type='number'
+                  variant="outlined"
+                  sx={{margin: '0.5em 0em'}}
+                  size={'small'}
+                  fullWidth
+                  helperText={"Your remaining balance: "+ walletAmount === undefined ? walletBalance :walletAmount}
+                  // Add necessary event handlers and state for inputs
+                />
+                <Button type="submit" variant="contained" sx={{
+                    backgroundColor: colors.gold,
+                    color: 'black',
+                    float:'right',
+                    fontWeight: 700,
+                  }}
+                  onClick={handleSubmitWithdrawal}
+                  >
+                  Submit
+                </Button>
+            </div>
+          </form>
+      </div>
+    )
   }
   const CashOutModal = () => {
     return (
@@ -127,7 +358,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
         >
           <Box
             sx={{
-              position: 'absolute',
+              position: 'fixed',
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
@@ -139,76 +370,25 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
               p: 4,
             }}
           >
-            <h2 id="modal-title">CashOut Form</h2>
-            <form onSubmit={handleSubmitWithdrawal} ref={formRef}>
-              <div id="modal-description">
-                  <TextField
-                    label="First Name"
-                    name='firstName'
-                    variant="outlined"
-                    sx={{margin: '0.5em 0em'}}
-                    fullWidth
-                    // Add necessary event handlers and state for inputs
-                  />
-                  <TextField
-                    label="Middle Name"
-                    name='middleName'
-                    variant="outlined"
-                    sx={{margin: '0.5em 0em'}}
-                    fullWidth
-                    // Add necessary event handlers and state for inputs
-                  />
-                  <TextField
-                    label="Last Name"
-                    name='lastName'
-                    variant="outlined"
-                    sx={{margin: '0.5em 0em'}}
-                    fullWidth
-                    // Add necessary event handlers and state for inputs
-                  />
-                  <TextField
-                    label="Amount"
-                    name='request_amount'
-                    type='number'
-                    variant="outlined"
-                    sx={{margin: '0.5em 0em'}}
-                    fullWidth
-                    helperText={"Your remaining balance: "+ walletBalance.toLocaleString("en-US", {
-                        style: "decimal",
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                    })}
-                    // Add necessary event handlers and state for inputs
-                  />
-                  <TextField
-                    label="Email"
-                    name='email'
-                    type='email'
-                    variant="outlined"
-                    sx={{margin: '0.5em 0em'}}
-                    fullWidth
-                    // Add necessary event handlers and state for inputs
-                  />
-                  <TextField
-                    label="GCASH Number"
-                    name='phoneNo'
-                    variant="outlined"
-                    sx={{margin: '0.5em 0em'}}
-                    fullWidth
-                    // Add necessary event handlers and state for inputs
-                  />
-                  <Button type="submit" variant="contained" sx={{
-                      backgroundColor: colors.gold,
-                      color: 'black',
-                      float:'right',
-                      fontWeight: 700,
-                    }}
-                    onClick={handleSubmitWithdrawal}
-                    >
-                    Submit
-                  </Button>
-              </div>
-            </form>
+            <Typography variant='h6'>
+              Select A Cashout Method
+            </Typography>
+            <Select
+                sx={{
+                    width: '80%'
+                }}
+                value={cashout}
+                size={'small'}
+                onChange={(event) => setCashout(event.target.value)}
+            >
+                <MenuItem value={"BANK"}>BANK</MenuItem>
+                <MenuItem value={"PERA_PADALA"}>Pera Padala</MenuItem>
+                <MenuItem value={"GCASH"}>GCASH</MenuItem>
+            </Select>
+            
+              {cashout === "BANK" && <BankComponent />}
+                {cashout === "PERA_PADALA" && <PadalaComponent />}
+                {cashout === "GCASH" && <GcashComponent /> }
           </Box>
         </Modal>
       </div>
@@ -371,8 +551,6 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
       const response = await TransactionList();
       if(response !== undefined) {
         const responseData= response.data
-        // console.log(responseData)
-        // setTransactionsData(responseData)
         let list: Transaction[] = []
         responseData.map((val: any, index: number) => {
           list.push({id: index, type: val.type, amount: val.amount, datetime: val.created_at})
@@ -387,6 +565,78 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+  
+  const ChatButton = memo(() => {
+    return (
+      <Box sx={{ '& > :not(style)': { m: 1 } }}>
+        <Fab color="secondary" aria-label="add"
+          onClick={() => setChatOpen(chatOpen ? false : true)}
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            }}>
+          <MailIcon />
+        </Fab>
+      </Box>
+    );
+  })
+  const ChatBox =  () => {
+    const [message, setMessage] = useState("");
+    const onSendMessage = async (text: string) => {
+      const { data, error } = await SBAPI
+      .from('chats')
+      .insert([
+        { text: text, sender: user?.id, recipient: 'admin'},
+      ])
+    }
+    const handleSendMessage = () => {
+      onSendMessage(message);
+      setMessage("");
+    };
+
+    return (
+      <Container
+        maxWidth={'xs'}
+      >
+        <Paper sx={{
+          padding: '2em 1em',
+        }}>
+          <Typography variant="h4">Chatbox</Typography>
+          <div style={{
+              border: '1px solid #e1e1e1',
+              borderRadius: '1rem'
+            }}>
+            <List>
+              {messages.map((message) => (
+                <ListItem key={message.id}>
+                  <ListItemText
+                    primary={message.text}
+                    secondary={message.sender !== "admin" ? "Sent" : "Received"}
+                  />
+                </ListItem>
+              ))}
+            </List>
+            <div style={{display: 'flex', margin: '0rem 1rem 1rem 1rem'}}>
+              <Input
+                placeholder="Enter your message"
+                value={message}
+                fullWidth
+                onChange={(event) => setMessage(event.target.value)}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSendMessage}
+              >
+                Send
+              </Button>
+            </div>
+          </div>
+        </Paper>
+      </Container>
+    );
+  }
   return (
     <Grid
       container
@@ -425,11 +675,7 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
           >
             <Card sx={{ maxHeight: '30px', padding: '0rem 1rem' }}>
               <Typography variant="caption" fontWeight={800}>
-                &#8369;{walletBalance.toLocaleString("en-US", {
-                                    style: "decimal",
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                })}
+                &#8369;{walletAmount === undefined ? walletBalance : walletAmount}
               </Typography>
             </Card>
             <Button size={'medium'} variant="contained" onClick={handleWalletModal}>
@@ -455,26 +701,39 @@ const LoggedHeader: React.FC<LoggedHeaderProps> = () => {
           <CashOutModal />
         </Grid>
       </Grid>
+      {
+        user?.user_origin === null &&
+        <div>
+          <ChatButton />
+          <div style={{display: chatOpen ? 'block': 'none',
+            position: 'fixed',
+            bottom: 36,
+            right: 36,
+            zIndex: 5}}>
+            <ChatBox />
+          </div>
+        </div>
+      }
     </Grid>
   );
 };
 const DeclaratorHeader = () => {
   const [user, setUser] = React.useState<UserModel_Hidden>()
   React.useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-          const response = await fetchUser()
-          if(response === undefined) {
-            document.location.href = '/login'
-          } else {
-            const userResponse: UserModel_Hidden = response
-            setUser(userResponse)
-          }
-      } catch(err) {
-        document.location.href = '/login'
-      }
-    }
-    fetchUserData()
+    // const fetchUserData = async () => {
+    //   try {
+    //       const response = await fetchUser()
+    //       if(response === undefined) {
+    //         document.location.href = '/login'
+    //       } else {
+    //         const userResponse: UserModel_Hidden = response
+    //         setUser(userResponse)
+    //       }
+    //   } catch(err) {
+    //     document.location.href = '/login'
+    //   }
+    // }
+    // fetchUserData()
   }, [])
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
@@ -486,14 +745,9 @@ const DeclaratorHeader = () => {
     setAnchorEl(null);
   };
   const handleLogout = async () => {
-    setAnchorEl(null);
-    try {
-      const response = await logout()
-      if (response) {
-        document.location.href = '/login'
-      }
-    } catch (err) {
-    }
+    await logout()
+    let { error } = await SBAPI.auth.signOut()
+    document.location.href = "/login" 
   }
   return(
       <Grid
