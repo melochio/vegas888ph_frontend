@@ -1,7 +1,6 @@
 'use client'
 import Card from '@mui/joy/Card';
-import Typography from '@mui/joy/Typography';
-import TextInput from '@/publicComponents/TextInput'
+import Typography from '@mui/joy/Typography';  
 import Model_User, { initialUser } from '../../../../models/users'
 import { createUser, fetchUser, updateCommissionUser } from '@/api/agent/users'
 
@@ -33,25 +32,27 @@ export default function Accounts() {
         // setFormInput(form)
     }
     const handleCanceEditUser = () => {
-        setEditUser(!editUser)
+        setEditUser(!editUser) 
     }
-    const [commissionRate, setCommissionRate] = React.useState('')
-    const handleSaveChangesUser = (userId: any) => {
+    const [commissionRate,setCommissionRate] = React.useState('')
+    const handleSaveChangesUser = (userId: any) => { 
         updateCommissionUser(userId, commissionRate)
             .then((res) => {
-                if (res?.status == 200) {
+                if(res?.status == 200){
                     Swal.fire(
                         'Success',
                     )
                     fetchData();
-
+                    
                     setEditUser(!editUser)
-                } else {
+                }else{
                     Swal.fire(
-                        'Failed',  
+                        'Failed',
+                        res?.data,
+                        'error'
                     )
                 }
-
+               
             })
     }
     const handleTableInput = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
@@ -62,6 +63,7 @@ export default function Accounts() {
         { field: 'created_at', headerName: 'DATE', width: 200 },
         { field: 'user_level', headerName: 'TRANSACTION TYPE', width: 200 },
         { field: 'name', headerName: 'Name', width: 200 },
+        // { field: 'commission', headerName: 'Commission %', width: 200 },
         {
             field: 'commission',
             headerName: 'Current Commission %',
@@ -125,15 +127,13 @@ export default function Accounts() {
             field: 'isActive',
             headerName: 'Action',
             flex: 1,
-            renderCell: (params: { row: {user_level:any, id: any; form: any; firstName: any; request_amount: any; userId: string }; }) => {
+            renderCell: (params: { row: { id: any; form: any; firstName: any; request_amount: any; userId: string }; }) => {
                 // const userId = params.row.id;
-                const form = params.row;
-                const userId = params.row.userId;
+                const form = params.row; 
+                const userId = params.row.userId; 
                 const index = params.row.id;
                 return (
                     <>
-                    {
-                        form.user_level != 'bettor' ?  
                         <Container>
                             {
                                 editUser && selectedRowIndex == index ?
@@ -146,7 +146,7 @@ export default function Accounts() {
                                         </Button>
                                     </>
                                     :
-                                    !editUser ? 
+                                    !editUser ?
                                         <Button size="small" variant="contained" style={{ backgroundColor: 'red', color: 'white' }} onClick={() => handleEditUser(index)}>
                                             Edit
                                         </Button>
@@ -154,10 +154,6 @@ export default function Accounts() {
                             }
 
                         </Container>
-                        :
-                        ''
-                    }
-                        
                     </>
 
                 );
@@ -166,6 +162,7 @@ export default function Accounts() {
 
 
     ];
+    const filteredColumns = editUser ? columns : columns.filter((column) => column.field !== 'Newcommission');
 
     const breadcrumbs = [
         <Link underline="hover" key="1" color="inherit" href="/" sx={{ color: 'black' }}>
@@ -206,15 +203,9 @@ export default function Accounts() {
     const fetchData = async () => {
         setFormInput({ ...formInput, 'isActive': 1 })
         try {
-            if (user?.user_level == 'agent') {
-                const users: [] = await fetchUser(['bettor'], 'active');
-                setUserlist(users);
-            } else {
-                const users: [] = await fetchUser(['bettor', 'agent'], 'active');
-                setUserlist(users);
-            }
-
-            // Assuming `users` is an array of objects with the 'PlayerName' property
+            const users: [] = await fetchUser(['master agent', 'admin', 'declarator'], 'active');
+            console.log(users)
+            setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
         } catch (error) {
             console.error('Error fetching data:', error);
             // setUserList([]); // Set an empty array if there's an error or no data
@@ -231,8 +222,7 @@ export default function Accounts() {
         updated_at: any,
         user_level: string | any,
     }
-    const [user, setUser] = React.useState<UserModel>() 
-    const filteredColumns = editUser ? columns : columns.filter((column) => column.field !== 'Newcommission');
+    const [user, setUser] = React.useState<UserModel>()
     React.useEffect(() => {
         const fetch = async () => {
             const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/tokenValue', null, {
@@ -244,7 +234,7 @@ export default function Accounts() {
             if (response === undefined) {
                 document.location.href = '/login'
             } else {
-                const userResponse: UserModel =  response.data
+                const userResponse: UserModel = response.data
                 setUser(userResponse)
             }
         }
@@ -260,7 +250,7 @@ export default function Accounts() {
             formInput.password != ""
 
         ) {
-            if (formInput.user_level == "declarator" || formInput.user_level == "admin" || formInput.user_level == "bettor" ) {
+            if (formInput.user_level == "declarator" || formInput.user_level == "admin") {
                 inputsValid = true
             } else {
                 if (formInput.commission != "") {
@@ -308,7 +298,7 @@ export default function Accounts() {
                 </Breadcrumbs>
             </Stack>
             <Grid container spacing={2}>
-                <Grid item xs={10} sm={10} md={12}>
+                <Grid item xs={12} sm={12} md={8}>
                     <Box sx={{ display: 'flex', justifyContent: 'start', padding: '20px', backgroundColor: "black" }}>
                         <Typography component="h1" sx={{ color: 'white', fontSize: '20px', marginTop: '10px' }}></Typography>
                     </Box>
@@ -335,7 +325,7 @@ export default function Accounts() {
                             </Grid>
                             <Grid item xs={12} sm={6} md={6}>
                                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
-                                    <label htmlFor="selectInput" className="form-label">User Type {user?.user_level}</label>
+                                    <label htmlFor="selectInput" className="form-label">User Type</label>
                                     <select
                                         className="form-control"
                                         id="selectInput"
@@ -347,18 +337,11 @@ export default function Accounts() {
                                     >
                                         <option value="" disabled>Select an option</option>
                                         {
-                                            user?.user_level == 'master agent' ?
-                                                ['agent', 'bettor'].map((option) => (
-                                                    <option key={option} value={option}>
-                                                        {option}{user?.user_level}
-                                                    </option>
-                                                ))
-                                                :
-                                                ['bettor'].map((option) => (
-                                                    <option key={option} value={option}>
-                                                        {option}
-                                                    </option>
-                                                ))
+                                            ['admin', 'master agent', 'declarator'].map((option) => (
+                                                <option key={option} value={option}>
+                                                    {option}
+                                                </option>
+                                            ))
                                         }
                                     </select>
                                 </div>
@@ -418,7 +401,7 @@ export default function Accounts() {
                                 </div>
                             </Grid>
                             {
-                                (formInput.user_level != 'declarator' && formInput.user_level != 'admin' && formInput.user_level != 'bettor') ?
+                                (formInput.user_level != 'declarator' && formInput.user_level != 'admin') ?
                                     <Grid item xs={12} sm={6} md={6}>
                                         <div className="form-group" style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
                                             <label htmlFor="selectInput" className="form-label">Commission %</label>
@@ -467,7 +450,7 @@ export default function Accounts() {
                         <Button variant="contained" sx={{ margin: '10px' }} size="small" color="error">Cancel</Button>
                     </Container>
                 </Grid>
-                <Grid item xs={12} sm={12} md={12}>
+                <Grid item xs={12} sm={6} md={12}>
                     <Card>
                         <Typography>
                             List of Users

@@ -9,7 +9,7 @@ import TextInput from '@/publicComponents/TextInput'
 import Model_tranferMoney, { initialUser } from '../../../../models/tranferMoney'
 import Model_user, { initialUser as initUser } from '../../../../models/users'
 import { transferWalletApi, getWalletHistory } from '@/api/agent/wallet'
-import { fetchUser } from '@/api/agent/users'
+import { fetchUser, fetchUserWallet } from '@/api/agent/users'
 import MoneyFormat from "@/publicComponents/MoneyFormat";
 import userMiddleware from '@/utils/middleware';
 import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
@@ -20,6 +20,7 @@ import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Model_User from "../../../../models/users";
+import supabase from "@/utils/supabase";
 
 
 const columns: GridColDef[] = [
@@ -57,6 +58,7 @@ export default function Wallet() {
 
     // const getUser()
     const handleInput = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
+        
         if (event.currentTarget.name == 'requestee') {
             const data = userlist.find((user) => user.name === event.currentTarget.value);
             const _player_name = data?.player_name
@@ -85,9 +87,26 @@ export default function Wallet() {
     const [userlist, setUserlist] = React.useState<Model_user[]>([]);
     const fetchData = async () => {
         try {
-            const users: Model_User[] = await fetchUser(['master agent'], 'active');
-            setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
-            // const userlist: Model_user[] = users
+            const { data: usersRaw, error: usersError } = await supabase
+            .from('users')
+            .select('*')
+            .in('user_level', ['master agent', 'bettor']);
+            let newUserlist:Model_user[] = []
+            if(usersRaw !== null) {
+                usersRaw.map(async (val, i) => {
+                    if(val.user_origin == null || val.user_origin == 9) {
+                        let { data: getwalletbalance, error } = await supabase
+                          .from('getwalletbalance')
+                          .select('wallet_amount')
+                          .eq('id', val.id)
+                        if (getwalletbalance !== null) {
+                            val.total_wallet_balance = getwalletbalance[0].wallet_amount
+                        }
+                        newUserlist.push(val)
+                    }
+                })
+            }
+            setUserlist(newUserlist);
         } catch (error) {
             console.error('Error fetching data:', error);
             // setUserList([]); // Set an empty array if there's an error or no data
@@ -104,11 +123,13 @@ export default function Wallet() {
             // setUserList([]); // Set an empty array if there's an error or no data
         }
     }
+    React.useEffect(() => {
+        fetchData();
+    })
     const [wallet_amount, setWallet_amount] = React.useState<Number | any>(0)
     React.useEffect(() => { 
         userMiddleware()
         fetchWalletHistory()
-        fetchData();
         setWallet_amount(Number(localStorage.getItem('wallet_amount')));
     }, []);
     const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
@@ -147,17 +168,7 @@ export default function Wallet() {
     }
     return (
         <div>
-            <Stack spacing={2}>
-
-                <Breadcrumbs
-                    separator={<NavigateNextIcon fontSize="small" />}
-                    aria-label="breadcrumb"
-                    color='white'
-                > 
-                    {breadcrumbs}
-                </Breadcrumbs>
-            </Stack>
-            <Grid container spacing={2}>
+            <Grid container spacing={2} columns={12}>
                 <Grid item xs={12} sm={12} md={8}>
                     <Box sx={{ display: 'flex', justifyContent: 'start', padding: '20px', backgroundColor: "black" }}>
                         {/* <Typography component="h1" sx={{ color: 'white', fontSize: '20px', marginTop: '10px' }}>Current Wallet : {'₱ ' + wallet_amount.toFixed(2)} </Typography> */}
@@ -167,7 +178,7 @@ export default function Wallet() {
                         <hr />
                         <Grid item xs={12} sm={12} md={12} container>
                             <Grid item xs={12} sm={6} md={6}>
-                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
                                     <label htmlFor="selectInput" className="form-label">Transaction Type</label>
                                     <select
                                         className="form-control"
@@ -297,7 +308,6 @@ export default function Wallet() {
                         />
                     </Card>
                 </Grid>
-
             </Grid>
         </div>
     )

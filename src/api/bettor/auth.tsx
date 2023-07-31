@@ -37,10 +37,9 @@ const fetchUser = async () => {
     } catch(err) {
     }
 }
-
 export {
     register,
     fetchUser,
     login,
-    logout,
+    logout
 }

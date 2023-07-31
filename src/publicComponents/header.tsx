@@ -25,7 +25,7 @@ import SBAPI from '@utils/supabase'
 import userMiddleware from '@/utils/middleware';
 
 interface LoggedHeaderProps {}
-const LoggedHeader = ({walletAmount}: {walletAmount: number}) => {
+const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
   React.useEffect(() => {
     userMiddleware()
   })
@@ -40,6 +40,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount: number}) => {
     text: string,
     sender: string, //userId
     recepient: string, //userId
+    created_at: Date, //userId
   }
   React.useEffect(() => {
     const fetchUserData = async (): Promise <UserModel_Hidden| undefined> => {
@@ -61,6 +62,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount: number}) => {
         let { data: chats, error } = await SBAPI
         .from('chats')
         .select('*')
+        .order('id', {ascending: false})
         if(chats !== null) {
           setMessages(chats)
         }
@@ -83,13 +85,14 @@ const LoggedHeader = ({walletAmount}: {walletAmount: number}) => {
     fetchBalance()
     fetchMessages()
     
-    SBAPI.channel('custom-all-channel')
+    const chats = SBAPI.channel('custom-insert-channel')
     .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'chats' },
-        (payload) => {
-          fetchMessages()
-        }
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'chats' },
+      (payload:any) => {
+        console.log('Change received on chat!', payload)
+        fetchMessages()
+      }
     )
     .subscribe()
   }, [])
@@ -220,7 +223,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount: number}) => {
                   sx={{margin: '0.5em 0em'}}
                   size={'small'}
                   fullWidth
-                  helperText={"Your remaining balance: "+ walletAmount === undefined ? walletBalance :walletAmount}
+                  helperText={"Remaining balance: " + (walletAmount === undefined ? walletBalance : walletAmount)}
                   // Add necessary event handlers and state for inputs
                 />
                 <Button type="submit" variant="contained" sx={{
@@ -279,7 +282,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount: number}) => {
                   sx={{margin: '0.5em 0em'}}
                   size={'small'}
                   fullWidth
-                  helperText={"Your remaining balance: "+ walletAmount === undefined ? walletBalance :walletAmount}
+                  helperText={"Remaining balance: " + (walletAmount === undefined ? walletBalance : walletAmount)}
                   // Add necessary event handlers and state for inputs
                 />
                 <Button type="submit" variant="contained" sx={{
@@ -329,7 +332,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount: number}) => {
                   sx={{margin: '0.5em 0em'}}
                   size={'small'}
                   fullWidth
-                  helperText={"Your remaining balance: "+ walletAmount === undefined ? walletBalance :walletAmount}
+                  helperText={"Remaining balance: " + (walletAmount === undefined ? walletBalance : walletAmount)}
                   // Add necessary event handlers and state for inputs
                 />
                 <Button type="submit" variant="contained" sx={{
@@ -602,17 +605,24 @@ const LoggedHeader = ({walletAmount}: {walletAmount: number}) => {
         <Paper sx={{
           padding: '2em 1em',
         }}>
-          <Typography variant="h4">Chatbox</Typography>
+          <Typography variant="h5">Admin Support</Typography>
           <div style={{
               border: '1px solid #e1e1e1',
               borderRadius: '1rem'
             }}>
-            <List>
+            <List sx={{maxHeight: '50vh', overflowY: 'auto'}}>
               {messages.map((message) => (
                 <ListItem key={message.id}>
                   <ListItemText
                     primary={message.text}
-                    secondary={message.sender !== "admin" ? "Sent" : "Received"}
+                    secondary={(message.sender !== "admin" ? "Sent" : "Received") + " " + new Date(message.created_at).toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true,
+                    })}
                   />
                 </ListItem>
               ))}

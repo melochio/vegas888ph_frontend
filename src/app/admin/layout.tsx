@@ -33,8 +33,9 @@ import AccountBoxSharpIcon from '@mui/icons-material/AccountBoxSharp';
 import AssessmentSharpIcon from '@mui/icons-material/AssessmentSharp';
 import userMiddleware from '@/utils/middleware';
 import axios from 'axios';
+import supabase from '@/utils/supabase';
+import './style.module.css'
 import { logout } from '@/api/bettor/auth';
-import supabase from '@utils/supabase'
 // const drawerWidth = 240;
 const drawerWidth = 240;
 
@@ -101,23 +102,24 @@ export default function RootLayout({
     if (target == 'Dashboard') {
       router.push('/admin/Dashboard');
     }
-    else if (target == 'Accounts') {
-      window.location.href = '/admin/Setup/Account';
+    else if (target == 'Accounts') { 
+      router.push('/admin/Setup/Account'); 
     } 
-    else if (target == 'Events') {
-      window.location.href = '/admin/Setup/Events';
+    else if (target == 'Game Settings') { 
+      router.push('/admin/Setup/GameSettings');
     } 
-    else if (target == 'Wallet') {
-      window.location.href = '/admin/LoadingStation/Wallet';
+    
+    else if (target == 'Events') { 
+      router.push('/admin/Setup/Events'); 
+    } 
+    else if (target == 'Wallet') { 
+      router.push('/admin/LoadingStation/Wallet');  
     }
     else if (target == 'Commission') {
-      window.location.href = '/admin/LoadingStation/Wallet';
+      router.push('/admin/LoadingStation/Commission');   
     }
     else if (target == 'Withdrawal Requests') {
-      window.location.href = '/admin/LoadingStation/WithdrawalRequests';
-    }
-    else if (target == 'Game Settings') {
-      window.location.href = '/admin/Setup/streamSettings';
+      router.push('/admin/LoadingStation/WithdrawalRequests');    
     }
   } 
   const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null);
@@ -137,21 +139,13 @@ export default function RootLayout({
   };
   const handleLogout = async () => {
     setAnchorEl(null);
-    
-    await logout()
-    let { error } = await supabase.auth.signOut()
-    // try {
-    //   const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/logout', null, {
-    //     withCredentials: true,
-    //     headers: {
-    //       'Authorization': 'Bearer ' + localStorage.getItem('token')
-    //     }
-    //   });
-    //   if (response) {
-    //     document.location.href = '/login'
-    //   }
-    // } catch (err) {
-    // }
+    try {
+      let { error } = await supabase.auth.signOut()
+        await logout()
+        document.location.href = '/login'
+    } catch (err) {
+      document.location.href = '/login' 
+    }
   }
 
   return (
@@ -179,13 +173,7 @@ export default function RootLayout({
           </Grid>
           <Grid item xs={12} sm={8} md lg xl>
             <Grid container flexDirection={'row'} justifyContent={'flex-end'}>
-              {/* <ButtonGroup
-                size="small"
-                aria-label="small button group"
-                sx={{ alignItems: 'center' }}
-              > 
-              </ButtonGroup> */}
-              <Avatar   onClick={handleAvatarClick} sx={{ cursor: 'pointer', margin: '0em 1em 0em 1em' }} />
+              <Avatar onClick={handleAvatarClick} sx={{ cursor: 'pointer', margin: '0em 1em 0em 1em' }} />
               <Popper open={Boolean(anchorEl)} anchorEl={anchorEl}>
                 <Paper>
                   <Menu
@@ -299,11 +287,41 @@ export default function RootLayout({
             </ListItem>
           ))} 
         </List>
+        <Divider />
+        <Typography sx={{
+          marginLeft: '10px',
+          fontSize: '.9rem',
+          color: '#989EB3',
+
+        }} >
+          SUPPORT
+        </Typography>
+        <List>
+          {['Messages'].map((text, index) => (
+            <ListItem key={text} disablePadding sx={{
+              color: '#989EB3',
+              '&:hover': {
+                backgroundColor: '#31343d',
+                color: 'white',
+                cursor: 'pointer',
+              },
+            }}>
+              <ListItemButton>
+                <ListItemIcon>
+                  <MailIcon style={{ color: 'white' }} />
+                </ListItemIcon>
+                <Typography sx={{ fontSize: '.8rem' }} onClick={() => handleRoutes(text)} >
+                  {text}
+                </Typography>
+              </ListItemButton>
+            </ListItem>
+          ))} 
+        </List>
       </Drawer>
 
       <Main open={open} sx={{ backgroundColor: '#eaf1f7', minHeight: '100vh',marginTop:'10px' }} >
         <DrawerHeader sx={{ backgroundColor: '#31343d' }} />
-        <Container sx={{ margin: 'auto', marginTop: '50px' }} >
+        <Container maxWidth='xl' sx={{marginTop: '50px' }} >
           {children}
         </Container>
       </Main>

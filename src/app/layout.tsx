@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className + "background-image-container"} style={{
-          backgroundImage: "url(/playgame-bg4.png) ", 
+          backgroundImage: "url(/playgame-bg.jpg)", 
           height: '100vh', 
           backgroundSize: 'cover',
           backgroundPosition: '0 0',

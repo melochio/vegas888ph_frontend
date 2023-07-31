@@ -4,13 +4,15 @@ import Card from '@mui/joy/Card';
 import CardCover from '@mui/joy/CardCover';
 import CardContent from '@mui/joy/CardContent';
 import Typography from '@mui/joy/Typography';
-import {Container, Typography as TypographyMui} from '@mui/material';
+import {Container, IconButton, Typography as TypographyMui} from '@mui/material';
 import LocationOnRoundedIcon from '@mui/icons-material/LocationOnRounded';
 import { Button, Grid } from "@mui/material";
 import StarRateIcon from '@mui/icons-material/StarRate';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import PlayCircleIcon from '@mui/icons-material/PlayCircle';
 import CasinoIcon from '@mui/icons-material/Casino';
 import { Scale } from "@mui/icons-material";
+import './customStyles.css'
 
 const gameList = [
     {
@@ -98,7 +100,7 @@ const GameCard: any = (props: {
 
     }
     return (
-        <Card className={'gameCard'} sx={{ minHeight: '350px', height: '10rem',
+        <Card className={'gameCardContainer'} sx={{ minHeight: '100px', transition: 'color 0.3s ease-in-out', 
         cursor: "pointer"}}>
             <CardCover>
                 <img
@@ -117,13 +119,17 @@ const GameCard: any = (props: {
                 <Typography level="h2" fontSize="xl" textColor="#fff" mb={1}>
                     {props.title}
                 </Typography>
-                <Typography
-                    textColor="neutral.300"
-                >
-                    {props.description}
-                </Typography>
+                <IconButton aria-label="delete" size={'large'} sx={{justifyContent: 'flex-end'}}>
+                    <PlayCircleIcon className="playbutton" style={{scale: 1.8}} />
+                </IconButton>
             </CardContent>
         </Card>
+        // <div style={{display: 'flex', flexDirection: 'row'}}>
+        //     <img src={props.imgPath} style={{height: '100px'}} />
+        //     <Typography level="h2" fontSize="xl">
+        //         {props.title}
+        //     </Typography>
+        // </div>
     )
 }
 export default function Dashboard() {
@@ -145,17 +151,15 @@ export default function Dashboard() {
             <LoggedHeader />
             <Container>
                 <Categories /><br /><br />
-                <Card sx={{backgroundColor: colors.silver}}>
                     <Grid container columns={12} flexDirection={'row'} rowSpacing={3} columnSpacing={3}>
                         {gameList.map((val, index) => (
-                            <Grid key={index} item sm md={6} lg={4} xl={4} xs={12}>
+                            <Grid key={index} item sm={12} md={6} lg={4} xl={4} xs={12}>
                                 <a href={val.href}>
                                     <GameCard {...val}/>
                                 </a>
                             </Grid>
                         ))}
                     </Grid>
-                </Card>
                 <div style={{
                     display: 'flex',
                     justifyContent: 'center',

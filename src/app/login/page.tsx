@@ -10,8 +10,6 @@ import { Typography } from "@mui/material"
 import { Card } from "@mui/material"
 import { FormControl, FormHelperText, Input, InputLabel, TextField } from "@mui/material"
 import { Grid } from "@mui/material"
-import axios from "axios"
-import Error from "next/error"
 import React from "react"
 import Swal from "sweetalert2"
 import SBAPI from '@utils/supabase'
@@ -38,6 +36,7 @@ const Form = () => {
                 'error'
             )
         }
+        console.log(loginresponse)
         if(data.user !== null) {
             document.location.reload()
         }

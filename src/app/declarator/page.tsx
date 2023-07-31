@@ -22,7 +22,8 @@ import {
     InputLabel,
     MenuItem,
     Select,
-    IconButton, } from "@mui/material"
+    IconButton,
+    SelectChangeEvent, } from "@mui/material"
 import CheckIcon from '@mui/icons-material/Check';
 import { colors } from "@/publicComponents/customStyles"
 import { updateGameResult, gameList as gameList_API } from "@/api/declarator/http"
@@ -62,8 +63,32 @@ export default function Declarator() {
             confirmButtonColor: 'gold',
             reverseButtons: true,
         }).then(async (result) =>{
-            if(result.isConfirmed){
-                await updateGameResult(currentGameState.id, status)
+            if(result.isConfirmed){ 
+                const { data: setStatusdata, error: setStatuserror } = await SBAPI
+                .from('sabong_histories')
+                .update({ 'result': status })
+                .eq('id', currentGameState.id)
+     
+                let { data, error } = await SBAPI
+                .rpc('calculate_game_stats', {
+                    game_id:currentGameState.id,
+                })
+                if (error) console.error(error)
+                else console.log(data)
+
+                if(status === "DRAW" || status === "FAILED"){                    
+                    let { data, error } = await SBAPI
+                    .rpc('cancel_game_transaction', {
+                        game_id: currentGameState.id
+                    })
+
+                    if (error) console.error(error)
+                    else console.log(data)
+
+                }
+                if(status === "MERON" || status === "WALA") {
+                    await updateGameResult(currentGameState.id, status)
+                }
             }
         })
     }
@@ -114,7 +139,7 @@ export default function Declarator() {
             { event: '*', schema: 'public', table: 'sabong_histories' },
             (payload) => {
                 fetchCurrentGame()
-                fetchCurrentStream()
+                // fetchCurrentStream()
                 fetchGameList()
                 fetchExpFights()
             }
@@ -173,24 +198,27 @@ export default function Declarator() {
             }
         })
         const [winner, setWinner] = React.useState<any>("")
-        React.useEffect(() => {
-          switch (gameInfo.result) {
-            case "DRAW":
-                setWinner("DRAW")
-                break;
-            case "MERON":
-                setWinner("MERON")
-                break;
-            case "WALA":
-                setWinner("WALA")
-                break;
-            case "FAILED":
-              setWinner("FAILED")
-              break;
-            default:
-              setBetStatus(gameInfo.result || "");
-          }
-        }, [gameInfo.result]);
+        const handleWinner = (event: SelectChangeEvent<any>) => {
+            setWinner(event.target.value)
+        }
+        // React.useEffect(() => {
+        //   switch (gameInfo.result) {
+        //     case "DRAW":
+        //         setWinner("DRAW")
+        //         break;
+        //     case "MERON":
+        //         setWinner("MERON")
+        //         break;
+        //     case "WALA":
+        //         setWinner("WALA")
+        //         break;
+        //     case "FAILED":
+        //       setWinner("FAILED")
+        //       break;
+        //     default:
+        //       setBetStatus(gameInfo.result || "");
+        //   }
+        // }, [gameInfo.result]);
         return (
             <Grid margin={'auto'} item sm={6} xs={12} md={4} lg={4} xl={3}>
                 <div style={{width: '100%'}}>
@@ -238,12 +266,14 @@ export default function Declarator() {
                             <Typography variant="body2" fontWeight={700}>Declare Winner</Typography>
                             <div style={{display: "flex", alignItems: 'center', justifyContent: 'space-between'}}>
                                 <Select
-                                    value={gameInfo.result}
+                                    value={gameInfo.result === "CLOSED" || gameInfo.result ===  "OPEN" || gameInfo.result === null 
+                                    ? winner:
+                                    gameInfo.result }
                                     sx={{
                                         width: '80%'
                                     }}
                                     disabled={isDisabled?true:false}
-                                    onChange={(event) => setWinner(event.target.value)}
+                                    onChange={(event) => handleWinner(event)}
                                 >
                                     <MenuItem value={"MERON"}>MERON</MenuItem>
                                     <MenuItem value={"WALA"}>WALA</MenuItem>
@@ -290,7 +320,7 @@ export default function Declarator() {
                 <Grid columns={12} container columnSpacing={3} rowSpacing={3}>
                     {
                         gameList.map((val, i) => (
-                            <RoundControl
+                            <RoundControl key={val.gameNo+"_"+val.id}
                             isDisabled={val.result === "CLOSED" || val.result ===  "OPEN" || val.result === null 
                             ? false:
                             true} 

@@ -1,5 +1,5 @@
 'use client'
-import { Button, Card, CardContent, Grid, IconButton, Typography } from "@mui/material"
+import { Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Typography } from "@mui/material"
 import CircleIcon from '@mui/icons-material/Circle';
 import { colors } from "@/publicComponents/customStyles";
 import EastIcon from '@mui/icons-material/East';
@@ -129,7 +129,7 @@ async function BET(amount:any, gameId:any, gameCode: any, receivedFrom: any) {
         gameId: gameId,
         createdById: receivedFrom,
         gameCode: gameCode,
-        amount: parseFloat(amount)*-1,
+        amount: (parseFloat(amount)-0.5)*-1,
         type: "BET",
     };
     try {
@@ -320,8 +320,60 @@ export default function GameView() {
         const [isOpen, setIsOpen] = React.useState(false);
         const handleClickOpen = (side: "MERON" | "WALA") => {
             setSelectedSide(side)
-            // setIsOpen(true);
+            setIsOpen(true);
         };
+        const BetModal = () => {
+            const handleClose = () => {
+                setIsOpen(false);
+            };
+            const betAmounts = [
+                {amount: '1'},
+                {amount: '10'},
+                {amount: '50'},
+                {amount: '100'},
+                {amount: '500'},
+                {amount: '1000'},
+                {amount: '5000'},
+                {amount: '10000'},
+                {amount: '50000'},
+                {amount: walletBalance.toString()}
+            ]
+            return (
+                <Dialog open={isOpen} onClose={handleClose} fullWidth maxWidth="xs" sx={{zIndex: 1000}}>
+                <Button onClick={handleClose} color="primary" sx={{position: 'absolute', right: 0}}>
+                    Close
+                </Button>
+                    <DialogTitle textAlign={'center'}>Select an Amount</DialogTitle>
+                    <DialogContent>
+                        <Grid container columns={12}>
+                            <Grid key={'betAmountList'} item xs sm md lg xl>
+                                <Typography variant="h6" textAlign={'center'} sx={{color: selectedSide === 'MERON' ? 'red': 'blue'}}>{selectedSide}</Typography>
+                                <Grid container columns={12} columnSpacing={3} rowSpacing={3} justifyContent={'center'}>
+                                    {
+                                        betAmounts.map((val, i) => (
+                                            <Grid item key={"betAmountItem_"+val.amount}>
+                                                <Button variant={'contained'}
+                                                    sx={{backgroundColor: colors.gold, color: 'black'}}
+                                                    onClick={() => handleBet(selectedSide, val.amount)}>
+                                                    {i !== betAmounts.length-1 ? parseFloat(val.amount).toLocaleString():"ALL IN" }
+                                                </Button>
+                                            </Grid>
+                                        ))
+                                    }
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </DialogContent>
+                    <DialogActions sx={{justifyContent: 'space-between'}}>
+                        <Typography variant="caption">Remaining Balance: {walletBalance.toLocaleString("en-US", {
+                                style: "decimal",
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                            })}</Typography>
+                    </DialogActions>
+                </Dialog>
+            )
+        }
         const betAmounts = [
             {amount: '1'},
             {amount: '10'},
@@ -350,7 +402,7 @@ export default function GameView() {
                             }): '0.00'}
                         </Typography>
                         <Button style={{
-                            backgroundColor: selectedSide === "MERON" ? 'rgb(173 173 173)':colors.gold,
+                            backgroundColor: colors.gold,
                             color: 'black',
                             padding: '1em 1em',
                             opacity: currentGameState !== undefined && currentGameState.result === "OPEN" ? '1':'0.7'
@@ -377,7 +429,7 @@ export default function GameView() {
                             }): '0.00'}
                         </Typography>
                         <Button style={{
-                            backgroundColor: selectedSide === "WALA" ? 'rgb(173 173 173)':colors.gold,
+                            backgroundColor: colors.gold,
                             color: 'black',
                             padding: '1em 1em',
                             opacity: currentGameState !== undefined && currentGameState.result === "OPEN" ? '1':'0.7'
@@ -390,7 +442,8 @@ export default function GameView() {
                         </Typography>
                     </div>
                 </Grid>
-                <Grid key={'betList'} item sm={12} md={12} lg={12}>
+                <BetModal />
+                {/* <Grid key={'betList'} item sm={12} md={12} lg={12}>
                     <Card>
                         <CardContent>
                             <Grid container columns={12} columnSpacing={3} rowSpacing={3} justifyContent={'center'}>
@@ -444,7 +497,7 @@ export default function GameView() {
                             </Grid>
                         </CardContent>
                     </Card>
-                </Grid>
+                </Grid> */}
             </Grid>
         )
     }

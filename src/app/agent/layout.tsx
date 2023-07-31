@@ -36,8 +36,7 @@ import axios from 'axios';
 import { getWalletSummary } from '@/api/agent/wallet'
 import { GetMyBalance } from '@/api/bettor/wallet';
 import userMiddleware from '@/utils/middleware';
-import { logout } from '@/api/bettor/auth';
-import supabase from '@utils/supabase'
+import supabase from '@/utils/supabase';
 // const drawerWidth = 240;
 const drawerWidth = 240;
 
@@ -207,9 +206,21 @@ export default function RootLayout({
     setOpen(false);
   };
   const handleLogout = async () => {
-    await logout()
-    let { error } = await supabase.auth.signOut()
-    document.location.href = "/login" 
+    setAnchorEl(null);
+    try {
+      let { error } = await supabase.auth.signOut()
+
+      // const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/logout', null, {
+      //   withCredentials: true,
+      //   headers: {
+      //     'Authorization': 'Bearer ' + localStorage.getItem('token')
+      //   }
+      // });
+      if (error) {
+        document.location.href = '/login'
+      }
+    } catch (err) {
+    }
   }
 
   React.useEffect(() => {
@@ -454,7 +465,7 @@ export default function RootLayout({
           AGENTS
         </Typography>
         <List style={{
-          display: user?.user_level === 'master agent' ? 'block' : 'none',
+          display: user?.user_level == 'master agent' ? 'block' : 'none',
           // Add other CSS properties as needed
           // For example:
           // color: 'red',

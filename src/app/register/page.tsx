@@ -42,6 +42,17 @@ const Form = () => {
                     'Your account has successfully been registered.',
                     'success'
                 )
+                Swal.fire({
+                    title: 'Success',
+                    html: `
+                        Your account has successfully been registered
+                    `,
+                    icon: 'success',
+                }).then(async (result) =>{
+                    if(result.isDismissed || result.isConfirmed){
+                        document.location.href= '/login'
+                    }
+                })
             } else {
                 Swal.fire(
                     'Failed',
@@ -81,6 +92,7 @@ const Form = () => {
             email: formInput.email,
             password: formInput.password,
         })
+        
     }
     const handleDateChange = (date:string) => {
         setFormInput({ ...formInput, bday: date });
