@@ -73,15 +73,33 @@ const SBselectedStream = async (title: string) => {
     }
     return stream_configuration !== null ? stream_configuration : null
 }
-const SBDepositTo = async () => {
-    
+const SBDepositTo = async (
+        created_by: any,
+        sender_id: any,
+        sent_to: any,
+        transaction_details: any,
+        transfer_amount: any,
+    ) => {
+    let { data, error } = await supabase
+    .rpc('deposit_to', {
+        created_by: created_by, 
+        sender_id: sender_id, 
+        sent_to: sent_to, 
+        transaction_details: transaction_details, 
+        transfer_amount: transfer_amount
+    })
+
+    if (error) return error.message
+    else return null
+
 }
 
 export {
     SBregisterPOST,
     initial_Register,
     SBstreamList,
-    SBselectedStream
+    SBselectedStream,
+    SBDepositTo
 }
 export type {
     accountRegisterType,

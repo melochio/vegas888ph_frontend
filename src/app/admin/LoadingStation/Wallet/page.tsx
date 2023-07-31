@@ -21,6 +21,7 @@ import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Model_User from "../../../../models/users";
 import supabase from "@/utils/supabase";
+import { SBDepositTo } from "@/api/supabaseAPI";
 
 
 const columns: GridColDef[] = [
@@ -36,11 +37,13 @@ const columns: GridColDef[] = [
 
 export default function Wallet() {
     interface members {
+        id: any,
         player_name: string,
         name: String | any,
         total_wallet_balance: number
     }
     const [memberDetails, setMemberDetails] = React.useState<members | any>({
+        id: 0,
         player_name: '',
         name: '',
         total_wallet_balance: 0
@@ -64,7 +67,7 @@ export default function Wallet() {
             const _player_name = data?.player_name
             const _name = data?.name
             const _total_wallet_balance = data?.total_wallet_balance
-            const memberData = { player_name: _player_name, name: _name, total_wallet_balance: _total_wallet_balance };
+            const memberData = {id: data?.id, player_name: _player_name, name: _name, total_wallet_balance: _total_wallet_balance };
             setMemberDetails(memberData);
         }
         setFormInput({ ...formInput, [event.currentTarget.name]: event.currentTarget.value })
@@ -137,20 +140,34 @@ export default function Wallet() {
             inputsValid = true
         }
         if (inputsValid) {
-            const response = await transferWalletApi(formInput)
-            console.log('response', response)
-            if (response.status == 200) {
-                Swal.fire(
-                    'Success',
-                ) 
-                location.href = '/admin/LoadingStation/Wallet'
-            } else {
-                Swal.fire(
-                    'Failed',
-                    response.data,
-                    'error'
-                )
+            const { data: { user } } = await supabase.auth.getUser()
+
+            // Check if the user is authenticated and has an email
+            if (user && user.email) {
+              // Fetch the data table records that match the user's email
+              const { data: userData, error } = await supabase
+                .from('data')
+                .select('*')
+                .eq('email', user.email);
+                if(userData){
+                    const depositResponse = await SBDepositTo(userData[0]?.id, null, memberDetails.id, formInput.transactionDetails, formInput.amount)
+                    // const response = await transferWalletApi(formInput)
+                    // console.log('response', response)
+                    if (depositResponse === null) {
+                        Swal.fire(
+                            'Success',
+                        ) 
+                        location.href = '/admin/LoadingStation/Wallet'
+                    } else {
+                        Swal.fire(
+                            'Failed',
+                            depositResponse,
+                            'error'
+                        )
+                    }
+                }
             }
+
         } else {
             Swal.fire(
                 'Failed',
