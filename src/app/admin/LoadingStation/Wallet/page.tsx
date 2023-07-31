@@ -87,45 +87,38 @@ export default function Wallet() {
     const [userlist, setUserlist] = React.useState<Model_user[]>([]);
     const fetchData = async () => {
         try {
-            const { data: usersRaw, error: usersError } = await supabase
-            .from('users')
-            .select('*')
-            .in('user_level', ['master agent', 'bettor']);
-            let newUserlist:Model_user[] = []
-            if(usersRaw !== null) {
-                usersRaw.map(async (val, i) => {
-                    if(val.user_origin == null || val.user_origin == 9) {
-                        let { data: getwalletbalance, error } = await supabase
-                          .from('getwalletbalance')
-                          .select('wallet_amount')
-                          .eq('id', val.id)
-                        if (getwalletbalance !== null) {
-                            val.total_wallet_balance = getwalletbalance[0].wallet_amount
-                        }
-                        newUserlist.push(val)
-                    }
-                })
-            }
-            setUserlist(newUserlist);
+            let { data, error } = await supabase
+              .rpc('get_users_with_wallet_balance')
+            
+            if (error) console.error(error)
+            else setUserlist(data);
+            
         } catch (error) {
             console.error('Error fetching data:', error);
             // setUserList([]); // Set an empty array if there's an error or no data
         }
     };
 
-    const [walletHistory, setWalletHistory] = React.useState([])
+    const [walletHistory, setWalletHistory] = React.useState<any[]>([])
     const fetchWalletHistory = async () => {
-        try { 
-            const data = await getWalletHistory(); 
-            setWalletHistory(data); // Assuming `users` is an array of objects with the 'PlayerName' property
-        } catch (error) {
-            console.error('Error fetching data:', error);
-            // setUserList([]); // Set an empty array if there's an error or no data
+        let { data: wallets, error } = await supabase
+        .from('wallets')
+        .select('*')
+        .eq('userId', 9)
+        if (wallets && wallets.length > 0) {
+            setWalletHistory(wallets);
         }
+        // try { 
+        //     // const data = await getWalletHistory(); 
+        //     // setWalletHistory(wallets); // Assuming `users` is an array of objects with the 'PlayerName' property
+        // } catch (error) {
+        //     // console.error('Error fetching data:', error);
+        //     // setUserList([]); // Set an empty array if there's an error or no data
+        // }
     }
     React.useEffect(() => {
         fetchData();
-    })
+    },[])
     const [wallet_amount, setWallet_amount] = React.useState<Number | any>(0)
     React.useEffect(() => { 
         userMiddleware()

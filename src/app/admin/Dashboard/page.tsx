@@ -43,8 +43,8 @@ export default function Dashboard() {
     const [monthlyEarningsAdmin, setMonthlyEarningsAdmin] = React.useState('0.00')
     const [prevmonthEarningsAdmin, setprevMonthEarningsAdmin] = React.useState('0.00')
     const [totalTeamEarnings, setTeamTotalEarnings] = React.useState('0.00')
-    const [teammonthlyEarnings, setteamMonthlyEarningsAdmin] = React.useState('0.00')
-    const [teamprevmonthEarnings, setteamprevMonthEarningsAdmin] = React.useState('0.00')
+    const [teammonthlyEarnings, setteamMonthlyEarnings] = React.useState('0.00')
+    const [teamprevmonthEarnings, setteamprevMonthEarnings] = React.useState('0.00')
     const today = new Date();
     const thismonth = today.toLocaleString('default', { month: 'long' })
     const monthArray = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -77,7 +77,7 @@ export default function Dashboard() {
         const firstDay = new Date(today.getFullYear(), today.getMonth()-1, 1);
         const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() - 1, 0);
         let { data, error } = await supabase
-        .rpc('plasada_betweendate', {
+        .rpc('getbalancebetween', {
         end_date: lastDayOfMonth, 
         start_date: firstDay, 
         user_id: 9
@@ -106,22 +106,22 @@ export default function Dashboard() {
             user_id: 0
         })
 
-        if (error) setteamMonthlyEarningsAdmin('0.00')
-        else setteamMonthlyEarningsAdmin(data)
+        if (error) setteamMonthlyEarnings('0.00')
+        else setteamMonthlyEarnings(data)
 
     }
     const fetch_teamlastmonthPlasada = async () => {
         const firstDay = new Date(today.getFullYear(), today.getMonth()-1, 1);
         const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() - 1, 0);
         let { data, error } = await supabase
-        .rpc('plasada_betweendate', {
-        end_date: lastDayOfMonth, 
-        start_date: firstDay, 
-        user_id: 0
+            .rpc('getbalancebetween', {
+            end_date: lastDayOfMonth, 
+            start_date: firstDay, 
+            user_id: 0
         })
 
-        if (error) setteamprevMonthEarningsAdmin('0.00')
-        else setteamprevMonthEarningsAdmin(data)
+        if (error) setteamprevMonthEarnings('0.00')
+        else setteamprevMonthEarnings(data)
 
     }
     React.useEffect(() => {

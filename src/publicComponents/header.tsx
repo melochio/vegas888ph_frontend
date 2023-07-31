@@ -688,8 +688,9 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
                 &#8369;{walletAmount === undefined ? walletBalance : walletAmount}
               </Typography>
             </Card>
-            <Button size={'medium'} variant="contained" onClick={handleWalletModal}>
+            <Button size={'medium'} variant="contained" onClick={handleWalletModal} sx={{display: 'flex', flexDirection: 'column', padding: '5px'}}>
               <AccountBalanceWalletIcon />
+              <Typography sx={{fontSize: '10px', lineHeight: 1}} variant='caption'>CASHOUT</Typography>
             </Button>
           </ButtonGroup>
           <Avatar onClick={handleAvatarClick} sx={{cursor:'pointer', margin: '0em 1em 0em 1em'}} />

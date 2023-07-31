@@ -1,6 +1,6 @@
 import supabase from "@/utils/supabase"
 import { generateReferralCode } from "@/utils/tools"
-import { createUser } from "./admin/users"
+import { createUser, hashString } from "./admin/users"
 
 type accountRegisterType ={
     referral_code: string | any,
@@ -33,20 +33,25 @@ const initial_Register: accountRegisterType = {
     user_origin: null,
 }
 const SBregisterPOST = async (formInput: accountRegisterType) => {
+    // let { data, error } = await supabase.auth.signUp({
+    //     email: formInput.email,
+    //     password: formInput.password,
+    // })
+    const response = await createUser(formInput.email, formInput.password)
+    if (response === undefined) {
+        return "failed creating user"
+    }
     const code = formInput.user_level.includes("agent") ?  await generateReferralCode():null ;
+    const hashedPassword = await hashString(formInput.password)
     const { data:usersTbl, error: usersTbl_err } = await supabase
     .from('users')
     .insert([
-        {...formInput, referral_code: code},
+        {...formInput, referral_code: code, email: formInput.email.toLowerCase(), password: hashedPassword},
     ])
     if(usersTbl_err !== null) {
         return usersTbl_err.message
     }    
 
-    const response = await createUser(formInput.email, formInput.password)
-    if (response === undefined) {
-        return "failed creating user"
-    }
     return null
 }
 const SBstreamList = async () => {    
@@ -67,6 +72,9 @@ const SBselectedStream = async (title: string) => {
         return null
     }
     return stream_configuration !== null ? stream_configuration : null
+}
+const SBDepositTo = async () => {
+    
 }
 
 export {

@@ -12,6 +12,7 @@ const register = async (formData: Model_User):Promise<any> => {
 }
 const login = async (formData: Model_User) => {
     try {
+        formData.email = formData.email.toLowerCase()
         const response = await axios.post(process.env.NEXT_PUBLIC_API_URL+'/api/bettor/login', formData, config);
         if(response !== undefined) {
             const tokenResponse = response.data

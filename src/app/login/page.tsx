@@ -23,6 +23,15 @@ const Form = () => {
     const handleLogin = async () => {
         setLoginState(true)
         const loginresponse = await login(formInput);
+        if(loginresponse === undefined){
+            Swal.fire(
+                'Failed',
+                'Invalid Credentials',
+                'error'
+            )
+            setLoginState(false)
+            return
+        }
         const token = loginresponse.token;
         localStorage.setItem('token', token);
         let { data, error } = await SBAPI.auth.signInWithPassword({
@@ -35,12 +44,12 @@ const Form = () => {
                 error?.message,
                 'error'
             )
+            setLoginState(false)
+            return
         }
-        console.log(loginresponse)
         if(data.user !== null) {
             document.location.reload()
         }
-        setLoginState(false)
     };
     return (
         <Grid container columns={12} justifyContent={'center'} minHeight={'70vh'}>

@@ -33,6 +33,14 @@ const Form = () => {
         ) {
             inputsValid = true
         }
+        if(formInput.password.length < 6) {
+            Swal.fire(
+                'Failed',
+                'Password must not be below 6 characters',
+                'error'
+            )
+            return
+        }
         if (inputsValid) {
             registerPOST()
             const response = await RegisterAPI(formInput)
@@ -92,7 +100,6 @@ const Form = () => {
             email: formInput.email,
             password: formInput.password,
         })
-        
     }
     const handleDateChange = (date:string) => {
         setFormInput({ ...formInput, bday: date });
