@@ -45,6 +45,9 @@ export default function Dashboard() {
     const [totalTeamEarnings, setTeamTotalEarnings] = React.useState('0.00')
     const [teammonthlyEarnings, setteamMonthlyEarnings] = React.useState('0.00')
     const [teamprevmonthEarnings, setteamprevMonthEarnings] = React.useState('0.00')
+    const [totalWithdrawals, setTotalWithdrawals] = React.useState('0.00')
+    const [monthWithdrawalsAdmin, setmonthWithdrawalsAdmin] = React.useState('0.00')
+    const [prevmonthWithdrawalsAdmin, setprevMonthWithdrawalsAdmin] = React.useState('0.00')
     const today = new Date();
     const thismonth = today.toLocaleString('default', { month: 'long' })
     const monthArray = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -85,6 +88,41 @@ export default function Dashboard() {
 
         if (error) setprevMonthEarningsAdmin('0.00')
         else setprevMonthEarningsAdmin(data)
+
+    }
+    const fetch_totalWithdrawals = async () => {
+        let { data, error } = await supabase
+        .rpc('admin_withdrawals')      
+        // console.log(data)
+        if (error) setTotalWithdrawals('0.00')
+        else setTotalWithdrawals(data)
+    }
+    const fetch_monthlyWithdrawalsAdmin = async () => {
+        // const oneMonthBefore = new Date(today);
+        // oneMonthBefore.setMonth(oneMonthBefore.getMonth() - 1);
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+        let { data, error } = await supabase
+        .rpc('getwithdrawalsbetweendates', {
+            end_date: formatDate(today), 
+            start_date: formatDate(firstDay), 
+            user_id: 9
+        })
+
+        if (error) setmonthWithdrawalsAdmin('0.00')
+        else setmonthWithdrawalsAdmin(data)
+    }
+    const fetch_lastmonthWithdrawals = async () => {
+        const firstDay = new Date(today.getFullYear(), today.getMonth()-1, 1);
+        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() - 1, 0);
+        let { data, error } = await supabase
+        .rpc('getwithdrawalsbetweendates', {
+        end_date: lastDayOfMonth, 
+        start_date: firstDay, 
+        user_id: 9
+        })
+
+        if (error) setprevMonthWithdrawalsAdmin('0.00')
+        else setprevMonthWithdrawalsAdmin(data)
 
     }
     const fetch_teamearnings = async () => {
@@ -131,6 +169,9 @@ export default function Dashboard() {
         fetch_teamearnings()
         fetch_teammonthlyEarnings()
         fetch_teamlastmonthPlasada()
+        fetch_totalWithdrawals()
+        fetch_monthlyWithdrawalsAdmin()
+        fetch_lastmonthWithdrawals()
     })
 
     return (
@@ -149,19 +190,28 @@ export default function Dashboard() {
                     {Cards('System Total Earnings', totalEarnings, '#3699ff')}
                 </Grid>
                 <Grid item xs={12} sm={12} md={4} style={{paddingTop:'30px'}}>
-                    {Cards('System Previous Month('+previousMonth+')', prevmonthEarningsAdmin, '#f64e60')}
+                    {Cards('System Earnings Month('+previousMonth+')', prevmonthEarningsAdmin, '#f64e60')}
                 </Grid>
                 <Grid item xs={12} sm={12} md={4} style={{paddingTop:'30px'}}>
-                    {Cards('System This Month('+thismonth+')', monthlyEarningsAdmin, '#1bc5bd')}
+                    {Cards('System Earnings Month('+thismonth+')', monthlyEarningsAdmin, '#1bc5bd')}
                 </Grid>
                 <Grid item xs={12} sm={12} md={4} style={{paddingTop:'30px'}}>
                     {Cards('Team Total Earnings', totalTeamEarnings, '#3699ff')}
                 </Grid> 
                 <Grid item xs={12} sm={12} md={4} style={{paddingTop:'30px'}}>
-                    {Cards('Team Previous Month('+previousMonth+')', teamprevmonthEarnings, '#f64e60')}
+                    {Cards('Team Earnings Month('+previousMonth+')', teamprevmonthEarnings, '#f64e60')}
                 </Grid>
                 <Grid item xs={12} sm={12} md={4} style={{paddingTop:'30px'}}>
-                    {Cards('Team This Month('+thismonth+')', teammonthlyEarnings, '#1bc5bd')}
+                    {Cards('Team Earnings Month('+thismonth+')', teammonthlyEarnings, '#1bc5bd')}
+                </Grid> 
+                <Grid item xs={12} sm={12} md={4} style={{paddingTop:'30px'}}>
+                    {Cards('Total Withdrawals', totalWithdrawals, '#3699ff')}
+                </Grid> 
+                <Grid item xs={12} sm={12} md={4} style={{paddingTop:'30px'}}>
+                    {Cards('Withdrawals Month('+previousMonth+')', prevmonthWithdrawalsAdmin, '#f64e60')}
+                </Grid>
+                <Grid item xs={12} sm={12} md={4} style={{paddingTop:'30px'}}>
+                    {Cards('Withdrawals Month('+thismonth+')', monthWithdrawalsAdmin, '#1bc5bd')}
                 </Grid> 
             </Grid>
         </Container>

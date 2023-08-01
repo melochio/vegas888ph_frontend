@@ -10,6 +10,7 @@ import Card from '@mui/joy/Card';
 import router from 'next/router';
 
 import userMiddleware from '@/utils/middleware';
+import supabase from '@/utils/supabase';
 interface User {
     // id: number;
     name: string;
@@ -18,15 +19,18 @@ interface User {
 
 const UserTable: React.FC = () => {
     const [request, setRequest] = React.useState<User[]>([]);
-
+    const fetchWithdrawals = async () => {
+        let { data: withdraw_requests, error } = await supabase
+        .from('withdraw_requests')
+        .select('*')
+        .eq('status', 'REQUEST')
+        if (withdraw_requests) {
+            setRequest(withdraw_requests)
+        }
+    }
     useEffect(() => {
         userMiddleware() 
-        getRequestWithdrawal(['bettor','agent'])
-            .then((res) => {
-                setRequest(res)
-                console.log(res)
-            })
-            .catch((error) => console.error('Error fetching users:', error));
+        fetchWithdrawals()
     }, []);
     const handleApproveRequest = (requestId: any, requesteeId: any, amount: any, name: any) => {
         Swal.fire({
@@ -85,7 +89,10 @@ const UserTable: React.FC = () => {
     }
     const columns: GridColDef[] = [
         { field: 'id', headerName: 'ID', flex: 1 },
-        { field: 'firstName', headerName: 'Name', flex: 1 },
+        { field: 'transaction_type', headerName: 'Transaction Type', flex: 1 },
+        { field: 'firstName', headerName: 'Account Holder', flex: 1 },
+        { field: 'phoneNo', headerName: 'Account Number(Phone No - Pera Padala)', flex: 1 },
+        { field: 'address', headerName: 'Address (Pera Padala)', flex: 1 },
         { field: 'request_amount', headerName: 'Request Amount', flex: 1 },
         {
             field: 'isActive',

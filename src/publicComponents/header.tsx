@@ -63,8 +63,11 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
         .from('chats')
         .select('*')
         .order('id', {ascending: false})
+        .eq('sender', user?.id)
+        .eq('recipient', user?.id)
         if(chats !== null) {
           setMessages(chats)
+          console.log()
         }
       }
     }
@@ -135,45 +138,48 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
       formInput.transaction_type = cashout === "GCASH" ? cashout : cashout === "PERA_PADALA" ? cashout : formData.get('transaction_type');
       // const response = await RequestWithdrawal(formInput)
 
-        const { data: { user } } = await SBAPI.auth.getUser()
-        let { data: users, error } = await SBAPI
-          .from('users')
-          .select('*')
-          .eq('email', user?.email)
-          if(users !== null) {
-            const { data:withdraw_data, error: withdraw_error } = await SBAPI
-            .from('withdraw_requests')
-            .insert({
-              status: "REQUEST",
-              userId: users[0].id,
-              firstName: formInput.firstName,
-              email: formInput.email,
-              phoneNo: formInput.phoneNo,
-              request_amount: formInput.request_amount,
-            })
-            const { data:deposit_to_data, error: deposit_to_error } = await SBAPI
-            .from('wallets')
-            .insert({
-              amount: formInput.request_amount * -1,
-              createdById: users[0].id, 
-              userId: users[0].id,
-              sentTo: users[0].user_origin,
-              remarks: '', 
-              type: "DEPOSIT"
-            })
-            const { data:receivedfrom_data, error: receivedfrom_error } = await SBAPI
-            .from('wallets')
-            .insert({
-              amount: formInput.request_amount,
-              createdById: users[0].id, 
-              userId: users[0].user_origin,
-              receivedFrom: users[0].id,
-              remarks: '', 
-              type: "RECEIVED",
-            })
-            
-          }
-      if(error !== null) {
+      const { data: { user } } = await SBAPI.auth.getUser()
+      let { data: users, error } = await SBAPI
+        .from('users')
+        .select('*')
+        .eq('email', user?.email)
+        if(users !== null) {
+          const { data:withdraw_data, error: withdraw_error } = await SBAPI
+          .from('withdraw_requests')
+          .insert({
+            status: "REQUEST",
+            userId: users[0].id,
+            firstName: formInput.firstName,
+            email: formInput.email,
+            phoneNo: formInput.phoneNo,
+            request_amount: formInput.request_amount,
+            approvedById: users[0].user_origin,
+            transaction_type: formInput.transaction_type,
+          })
+          // const { data:deposit_to_data, error: deposit_to_error } = await SBAPI
+          // .from('wallets')
+          // .insert({
+          //   amount: formInput.request_amount * -1,
+          //   createdById: users[0].id, 
+          //   userId: users[0].id,
+          //   sentTo: users[0].user_origin === null ? 9 : users[0].user_origin,
+          //   remarks: '', 
+          //   type: "DEPOSIT"
+          // })
+
+          // const { data:receivedfrom_data, error: receivedfrom_error } = await SBAPI
+          // .from('wallets')
+          // .insert({
+          //   amount: formInput.request_amount,
+          //   createdById: users[0].id, 
+          //   userId: users[0].user_origin === null ? 9 : users[0].user_origin,
+          //   receivedFrom: users[0].id,
+          //   remarks: '', 
+          //   type: "RECEIVED",
+          // })
+          
+        }
+      if(users) {
         Swal.fire('Success', 'Your withdrawal request has been successfully sent to your agent', 'success')
       } else {
         Swal.fire('Failed', 'Something went wrong while submitting your withdrawal request, Please try again after refreshing the page.', 'error')
@@ -199,7 +205,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
                 />
                 <TextField
                   label="Account Holder"
-                  name='firstname'
+                  name='firstName'
                   variant="outlined"
                   size={'small'}
                   sx={{margin: '0.5em 0em'}}
@@ -249,7 +255,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
             <div id="modal-description">
                 <TextField
                   label="Name"
-                  name='firstname'
+                  name='firstName'
                   variant="outlined"
                   sx={{margin: '0.5em 0em'}}
                   size={'small'}
@@ -308,7 +314,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
             <div id="modal-description">
                 <TextField
                   label="GCASH Name"
-                  name='firstname'
+                  name='firstName'
                   variant="outlined"
                   sx={{margin: '0.5em 0em'}}
                   size={'small'}

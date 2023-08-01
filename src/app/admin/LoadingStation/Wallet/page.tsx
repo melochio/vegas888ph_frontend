@@ -68,6 +68,7 @@ export default function Wallet() {
             const _name = data?.name
             const _total_wallet_balance = data?.total_wallet_balance
             const memberData = {id: data?.id, player_name: _player_name, name: _name, total_wallet_balance: _total_wallet_balance };
+            setFormInput({ ...formInput, receiverId: data?.id })
             setMemberDetails(memberData);
         }
         setFormInput({ ...formInput, [event.currentTarget.name]: event.currentTarget.value })
@@ -145,15 +146,16 @@ export default function Wallet() {
             // Check if the user is authenticated and has an email
             if (user && user.email) {
               // Fetch the data table records that match the user's email
-              const { data: userData, error } = await supabase
-                .from('data')
-                .select('*')
-                .eq('email', user.email);
-                if(userData){
-                    const depositResponse = await SBDepositTo(userData[0]?.id, null, memberDetails.id, formInput.transactionDetails, formInput.amount)
-                    // const response = await transferWalletApi(formInput)
+            //   const { data: userData, error } = await supabase
+            //     .from('data')
+            //     .select('*')
+            //     .eq('email', user.email);
+            //     if(userData){
+                    // const depositResponse = await SBDepositTo(userData[0]?.id, null, memberDetails.id, formInput.transactionDetails, formInput.amount)
+                    // const depositResponse = await transferWalletApi(formInput)
+                    const response = await transferWalletApi(formInput)
                     // console.log('response', response)
-                    if (depositResponse === null) {
+                    if (response === null) {
                         Swal.fire(
                             'Success',
                         ) 
@@ -161,11 +163,11 @@ export default function Wallet() {
                     } else {
                         Swal.fire(
                             'Failed',
-                            depositResponse,
+                            response,
                             'error'
                         )
                     }
-                }
+                // }
             }
 
         } else {

@@ -72,17 +72,17 @@ const Categories = () => {
                             cursor: 'pointer',
                             border: 'solid 3px '+ colors.gold,
                             borderRadius: '50%',
-                            minHeight: '130px',
-                            minWidth: '130px',
+                            minHeight: '100px',
+                            minWidth: '100px',
                             margin: '0rem 1rem',
                             backgroundColor: val.isActive ? '#4f4f4fa3' : 'transparent',
-                            transform: 'scale(0.9)',
+                            transform: 'scale(0.8)',
                             '&:hover':{
-                                transform: 'scale(1.1)'
+                                transform: 'scale(1)'
                             }
                         }}>
                             <val.icon />
-                            <Typography level="h2" fontSize="lg" textColor="#fff">
+                            <Typography level="h2" fontSize="sm" textColor="#fff">
                                 {val.title}
                             </Typography>
                         </Grid>
