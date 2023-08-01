@@ -58,16 +58,15 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
       }
     }
     const fetchMessages = async () => {
-      if(fetchUserData !== undefined) {
-        let { data: chats, error } = await SBAPI
+      const currentuser = await fetchUserData();
+      if (currentuser !== undefined) {
+        let { data, error } = await SBAPI
         .from('chats')
         .select('*')
-        .order('id', {ascending: false})
-        .eq('sender', user?.id)
-        .eq('recipient', user?.id)
-        if(chats !== null) {
-          setMessages(chats)
-          console.log()
+        .or(`sender.eq.${currentuser.id},recipient.eq.${currentuser.id}`)
+        .order('created_at', {ascending: false})
+        if(data !== null) {
+          setMessages(data)
         }
       }
     }

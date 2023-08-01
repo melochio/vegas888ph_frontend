@@ -121,6 +121,9 @@ export default function RootLayout({
     else if (target == 'Withdrawal Requests') {
       router.push('/admin/LoadingStation/WithdrawalRequests');    
     }
+    else if (target == 'Messages') {
+      router.push('/admin/Support/Messages');    
+    }
   } 
   const [anchorEl, setAnchorEl] = React.useState<HTMLDivElement | null>(null);
   const handleAvatarClick = (event: React.MouseEvent<HTMLDivElement>) => {
