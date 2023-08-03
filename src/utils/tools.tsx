@@ -30,7 +30,18 @@ const formatDate = (date: Date) => {
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 };
+const stringToShortDate = (date : Date) => {
+  const formattedDateTime = new Date(date).toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+  return formattedDateTime
+}
 export {
     generateReferralCode,
-    formatDate
+    formatDate,
+    stringToShortDate
 }

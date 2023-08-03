@@ -92,8 +92,15 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'chats' },
       (payload:any) => {
-        console.log('Change received on chat!', payload)
         fetchMessages()
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'withdraw_requests' },
+      (payload:any) => {
+        fetchUserData()
+        fetchBalance()
       }
     )
     .subscribe()
@@ -249,7 +256,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
   const PadalaComponent = () => {
     return (
       <div>
-          <h2 id="modal-title">Bank Transfer Form</h2>
+          <h2 id="modal-title">Remittance Form</h2>
           <form onSubmit={handleSubmitWithdrawal} ref={formRef}>
             <div id="modal-description">
                 <TextField
@@ -308,7 +315,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
   const GcashComponent = () => {
     return (
       <div>
-          <h2 id="modal-title">Bank Transfer Form</h2>
+          <h2 id="modal-title">GCASH Transfer Form</h2>
           <form onSubmit={handleSubmitWithdrawal} ref={formRef}>
             <div id="modal-description">
                 <TextField
@@ -595,7 +602,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
       const { data, error } = await SBAPI
       .from('chats')
       .insert([
-        { text: text, sender: user?.id, recipient: 'admin'},
+        { text: text, sender: user?.id, recipient: 9},
       ])
     }
     const handleSendMessage = () => {
