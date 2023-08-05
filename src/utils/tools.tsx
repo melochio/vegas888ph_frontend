@@ -1,4 +1,5 @@
 import supabase from "./supabase";
+import supabase from "./supabase";
 
 const checkReferralValidity = async (code: string) => {    
     let { data: users, error } = await supabase
