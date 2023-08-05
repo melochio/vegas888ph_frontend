@@ -13,10 +13,11 @@ import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import axios from "axios";
+import { SBregisterPOST, accountRegisterType, initial_Register } from '@/api/supabaseAPI';
 
 export default function Accounts() {
 
-    const [formInput, setFormInput] = React.useState<Model_User>(initialUser)
+    const [formInput, setFormInput] = React.useState<accountRegisterType>(initial_Register)
     const [editUser, setEditUser] = React.useState(false)
     const commissionList = [
         {value: '0.6', text: '6%'},
@@ -279,18 +280,17 @@ export default function Accounts() {
             }
         }
         if (inputsValid) {
-            const response = await createUser(formInput)
-            console.log('response', response)
-            if (response.status == 200) {
+            const err = await SBregisterPOST(formInput, user?.id)
+            if (err === null) {
+                fetchData();
                 Swal.fire(
                     'Success',
                 )
-                fetchData();
                 // location.href = '/admin/Setup/Account'
             } else {
                 Swal.fire(
                     'Failed',
-                    response.data,
+                    err,
                     'error'
                 )
             }

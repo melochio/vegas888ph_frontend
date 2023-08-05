@@ -37,6 +37,17 @@ const SBregisterPOST = async (formInput: accountRegisterType, user_origin?: numb
     //     email: formInput.email,
     //     password: formInput.password,
     // })
+    
+    let { data: users, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('email', formInput.email.toLowerCase())
+    if(users != null) {
+        if (users.length > 0) {
+            return "Email is already in use"
+        }
+    }
+
     const response = await createUser(formInput.email, formInput.password)
     if (response === undefined) {
         return "failed creating user"
