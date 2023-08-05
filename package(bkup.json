@@ -1,0 +1,46 @@
+{
+  "name": "frontend",
+  "version": "0.1.0",
+  "homepage": "https://melochio.github.io/vegas888ph_frontend/",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start --port 80",
+    "lint": "next lint",
+    "deploy": "next build && next export && npx gh-pages -d out"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@fontsource/public-sans": "^5.0.5",
+    "@mui/icons-material": "^5.14.1",
+    "@mui/joy": "^5.0.0-alpha.87",
+    "@mui/lab": "^5.0.0-alpha.136",
+    "@mui/material": "^5.14.1",
+    "@mui/x-data-grid": "^6.10.1",
+    "@mui/x-date-pickers": "^6.10.1",
+    "@mux/mux-player-react": "^1.11.4",
+    "@types/node": "20.4.2",
+    "@types/react": "18.2.15",
+    "@types/react-dom": "18.2.7",
+    "axios": "^1.4.0",
+    "date-fns": "^2.30.0",
+    "dayjs": "^1.11.9",
+    "laravel-echo": "^1.15.2",
+    "next": "13.4.10",
+    "pusher-js": "^8.3.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "socket.io-client": "^4.7.1",
+    "sweetalert2": "^11.7.18",
+    "typescript": "5.1.6"
+  },
+  "devDependencies": {
+    "gh-pages": "^5.0.0"
+  },
+  "description": "This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).",
+  "main": "next.config.js",
+  "author": "",
+  "license": "ISC"
+}

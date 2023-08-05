@@ -1,0 +1,14 @@
+@keyframes example {
+    0% {
+      color: #216fbd; /* Initial color */
+    }
+    50% {
+      color: #7897b6; /* Target color */
+    }
+    100% {
+      color: #216fbd; /* Back to the initial color */
+    }
+}
+.playbutton {
+    animation: example 2s infinite;
+}
