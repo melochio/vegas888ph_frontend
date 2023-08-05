@@ -23,6 +23,7 @@ import Swal from 'sweetalert2';
 import { DataGrid } from '@mui/x-data-grid';
 import SBAPI from '@utils/supabase'
 import userMiddleware from '@/utils/middleware';
+import { stringToShortDate } from '@/utils/tools';
 
 interface LoggedHeaderProps {}
 const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
@@ -414,7 +415,8 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
     id: number,
     amount: number,
     type: string,
-    datetime: string,
+    datetime: Date,
+    remarks: string
   }
 
   interface TransactionHistoryModalProps {
@@ -423,13 +425,17 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
     onClose: () => void;
   }
   const columns = [
-    { field: 'type', headerName: 'Type', width: 150 },
+    { field: 'datetime', headerName: 'Datetime', width: 200,
+    valueGetter: (params:any) => {
+      return stringToShortDate(params.row.datetime);
+    }, },
     { field: 'amount', headerName: 'Amount', width: 150 },
-    { field: 'datetime', headerName: 'Datetime', width: 200 },
+    { field: 'type', headerName: 'Type', width: 150},
+    { field: 'remarks', headerName: 'Remarks', width: 350 },
   ];
-  const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = ({ open, transactions, onClose }) => {
+  const TransactionHistoryModal = ({ open, transactions, onClose }: {open: boolean, transactions: Transaction[], onClose: () => void}) => {
     // const rows = transactions.map((transaction, index) => ({ id: index, ...transaction }));
-  
+    console.log(transactions)
     return (
       <Modal open={open} onClose={onClose}>
         <Box
@@ -447,10 +453,9 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
           <DataGrid
             rows={transactions}
             columns={columns}
-            autoHeight
             disableRowSelectionOnClick
-            autoPageSize
             checkboxSelection={false}
+            sx={{maxHeight: '40vh'}}
           />
           <Button onClick={onClose} variant="contained" color="secondary" sx={{ mt: 2 }}>
             Close
@@ -563,15 +568,29 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
   const [transactionsData, setTransactionsData] = useState<Transaction[]>([])
   const handleOpenModal = () => {
     const fetch = async () => {
-      const response = await TransactionList();
-      if(response !== undefined) {
-        const responseData= response.data
-        let list: Transaction[] = []
-        responseData.map((val: any, index: number) => {
-          list.push({id: index, type: val.type, amount: val.amount, datetime: val.created_at})
-        })
-        setTransactionsData(list)
-      }
+      let { data: wallets, error } = await SBAPI
+        .from('wallets')
+        .select('*')
+        .eq('userId', user?.id)  
+        if(wallets !== null) {
+          let list: Transaction[] = []
+          wallets.map((val: any, index: number) => {
+            list.push({id: index, type: val.type, amount: val.amount, datetime:  new Date(val.created_at), remarks: val.remarks})
+          })
+          list.sort((a, b) => {
+            return (b.datetime as Date).getTime() - (a.datetime as Date).getTime();
+          });
+          setTransactionsData(list)
+        }    
+      // const response = await TransactionList();
+      // if(response !== undefined) {
+      //   const responseData= response.data
+      //   let list: Transaction[] = []
+      //   responseData.map((val: any, index: number) => {
+      //     list.push({id: index, type: val.type, amount: val.amount, datetime: val.created_at})
+      //   })
+      //   setTransactionsData(list)
+      // }
     }
     fetch()
     setIsModalOpen(true);

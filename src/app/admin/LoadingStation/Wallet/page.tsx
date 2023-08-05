@@ -60,16 +60,21 @@ export default function Wallet() {
     };
 
     // const getUser()
+    const [selectedId, setSelectedId] = React.useState(0)
     const handleInput = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
         
+        const data = userlist.find((user) => user.name === event.currentTarget.value);
         if (event.currentTarget.name == 'requestee') {
-            const data = userlist.find((user) => user.name === event.currentTarget.value);
+            console.log(data?.id)
             const _player_name = data?.player_name
             const _name = data?.name
             const _total_wallet_balance = data?.total_wallet_balance
             const memberData = {id: data?.id, player_name: _player_name, name: _name, total_wallet_balance: _total_wallet_balance };
-            setFormInput({ ...formInput, receiverId: data?.id })
+            setFormInput({ ...formInput, requesteeId: data?.id })
             setMemberDetails(memberData);
+            setSelectedId(data?.id)
+            console.log(memberData)
+            console.log(formInput)
         }
         setFormInput({ ...formInput, [event.currentTarget.name]: event.currentTarget.value })
     }
@@ -153,9 +158,11 @@ export default function Wallet() {
             //     if(userData){
                     // const depositResponse = await SBDepositTo(userData[0]?.id, null, memberDetails.id, formInput.transactionDetails, formInput.amount)
                     // const depositResponse = await transferWalletApi(formInput)
-                    const response = await transferWalletApi(formInput)
+                    let newforminput = formInput
+                    newforminput.requesteeId = selectedId
+                    const response = await transferWalletApi(newforminput)
                     // console.log('response', response)
-                    if (response === null) {
+                    if (response.data === "success") {
                         Swal.fire(
                             'Success',
                         ) 

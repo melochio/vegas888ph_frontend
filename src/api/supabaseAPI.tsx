@@ -37,11 +37,12 @@ const SBregisterPOST = async (formInput: accountRegisterType, user_origin?: numb
     //     email: formInput.email,
     //     password: formInput.password,
     // })
-    
+    let loweredEmail = formInput.email
+    loweredEmail = loweredEmail.toLowerCase()
     let { data: users, error } = await supabase
     .from('users')
     .select('*')
-    .eq('email', formInput.email.toLowerCase())
+    .eq('email', loweredEmail)
     if(users != null) {
         if (users.length > 0) {
             return "Email is already in use"
@@ -57,7 +58,7 @@ const SBregisterPOST = async (formInput: accountRegisterType, user_origin?: numb
     const { data:usersTbl, error: usersTbl_err } = await supabase
     .from('users')
     .insert([
-        {...formInput, referral_code: code, email: formInput.email.toLowerCase(), password: hashedPassword, user_origin: user_origin !== undefined && user_origin},
+        {...formInput, referral_code: code, email: loweredEmail, password: hashedPassword, user_origin: user_origin !== undefined && user_origin},
     ])
     if(usersTbl_err !== null) {
         return usersTbl_err.message

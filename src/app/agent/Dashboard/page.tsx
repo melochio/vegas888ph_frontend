@@ -11,6 +11,7 @@ import React from "react";
 import { GetMyBalance } from "@/api/bettor/wallet";
 import { getEarnings } from "@/api/agent/wallet";  
 import userMiddleware from '@/utils/middleware';
+import supabase from '@/utils/supabase';
 
 export default function Dashboard() {
     const [user, setUser] = React.useState<UserModel_Hidden>()
@@ -22,13 +23,22 @@ export default function Dashboard() {
     useEffect(() => {
         userMiddleware()
         const fetchUserData = async () => {
-            const response = await fetchUser()
-            if (response !== undefined) {
-                const userResponse: UserModel_Hidden = response
-                setUser(userResponse)
-            } else {
-                // document.location.href = "/login"
+            const { data: { user } } = await supabase.auth.getUser()
+            let { data: users, error } = await supabase
+              .from('users')
+              .select('*')
+              .eq('email', user?.email)
+            
+            if(users !== null) {
+                setUser(users[0])
             }
+            // const response = await fetchUser()
+            // if (response !== undefined) {
+            //     const userResponse: UserModel_Hidden = response
+            //     setUser(userResponse)
+            // } else {
+            //     // document.location.href = "/login"
+            // }
         }
         const fetchEarnings = async () => {
             const response = await getEarnings()

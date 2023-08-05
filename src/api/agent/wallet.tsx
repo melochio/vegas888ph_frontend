@@ -17,13 +17,8 @@ const transferWalletApi = async (data: any): Promise<string | any> => {
   //     alert('Invalid account details')
   //     return "Invalid account details";
   // }
-  const transferResponse = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/agent/transfer', {
-    transactionDetails: data.transactionDetails,
-    amount: data.amount,
-    password: data.password,
-    requestee: data.requestee,
-    type: data.type
-  }, config)
+  console.log(data)
+  const transferResponse = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/agent/transfer', data, config)
   return transferResponse
 }
 

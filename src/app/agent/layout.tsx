@@ -39,6 +39,8 @@ import userMiddleware from '@/utils/middleware';
 import supabase from '@/utils/supabase';
 import Footer from '@/publicComponents/footer'
 import { Height } from '@mui/icons-material';
+import { logout } from '@/api/bettor/auth';
+import { UserModel_Hidden } from '@/models/users';
 // const drawerWidth = 240;
 const drawerWidth = 240;
 
@@ -124,11 +126,33 @@ export default function RootLayout({
   //     // setUserList([]); // Set an empty array if there's an error or no data
   //   }
   // };
+    const fetchUserData = async (): Promise <UserModel_Hidden| undefined> => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        let { data: users, error } = await supabase
+          .from('users')
+          .select('*')
+          .eq('email', user?.email)
+          if(users !== null) {
+            setUser(users[0])
+            return users[0]
+          }
+      } catch {
+      }
+    }
   React.useEffect(() => {
     const fetchBalance = async () => {
-      const response = await GetMyBalance();
-      setwalletAmount(response?.data);
-      localStorage.setItem('wallet_amount', response?.data)
+      const currentuser = await fetchUserData();
+      if (currentuser !== undefined) {
+        let { data: getwalletbalance, error } = await supabase
+        .from('getwalletbalance')
+        .select('*')
+        .eq('id', currentuser.id)
+        // console.log(getwalletbalance)
+        if(getwalletbalance !== null) {
+            setwalletAmount(getwalletbalance[0].wallet_amount !== null ? getwalletbalance[0].wallet_amount : 0.00)
+        }
+      }
     }
     fetchBalance()
     // fetchWallet();
@@ -217,17 +241,10 @@ export default function RootLayout({
     setAnchorEl(null);
     try {
       let { error } = await supabase.auth.signOut()
-
-      // const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/logout', null, {
-      //   withCredentials: true,
-      //   headers: {
-      //     'Authorization': 'Bearer ' + localStorage.getItem('token')
-      //   }
-      // });
-      if (error) {
+        await logout()
         document.location.href = '/login'
-      }
     } catch (err) {
+      document.location.href = '/login' 
     }
   }
 

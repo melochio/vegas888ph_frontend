@@ -53,27 +53,46 @@ export default function Dashboard() {
     const monthArray = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const previousMonth = monthArray.indexOf(thismonth) === 0 ? monthArray[11] : monthArray[monthArray.indexOf(thismonth) - 1];
     const fetch_totalearnings = async () => {
+        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
         let { data, error } = await supabase
-        .rpc('admin_earnings')      
-        // console.log(data)
-        if (error) return '0.00'
-        else {
-            setTotalEarnings(data)
-        }
+          .rpc('admin_earnings', {
+            end_date: formatDate(today), 
+            start_date: formatDate(firstDay), 
+          })
+        
+        if (error) setTotalEarnings('0.00')
+        else setTotalEarnings(data)
+
+        // let { data, error } = await supabase
+        // .rpc('admin_earnings')      
+        // // console.log(data)
+        // if (error) return '0.00'
+        // else {
+        //     setTotalEarnings(data)
+        // }
     }
     const fetch_monthlyEarningsAdmin = async () => {
         // const oneMonthBefore = new Date(today);
         // oneMonthBefore.setMonth(oneMonthBefore.getMonth() - 1);
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
         let { data, error } = await supabase
-        .rpc('getbalancebetween', {
+          .rpc('admin_earnings', {
             end_date: formatDate(today), 
             start_date: formatDate(firstDay), 
-            user_id: 9
-        })
-
+          })
+        
         if (error) setMonthlyEarningsAdmin('0.00')
         else setMonthlyEarningsAdmin(data)
+        
+        // let { data, error } = await supabase
+        // .rpc('getbalancebetween', {
+        //     end_date: formatDate(today), 
+        //     start_date: formatDate(firstDay), 
+        //     user_id: 9
+        // })
+
+        // if (error) setMonthlyEarningsAdmin('0.00')
+        // else setMonthlyEarningsAdmin(data)
 
     }
     const fetch_lastmonthPlasada = async () => {
