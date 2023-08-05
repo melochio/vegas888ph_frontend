@@ -64,29 +64,38 @@ export default function Declarator() {
             reverseButtons: true,
         }).then(async (result) =>{
             if(result.isConfirmed){ 
-                distributeCommissions(status, currentGameState.id)
-                // const { data: setStatusdata, error: setStatuserror } = await SBAPI
-                // .from('sabong_histories')
-                // .update({ 'result': status })
-                // .eq('id', currentGameState.id)
+                
+
+                // distributeCommissions(status, currentGameState.id)
+                const { data: setStatusdata, error: setStatuserror } = await SBAPI
+                .from('sabong_histories')
+                .update({ 'result': status })
+                .eq('id', currentGameState.id)
      
-                // let { data, error } = await SBAPI
-                // .rpc('calculate_game_stats', {
-                //     game_id:currentGameState.id,
-                // })
-                // if (error) console.error(error)
-                // else console.log(data)
+                let { data, error } = await SBAPI
+                .rpc('calculate_game_stats', {
+                    game_id:currentGameState.id,
+                })
+                if (error) console.error(error)
+                else console.log(data)
 
-                // if(status === "DRAW" || status === "FAILED"){                    
-                //     let { data, error } = await SBAPI
-                //     .rpc('cancel_game_transaction', {
-                //         game_id: currentGameState.id
-                //     })
+                if(status === "DRAW" || status === "FAILED"){                    
+                    let { data, error } = await SBAPI
+                    .rpc('cancel_game_transaction', {
+                        game_id: currentGameState.id
+                    })
 
-                //     if (error) console.error(error)
-                //     else console.log(data)
+                    if (error) console.error(error)
+                    else console.log(data)
 
-                // }
+                }
+                let { data: process_data, error: process_error } = await SBAPI
+                .rpc('process_game_results', {
+                    game_id : currentGameState.id,
+                })
+
+                if (error) console.error(error)
+                else console.log(data)
                 // if(status === "MERON" || status === "WALA") {
                 //     await updateGameResult(currentGameState.id, status)
                 // }

@@ -32,7 +32,7 @@ const initial_Register: accountRegisterType = {
     isActive: null,
     user_origin: null,
 }
-const SBregisterPOST = async (formInput: accountRegisterType) => {
+const SBregisterPOST = async (formInput: accountRegisterType, user_origin?: number | null) => {
     // let { data, error } = await supabase.auth.signUp({
     //     email: formInput.email,
     //     password: formInput.password,
@@ -46,7 +46,7 @@ const SBregisterPOST = async (formInput: accountRegisterType) => {
     const { data:usersTbl, error: usersTbl_err } = await supabase
     .from('users')
     .insert([
-        {...formInput, referral_code: code, email: formInput.email.toLowerCase(), password: hashedPassword},
+        {...formInput, referral_code: code, email: formInput.email.toLowerCase(), password: hashedPassword, user_origin: user_origin !== undefined && user_origin},
     ])
     if(usersTbl_err !== null) {
         return usersTbl_err.message

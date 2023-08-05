@@ -13,10 +13,11 @@ import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import axios from "axios";
+import { SBregisterPOST, accountRegisterType } from '@/api/supabaseAPI';
 
 export default function Accounts() {
 
-    const [formInput, setFormInput] = React.useState<Model_User>(initialUser)
+    const [formInput, setFormInput] = React.useState<accountRegisterType>(initialUser)
     const [editUser, setEditUser] = React.useState(false)
 
 
@@ -69,7 +70,7 @@ export default function Accounts() {
             renderCell: (params: { row: { form: any; commission: any; }; }) => {
                 // const userId = params.row.id;
                 const form = params.row;
-                const commission = params.row.commission * 100 + '%';
+                const commission = (params.row.commission * 100).toFixed(1) + '%';
 
                 return (
                     <>
@@ -107,7 +108,7 @@ export default function Accounts() {
                                     name="commission"
                                 >
                                     <option value="" disabled>Select an option</option>
-                                    {['8%', '9%'].map((option) => (
+                                    {['3%','3.5%','4%','4.5%','5%','5.5%','6%','6.5%','7%','7.5%','8%'].map((option) => (
                                         <option key={option} value={option}>
                                             {option}
                                         </option>
@@ -268,19 +269,19 @@ export default function Accounts() {
                 }
             }
         }
+        
         if (inputsValid) {
-            const response = await createUser(formInput)
-            console.log('response', response)
-            if (response.status == 200) {
+            const err = await SBregisterPOST(formInput)
+            if (err === null) {
+                fetchData();
                 Swal.fire(
                     'Success',
                 )
-                fetchData();
                 // location.href = '/admin/Setup/Account'
             } else {
                 Swal.fire(
                     'Failed',
-                    response.data,
+                    err,
                     'error'
                 )
             }
@@ -291,6 +292,29 @@ export default function Accounts() {
                 'error'
             )
         }
+        // if (inputsValid) {
+        //     const response = await createUser(formInput)
+        //     console.log('response', response)
+        //     if (response.status == 200) {
+        //         Swal.fire(
+        //             'Success',
+        //         )
+        //         fetchData();
+        //         // location.href = '/admin/Setup/Account'
+        //     } else {
+        //         Swal.fire(
+        //             'Failed',
+        //             response.data,
+        //             'error'
+        //         )
+        //     }
+        // } else {
+        //     Swal.fire(
+        //         'Failed',
+        //         'Invalid Details Entered',
+        //         'error'
+        //     )
+        // }
         const columns: GridColDef[] = [
             { field: 'PlayerName', headerName: 'Player name', width: 130 },
         ];
@@ -335,7 +359,7 @@ export default function Accounts() {
                             </Grid>
                             <Grid item xs={12} sm={6} md={6}>
                                 <div className="form-group" style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
-                                    <label htmlFor="selectInput" className="form-label">User Type {user?.user_level}</label>
+                                    <label htmlFor="selectInput" className="form-label">User Type</label>
                                     <select
                                         className="form-control"
                                         id="selectInput"
@@ -350,7 +374,7 @@ export default function Accounts() {
                                             user?.user_level == 'master agent' ?
                                                 ['agent', 'bettor'].map((option) => (
                                                     <option key={option} value={option}>
-                                                        {option}{user?.user_level}
+                                                        {option}
                                                     </option>
                                                 ))
                                                 :
@@ -431,7 +455,7 @@ export default function Accounts() {
                                                 name="commission"
                                             >
                                                 <option value="" disabled>Select an option</option>
-                                                {['8%', '9%'].map((option) => (
+                                                {['3%','3.5%','4%','4.5%','5%','5.5%','6%','6.5%','7%','7.5%','8%'].map((option) => (
                                                     <option key={option} value={option}>
                                                         {option}
                                                     </option>
