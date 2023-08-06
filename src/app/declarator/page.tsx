@@ -64,8 +64,6 @@ export default function Declarator() {
             reverseButtons: true,
         }).then(async (result) =>{
             if(result.isConfirmed){ 
-                
-
                 // distributeCommissions(status, currentGameState.id)
                 const { data: setStatusdata, error: setStatuserror } = await SBAPI
                 .from('sabong_histories')
@@ -87,18 +85,17 @@ export default function Declarator() {
 
                     if (error) console.error(error)
                     else console.log(data)
-
                 }
-                let { data: process_data, error: process_error } = await SBAPI
-                .rpc('process_game_results', {
-                    game_id : currentGameState.id,
-                })
+                if(status === "MERON" || status === "WALA") {
+                    await updateGameResult(currentGameState.id, status)
+                }
+                // let { data: process_data, error: process_error } = await SBAPI
+                // .rpc('process_game_results', {
+                //     game_id : currentGameState.id,
+                // })
 
-                if (error) console.error(error)
-                else console.log(data)
-                // if(status === "MERON" || status === "WALA") {
-                //     await updateGameResult(currentGameState.id, status)
-                // }
+                // if (error) console.error(error)
+                // else console.log(data)
             }
         })
     }
@@ -136,7 +133,7 @@ export default function Declarator() {
         .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
         .order('id', { ascending: true })
         if(data !== null) {
-            setStreamData(data[0])
+            data[0] && setStreamData(data[0])
         }
     }
     const fetchCurrentGame = async () => {
@@ -146,7 +143,7 @@ export default function Declarator() {
         .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
         .order('id', { ascending: true })
         if(data !== null) {
-            setCurrentGameState(data[0])
+            data[0] && setCurrentGameState(data[0])
         }
     }
     React.useEffect(() => {
@@ -170,14 +167,14 @@ export default function Declarator() {
     }, [])
     const LiveStreamComponent = () => {
         return (
-            <Grid container columns={12}>
-              <Grid item xs sm md lg className={'frameContainer'}>
-                  <iframe id="ifvideo"style={{minHeight: '100%', minWidth: '99.8%'}} allowFullScreen={true}
-                      src="">
-                  </iframe>
-                  {/* <ReactPlayer url={streamData.streamID} controls style={{minHeight: '100%', minWidth: '99.8%'}} /> */}
-              </Grid>
-          </Grid>
+          <Grid container columns={12}>
+            <Grid item xs sm md lg className={'frameContainer'}>
+                <iframe id="ifvideo" style={{backgroundColor: 'gray', minHeight: '100%', minWidth: '99%'}} allowFullScreen={true}
+                    src={streamData.streamID}>
+                </iframe>
+                {/* <ReactPlayer url={streamData.streamID} controls style={{minHeight: '100%', minWidth: '99.8%'}} /> */}
+            </Grid>
+        </Grid>
         );
     };
     

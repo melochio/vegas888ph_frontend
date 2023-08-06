@@ -116,7 +116,7 @@ export default function RootLayout({
       router.push('/admin/LoadingStation/Wallet');  
     }
     else if (target == 'Commission') {
-      router.push('/admin/LoadingStation/Commission');   
+      router.push('/admin/LoadingStation/Commision');   
     }
     else if (target == 'Withdrawal Requests') {
       router.push('/admin/LoadingStation/WithdrawalRequests');    

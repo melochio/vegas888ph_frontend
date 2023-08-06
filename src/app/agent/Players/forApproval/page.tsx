@@ -8,6 +8,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Swal from 'sweetalert2';
 import Card from '@mui/joy/Card';
 import router from 'next/router';
+import Loader from '@/publicComponents/Loading';
 import userMiddleware from '@/utils/middleware';
 interface User {
     // id: number;
@@ -17,8 +18,9 @@ interface User {
 
 const UserTable: React.FC = () => {
     const [request, setRequest] = React.useState<User[]>([]);
-
+    const [loading, setLoading] = React.useState(true);
     useEffect(() => {
+        setLoading(true)
         userMiddleware()
         // Fetch data from the user API endpoint here
         // Replace 'YOUR_API_ENDPOINT' with the actual API endpoint URL
@@ -27,12 +29,15 @@ const UserTable: React.FC = () => {
         //   .then((data) => setUsers(data))
         //   .catch((error) => console.error('Error fetching users:', error));
 
-        fetchUser(['bettor'], 'Inactive')
+        fetchUser(['bettor'], 'inactive')
             .then((res) => {
                 setRequest(res)
-                console.log(res)
+                setLoading(false)
             })
-            .catch((error) => console.error('Error fetching users:', error));
+            .catch((error) => {
+                setLoading(false)
+                console.error('Error fetching users:', error)
+            });
     }, []);
     const handleActivateUser = (userId: any) => {
 
@@ -44,18 +49,23 @@ const UserTable: React.FC = () => {
         }).then((result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isConfirmed) {
+                setLoading(true)
                 activateUser(userId)
                     .then((res) => {
                         Swal.fire('Saved!', '', 'success')
                         fetchUser(['bettor'], 'inactive')
                             .then((res) => {
                                 setRequest(res)
-                                console.log(res)
+                                setLoading(false)
                             })
-                            .catch((error) => console.error('Error fetching users:', error));
+                            .catch((error) => {
+                                setLoading(false)
+                                console.error('Error fetching users:', error)
+                            });
 
                     })
             } else if (result.isDenied) {
+                setLoading(false)
                 Swal.fire('Changes are not saved', '', 'info')
             }
         })
@@ -116,7 +126,7 @@ const UserTable: React.FC = () => {
                     <DataGrid rows={request} columns={columns} />
                 </Grid>
             </Container>
-
+            <Loader isOpen={loading} />
         </Grid>
     );
 };

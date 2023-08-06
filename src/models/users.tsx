@@ -58,7 +58,7 @@ const initialUser: Model_User = {
     commission: '',  
     referral_code: '', 
     total_wallet_balance: '0.00', 
-    isActive: 1, 
+    isActive: '', 
     mobileNo: '', 
     user_origin: '',
 }

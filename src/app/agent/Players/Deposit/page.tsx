@@ -22,7 +22,7 @@ const Form = () => {
     const formSubmit = async (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         let inputsValid = false
         console.log(formInput)
-        if (formInput.receiverId != "" &&
+        if (formInput.requesteeId != "" &&
             formInput.amount != 0
         ) {
             inputsValid = true
@@ -74,7 +74,7 @@ const Form = () => {
         setFormInput({ ...formInput, [event.currentTarget.name]: event.currentTarget.value })
     }
     const handleAutocompleteChange = (event: React.ChangeEvent<{}>, newValue: any) => {
-        setFormInput({ ...formInput, 'receiverId': newValue.id })
+        setFormInput({ ...formInput, requesteeId: newValue.id })
         setReceiver(newValue)
     };
     // const validatePassword = (event: React.KeyboardEvent<HTMLDivElement>) => {

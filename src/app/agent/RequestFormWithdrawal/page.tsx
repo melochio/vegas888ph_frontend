@@ -5,8 +5,8 @@ import Card from '@mui/joy/Card';
 import CardCover from '@mui/joy/CardCover';
 import CardContent from '@mui/joy/CardContent';
 import Typography from '@mui/joy/Typography';
-import TextInput from '@/publicComponents/TextInput' 
-import { Model_Withdrawal, initialWithdrawalValue } from '@/models/wallet';  
+import TextInput from '@/publicComponents/TextInput'
+import { Model_Withdrawal, initialWithdrawalValue } from '@/models/wallet';
 import { RequestWithdrawal } from '@/api/agent/wallet';
 import { Box, Breadcrumbs, Button, Grid, Link, Stack, Typography as TypographyMui } from '@mui/material';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
@@ -16,7 +16,7 @@ import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import axios from "axios";
-
+import Loader from '@/publicComponents/Loading';
 
 const columns: GridColDef[] = [
     { field: 'created_at', headerName: 'DATE', width: 200 },
@@ -26,8 +26,14 @@ const columns: GridColDef[] = [
 
 
 ];
-export default function Accounts() {
+export default function Request() {
 
+    const [loading, setLoading] = React.useState(true);
+    const withdrawalOption = [
+        { value: 'GCASH', text: 'GCASH' },
+        { value: 'BANK', text: 'BANK' },
+        { value: 'PERA_PADALA', text: 'PERA PADALA' }
+    ]
     const [formInput, setFormInput] = React.useState<Model_Withdrawal>(initialWithdrawalValue)
     const breadcrumbs = [
         <Link underline="hover" key="1" color="inherit" sx={{ color: 'black' }}>
@@ -56,33 +62,48 @@ export default function Accounts() {
         const formattedValue = new Intl.NumberFormat('en-US').format(parseFloat(numericValue));
         setFormInput({ ...formInput, [event.currentTarget.name]: event.currentTarget.value })
         setMoney(formattedValue)
-    } 
-    
+    }
+
     React.useEffect(() => {
+        setLoading(true);
         // fetchData();
         userMiddleware()
+        setLoading(false);
     }, []);
     const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        setLoading(true);
         let inputsValid = false
         if (formInput.firstName != "" &&
             formInput.middleName != "" &&
-            formInput.lastName != "" && 
-            formInput.email != "" && 
-            formInput.phoneNo != "" && 
-            formInput.request_amount != ""
+            formInput.lastName != "" &&
+            formInput.email != "" &&
+            formInput.phoneNo != "" &&
+            formInput.request_amount != "" &&
+            formInput.transaction_type != "" &&
+            formInput.address != ""
         ) {
             inputsValid = true
         }
-        if (inputsValid) { 
-            const response :  any = await RequestWithdrawal(formInput)
+        if (inputsValid) {
+            console.log(formInput)
+            const response: any = await RequestWithdrawal(formInput)
             console.log('response', response)
+            if (response == undefined) {
+                setLoading(false);
+                Swal.fire(
+                    'Failed',
+                    'Invalid Details Entered',
+                    'error'
+                )
+            }
             if (response.status == 200) {
+                setLoading(false);
                 Swal.fire(
                     'Success',
                 )
-
                 location.href = '/agent/Dashboard'
             } else {
+                setLoading(false);
                 Swal.fire(
                     'Failed',
                     response.data,
@@ -99,22 +120,13 @@ export default function Accounts() {
         const columns: GridColDef[] = [
             { field: 'PlayerName', headerName: 'Player name', width: 130 },
         ];
+       
     }
     return (
         <div>
-            <Stack spacing={2}>
-
-                <Breadcrumbs
-                    separator={<NavigateNextIcon fontSize="small" />}
-                    aria-label="breadcrumb"
-                    color='white'
-                >
-                    {breadcrumbs}
-                </Breadcrumbs>
-            </Stack>
-            <Grid container spacing={2}>
+            <Grid item>
                 <Grid item xs={12} sm={12} md={12}>
-                    <Box sx={{ display: 'flex', justifyContent: 'start', padding: '20px', backgroundColor: "black" }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'start', padding: '20px', }}>
                         <Typography component="h1" sx={{ color: 'white', fontSize: '20px', marginTop: '10px' }}></Typography>
                     </Box>
                     <Container style={containerStyle} sx={{ borderTop: '6px solid red', backgroundColor: 'white' }}>
@@ -179,7 +191,7 @@ export default function Accounts() {
                                         onChange={(event) => handleMoneyInput(event)}
                                         type={'text'}
                                         value={formInput.request_amount}
-                                        style={{ 
+                                        style={{
                                             padding: '8px',
                                         }}
                                         className="form-control"
@@ -225,12 +237,54 @@ export default function Accounts() {
                                     />
                                 </div>
                             </Grid>
+                            <Grid item xs={12} sm={12} md={12}>
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
+                                    <label htmlFor="selectInput" className="form-label">Address</label>
+                                    <input
+                                        onChange={(event) => handleInput(event)}
+                                        type={'text'}
+                                        value={formInput.address}
+                                        style={{
+
+                                            padding: '8px',
+                                        }}
+                                        className="form-control"
+                                        id="textInput"
+                                        name="address"
+
+                                    />
+                                </div>
+                                {/* <FormInput label="Transaction Type" placeholder="Enter text here" options={['deposit','withdraw']} type={"select"} /> */}
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={6}>
+                                <div className="form-group" style={{ display: 'flex', flexDirection: 'column', padding: '10px' }}>
+                                    <label htmlFor="selectInput" className="form-label">Option</label>
+                                    <select
+                                        className="form-control"
+                                        id="selectInput"
+                                        defaultValue=""
+                                        style={{ padding: '8px', }}
+                                        onChange={(event) => handleInput(event)}
+                                        name="transaction_type"
+                                    >
+                                        <option value="" disabled>Select an option</option>
+                                        {withdrawalOption.map((option) => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.text}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                {/* <FormInput label="Transaction Type" placeholder="Enter text here" options={['deposit','withdraw']} type={"select"} /> */}
+                            </Grid>
+
                         </Grid>
                         <Button variant="contained" sx={{ margin: '10px' }} size="small" color="info" onClick={(event) => formSubmit(event)} >Save changes</Button>
                         <Button variant="contained" sx={{ margin: '10px' }} size="small" color="error">Cancel</Button>
                     </Container>
                 </Grid>
             </Grid>
+            <Loader isOpen={loading} />
         </div>
     )
 }

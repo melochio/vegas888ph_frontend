@@ -506,7 +506,7 @@ export default function GameView() {
           <Grid container columns={12}>
             <Grid item xs sm md lg className={'frameContainer'}>
                 <iframe id="ifvideo" style={{backgroundColor: 'gray', minHeight: '100%', minWidth: '99%'}} allowFullScreen={true}
-                    src="">
+                    src={streamData.streamID}>
                 </iframe>
                 {/* <ReactPlayer url={streamData.streamID} controls style={{minHeight: '100%', minWidth: '99.8%'}} /> */}
             </Grid>

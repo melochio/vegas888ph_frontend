@@ -22,7 +22,7 @@ import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
 import { colors } from '@pComp/customStyles'
-import { Avatar, Button, ButtonGroup, Card, Container, Grid, Menu, MenuItem, Paper, Popper } from '@mui/material';
+import { Avatar, Button, ButtonGroup, Card, CircularProgress, Container, Grid, Menu, MenuItem, Paper, Popper } from '@mui/material';
 import Logo from '@/publicComponents/logo.png'
 import Image from 'next/image'
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
@@ -53,17 +53,17 @@ const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' })<{
     duration: theme.transitions.duration.leavingScreen,
   }),
 
-  marginLeft: `-${drawerWidth}px`,
+  // marginLeft: `-${drawerWidth}px`,
   ...(open && {
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.easeOut,
       duration: theme.transitions.duration.enteringScreen,
     }),
-    marginLeft: 0, 
+    marginLeft: 0,
     position: 'fixed',
-    width:'100%',
-    right:`-${drawerWidth/3}px`
-    
+    width: '100%',
+    // right: `-${drawerWidth / 3}px`
+
   }),
 }));
 
@@ -267,7 +267,7 @@ export default function RootLayout({
           },
 
         }}
-        variant="persistent"
+        variant="temporary"
         // anchor="left"
         open={open}
       >
@@ -579,7 +579,8 @@ export default function RootLayout({
         </Toolbar>
       </AppBar>
       <Main open={open} sx={{ backgroundColor: '#eaf1f7', height: '100%', overflow: 'auto' }} >
-        <Grid item style={{ margin: '0 auto',marginTop:'calc(10vh + 50px)', height: '100vh' }}>
+        <Grid item style={{ margin: '0 auto', marginTop: 'calc(10vh + 50px)', height: '100vh' }}>
+          
           {children}
         </Grid>
       </Main>

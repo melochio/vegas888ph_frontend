@@ -42,9 +42,9 @@ const Form = () => {
             return
         }
         if (inputsValid) {
-            registerPOST()
             const response = await RegisterAPI(formInput)
             if(response.status == 200) {
+                registerPOST()
                 Swal.fire(
                     'Success',
                     'Your account has successfully been registered.',

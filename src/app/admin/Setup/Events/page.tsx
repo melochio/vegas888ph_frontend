@@ -8,13 +8,24 @@ import React from "react";
 import Swal from "sweetalert2";
 import { currentGame } from "@/api/bettor/game";
 import Game_Model from "@/models/game";
+import LoadingButton from '@mui/lab/LoadingButton';
+import supabase from '@/utils/supabase';
 
 export default function Accounts() {
     const [currentGameState, setCurrentGameState] = React.useState<Game_Model>()
+    const [buttonState, setButtonState] = React.useState(false)
     const fetchCurrentGame = async () => {
-        const gameResponse = await currentGame()
-        if (gameResponse !== undefined){
-            setCurrentGameState(gameResponse.data)
+        // const gameResponse = await currentGame()
+        // if (gameResponse !== undefined){
+        //     setCurrentGameState(gameResponse.data)
+        // }
+        const { data, error } = await supabase
+        .from('sabong_histories')
+        .select('*')
+        .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
+        .order('id', { ascending: true })
+        if(data !== null) {
+            setCurrentGameState(data[0])
         }
     }
     React.useEffect(() => {
@@ -40,6 +51,7 @@ export default function Accounts() {
     }
 
     const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        setButtonState(true)
         fetchCurrentGame()
         if (currentGameState?.id === undefined) {
             const response = await CreateEvents(formInput).then((val) => {
@@ -49,16 +61,19 @@ export default function Accounts() {
                         'Event Was Initialized Successfully',
                         'success'
                     );
+                    setButtonState(false)
                 }
-            }).catch((err)=>
+            }).catch((err)=>{
                 Swal.fire(
                     'Failed',
                     err,
                     'error'
                 )
-            )
+                setButtonState(false)
+            })
         } else {
             Swal.fire('Ongoing Event', 'Looks like there are still ongoing event at the moment. Try again later', 'error')
+            setButtonState(false)
         }
     }
     const plasadaOptions = [
@@ -133,7 +148,7 @@ export default function Accounts() {
                                 </div>
                             </Grid> 
                             <Grid item xs={12} sm={12} md={12} display={'flex'} justifyContent={'flex-end'}>
-                                <Button variant="contained" sx={{ margin: '10px' }} size="small" color="info" onClick={(event) => formSubmit(event)} >Initiate Games</Button>
+                                <LoadingButton loading={buttonState} variant="contained" sx={{ margin: '10px' }} size="small" color="info" onClick={(event) => formSubmit(event)} >Initiate Games</LoadingButton>
                             </Grid>
                         </Grid>
                     </Container>

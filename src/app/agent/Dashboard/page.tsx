@@ -44,7 +44,7 @@ export default function Dashboard() {
             const response = await getEarnings()
             if (response !== undefined) {
                 const totalEarningsResponse = response
-                setTotalEarnings(totalEarningsResponse.total_earnings)
+                setTotalEarnings(parseFloat(totalEarningsResponse.total_earnings))
                 setClaimedEarnings(totalEarningsResponse.claimed)
                 setUnclaimedEarnings(totalEarningsResponse.unclaimed)
                 setAvgEarnings(totalEarningsResponse.avg)

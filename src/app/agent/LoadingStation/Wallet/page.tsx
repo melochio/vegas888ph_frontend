@@ -20,6 +20,7 @@ import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Model_User from "../../../../models/users";
+import Loader from '@/publicComponents/Loading';
 
 
 const columns: GridColDef[] = [
@@ -34,6 +35,8 @@ const columns: GridColDef[] = [
 ];
 
 export default function Wallet() {
+
+    const [loading, setLoading] = React.useState(true);
     interface members {
         player_name: string,
         name: String | any,
@@ -57,11 +60,12 @@ export default function Wallet() {
 
     // const getUser()
     const handleInput = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
-        if (event.currentTarget.name == 'requestee') {
-            const data = userlist.find((user) => user.name === event.currentTarget.value);
+        if (event.currentTarget.name == 'requesteeId') {
+            const data = userlist.find((user) => user.id == event.currentTarget.value);
             const _player_name = data?.player_name
             const _name = data?.name
             const _total_wallet_balance = data?.total_wallet_balance
+             
             const memberData = { player_name: _player_name, name: _name, total_wallet_balance: _total_wallet_balance };
             setMemberDetails(memberData);
         }
@@ -78,58 +82,71 @@ export default function Wallet() {
 
         // Format the numeric value as money (e.g., 1234.56 -> $1,234.56)
         const formattedValue = new Intl.NumberFormat('en-US').format(parseFloat(numericValue));
-        setFormInput({ ...formInput, [event.currentTarget.name]: value.replace(/[^0-9.]/g, '')})
+        setFormInput({ ...formInput, [event.currentTarget.name]: value.replace(/[^0-9.]/g, '') })
         setMoney(formattedValue)
     }
 
     const [userlist, setUserlist] = React.useState<Model_user[]>([]);
     const fetchData = async () => {
         try {
-            const users: Model_User[] = await fetchUser(['bettor'], 'active');
+            const users: Model_User[] = await fetchUser(['bettor', 'agent'], 'active');
+            console.log(users);
             setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
             // const userlist: Model_user[] = users
         } catch (error) {
-            console.error('Error fetching data:', error);
+            // console.error('Error fetching data:', error);
             // setUserList([]); // Set an empty array if there's an error or no data
         }
     };
 
     const [walletHistory, setWalletHistory] = React.useState([])
     const fetchWalletHistory = async () => {
-        try { 
-            const data = await getWalletHistory(); 
+        try {
+            const data = await getWalletHistory();
             setWalletHistory(data); // Assuming `users` is an array of objects with the 'PlayerName' property
         } catch (error) {
-            console.error('Error fetching data:', error);
+            // console.error('Error fetching data:', error);
             // setUserList([]); // Set an empty array if there's an error or no data
         }
     }
     const [wallet_amount, setWallet_amount] = React.useState<Number | any>(0)
-    React.useEffect(() => { 
+    React.useEffect(() => {
+        setLoading(true)
         userMiddleware()
         fetchWalletHistory()
         fetchData();
         setWallet_amount(Number(localStorage.getItem('wallet_amount')));
+        setLoading(false)
     }, []);
     const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        console.log(formInput)
         let inputsValid = false
         if (formInput.type != "" &&
             Number(formInput.amount) > 0 &&
-            formInput.requestee != "" &&
+            formInput.requesteeId != "" &&
             formInput.password != ""
         ) {
             inputsValid = true
         }
         if (inputsValid) {
+            setLoading(true)
             const response = await transferWalletApi(formInput)
-            console.log('response', response)
+            if (response == undefined) {
+                Swal.fire(
+                    'Failed',
+                    'You must load your wallet!',
+                    'error'
+                )
+                
+                setLoading(false)
+            }
             if (response.status == 200) {
                 Swal.fire(
                     'Success',
-                ) 
+                )
+                setLoading(false)
                 location.href = '/agent/LoadingStation/Wallet'
-            } else {
+            } else { 
+                setLoading(false)
                 Swal.fire(
                     'Failed',
                     response.data,
@@ -142,11 +159,13 @@ export default function Wallet() {
                 'Invalid Details Entered',
                 'error'
             )
+            
+            setLoading(false)
         }
     }
     return (
-        <div> 
-            
+        <div>
+
             <Grid item>
                 <Grid item xs={12} sm={12} md={8}>
                     <Container sx={{ display: 'flex', justifyContent: 'start', padding: '20px', backgroundColor: "black" }}>
@@ -186,12 +205,12 @@ export default function Wallet() {
                                         defaultValue=""
                                         style={{ padding: '8px', }}
                                         onChange={(event) => handleInput(event)}
-                                        name="requestee"
+                                        name="requesteeId"
                                     >
                                         <option value="" disabled>Select an option</option>
                                         {userlist.map((option: any) => (
-                                            <option key={option.id} value={option.name}>
-                                                {option.name} (PLAYER)
+                                            <option key={option.id} value={option.id}>
+                                                {option.name} ({option.user_level})
                                             </option>
                                         ))}
                                     </select>
@@ -222,7 +241,7 @@ export default function Wallet() {
                                         onChange={(event) => handleInput(event)}
                                         type={'text'}
                                         value={formInput.transactionDetails}
-                                        style={{ 
+                                        style={{
                                             padding: '8px',
                                         }}
                                         className="form-control"
@@ -264,7 +283,7 @@ export default function Wallet() {
                             </Typography>
                             <Typography sx={{ fontSize: '15px' }}>Username: {memberDetails.player_name}
                             </Typography>
-                            <Typography sx={{ fontSize: '15px' }}>Current Wallet: {'₱ ' + memberDetails.total_wallet_balance.toFixed(2)}
+                            <Typography sx={{ fontSize: '15px' }}>Current Wallet: {'₱ ' + memberDetails.total_wallet_balance || '0.00'}
                             </Typography>
                         </Box>
                     </Container>
@@ -287,7 +306,8 @@ export default function Wallet() {
                         />
                     </Container>
                 </Grid>
-            </Grid>
+            </Grid> 
+            <Loader isOpen={loading} />
         </div>
     )
 }

@@ -135,6 +135,20 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
     if (formElement) {
       const formData = new FormData(formElement);
       let formInput: Model_Withdrawal = initialWithdrawalValue
+      console.log(walletBalance-parseFloat(formInput.request_amount))
+      console.log(walletBalance)
+      if(walletBalance < walletBalance-parseFloat(formInput.request_amount)){
+        Swal.fire('Failed', 'Insufficient Balance', 'error')
+        return
+      }
+      if(walletBalance <= 0){
+        Swal.fire('Failed', 'Insufficient Balance', 'error')
+        return
+      }
+      if(walletBalance-parseFloat(formInput.request_amount) <= 0){
+        Swal.fire('Failed', 'Insufficient Balance', 'error')
+        return
+      }
       formInput.firstName = formData.get('firstName');
       formInput.middleName = formData.get('middleName');
       formInput.lastName = formData.get('lastName');
@@ -191,7 +205,6 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
       } else {
         Swal.fire('Failed', 'Something went wrong while submitting your withdrawal request, Please try again after refreshing the page.', 'error')
       }
-      console.log(formInput)
       handleClose()
     }
   }
@@ -371,6 +384,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
           onClose={handleClose}
           aria-labelledby="modal-title"
           aria-describedby="modal-description"
+          sx={{zIndex: 1040}}
         >
           <Box
             sx={{

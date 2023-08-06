@@ -21,6 +21,7 @@ import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Model_User from "../../../../models/users";
 
+import Loader from '@/publicComponents/Loading';
 
 const columns: GridColDef[] = [
     { field: 'created_at', headerName: 'DATE', width: 200 },
@@ -34,6 +35,8 @@ const columns: GridColDef[] = [
 ];
 
 export default function Wallet() {
+    
+    const [loading, setLoading] = React.useState(true);
     interface members {
         player_name: string,
         name: String | any,
@@ -57,7 +60,7 @@ export default function Wallet() {
 
     // const getUser()
     const handleInput = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
-        if (event.currentTarget.name == 'requestee') {
+        if (event.currentTarget.name == 'requesteeId') {
             const data = userlist.find((user) => user.name === event.currentTarget.value);
             const _player_name = data?.player_name
             const _name = data?.name
@@ -86,11 +89,11 @@ export default function Wallet() {
     const fetchData = async () => {
         try {
             const users: Model_User[] = await fetchUser(['agent', 'master agent'], 'active');
-            setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property
-            // const userlist: Model_user[] = users
+            setUserlist(users); // Assuming `users` is an array of objects with the 'PlayerName' property 
+            setLoading(false)
         } catch (error) {
-            console.error('Error fetching data:', error);
-            // setUserList([]); // Set an empty array if there's an error or no data
+            console.error('Error fetching data:', error); 
+            setLoading(false)
         }
     };
 
@@ -106,36 +109,40 @@ export default function Wallet() {
     }
     const [wallet_amount, setWallet_amount] = React.useState<Number | any>(0)
     React.useEffect(() => {
+        setLoading(true)
         userMiddleware()
         fetchWalletHistory()
         fetchData();
         setWallet_amount(Number(localStorage.getItem('wallet_amount')));
+
     }, []);
-    const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-        console.log(formInput)
+    const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => { 
         let inputsValid = false
         if (formInput.type != "" &&
             formInput.amount > 0 &&
-            formInput.requestee != "" &&
+            formInput.requesteeId != "" &&
             formInput.password != ""
         ) {
             inputsValid = true
         }
-        if (inputsValid) {
+        if (inputsValid) { 
+            setLoading(true)
             const response = await transferWalletApi(formInput)
             console.log('response', response)
             if (response.status == 200) {
                 Swal.fire(
                     'Success',
                 )
-
-                location.href = '/Dashboard'
+ 
+                setLoading(false)
+                location.href = '/agent/LoadingStation/Commision'
             } else {
                 Swal.fire(
                     'Failed',
                     response.data,
                     'error'
                 )
+                setLoading(false)
             }
         } else {
             Swal.fire(
@@ -143,6 +150,7 @@ export default function Wallet() {
                 'Invalid Details Entered',
                 'error'
             )
+            setLoading(false)
         }
     }
     return (
@@ -153,7 +161,7 @@ export default function Wallet() {
                         <Typography component="h1" sx={{ color: 'white', fontSize: '20px', marginTop: '10px' }}>Current Wallet : {'₱ ' + wallet_amount.toFixed(2)} </Typography>
                     </Container>
                     <Container style={containerStyle} sx={{ borderTop: '6px solid red', backgroundColor: 'white' }}>
-                        <Typography component="h1" sx={{ color: 'black', fontSize: '15px', marginTop: '10px' }}>Wallet Management</Typography>
+                        <Typography component="h1" sx={{ color: 'black', fontSize: '15px', marginTop: '10px' }}>Commision Management</Typography>
                         <hr />
                         <Grid item xs={12} sm={12} md={12} container>
                             <Grid item xs={12} sm={6} md={6}>
@@ -186,12 +194,12 @@ export default function Wallet() {
                                         defaultValue=""
                                         style={{ padding: '8px', }}
                                         onChange={(event) => handleInput(event)}
-                                        name="requestee"
+                                        name="requesteeId"
                                     >
                                         <option value="" disabled>Select an option</option>
                                         {userlist.map((option: any) => (
-                                            <option key={option.id} value={option.name}>
-                                                {option.name} (AGENT)
+                                            <option key={option.id} value={option.id}>
+                                                {option.name} ({option.user_level})
                                             </option>
                                         ))}
                                     </select>
@@ -264,7 +272,7 @@ export default function Wallet() {
                             </Typography>
                             <Typography sx={{ fontSize: '15px' }}>Username: {memberDetails.player_name}
                             </Typography>
-                            <Typography sx={{ fontSize: '15px' }}>Current Wallet: {'₱ ' + memberDetails.total_wallet_balance.toFixed(2)}
+                            <Typography sx={{ fontSize: '15px' }}>Current Wallet: {'₱ ' + memberDetails.total_wallet_balance}
                             </Typography>
                         </Box>
                     </Container>
@@ -286,8 +294,8 @@ export default function Wallet() {
                             checkboxSelection={false}
                         />
                     </Container>
-                </Grid>
-
+                </Grid> 
+                <Loader isOpen={loading} />
             </Grid>
         </div>
     )

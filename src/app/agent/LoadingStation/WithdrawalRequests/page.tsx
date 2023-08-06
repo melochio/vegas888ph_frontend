@@ -9,6 +9,8 @@ import Swal from 'sweetalert2';
 import Card from '@mui/joy/Card';
 import router from 'next/router';
 import userMiddleware from '@/utils/middleware';
+
+import Loader from '@/publicComponents/Loading';
 interface User {
     // id: number;
     name: string;
@@ -18,7 +20,9 @@ interface User {
 const UserTable: React.FC = () => {
     const [request, setRequest] = React.useState<User[]>([]);
 
+    const [loading, setLoading] = React.useState(true);
     useEffect(() => {
+        setLoading(true);
         userMiddleware()
         // Fetch data from the user API endpoint here
         // Replace 'YOUR_API_ENDPOINT' with the actual API endpoint URL
@@ -28,10 +32,13 @@ const UserTable: React.FC = () => {
         //   .catch((error) => console.error('Error fetching users:', error)); 
         getRequestWithdrawal(['bettor', 'agent'])
             .then((res) => {
-                setRequest(res)
-                console.log(res)
+                setRequest(res) 
+                setLoading(false);
             })
-            .catch((error) => console.error('Error fetching users:', error));
+            .catch((error) => {
+                console.error('Error fetching users:', error) 
+                setLoading(false);
+            });
     }, []);
     const handleApproveRequest = (requestId: any, requesteeId: any, amount: any, name: any) => {
         Swal.fire({
@@ -43,20 +50,26 @@ const UserTable: React.FC = () => {
         }).then((result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isConfirmed) {
+                setLoading(true);
                 approvedRequestWithdrawal({ requestId: requestId, requesteeId: requesteeId, amount: amount })
                     .then((res) => {
                         res.data
                         Swal.fire('Saved!', '', 'success')
                         location.href = '/agent/LoadingStation/WithdrawalRequests'
-                        getRequestWithdrawal(['bettor'])
+                        getRequestWithdrawal(['bettor','agent'])
                             .then((res) => {
                                 setRequest(res)
                                 console.log(res)
+                                setLoading(false);
                             })
-                            .catch((error) => console.error('Error fetching users:', error));
+                            .catch((error) => { 
+                                setLoading(false);
+                                console.error('Error fetching users:', error)
+                            });
                     })
             } else if (result.isDenied) {
-                Swal.fire('Changes are not saved', '', 'info')
+                Swal.fire('Changes are not saved', '', 'info') 
+                setLoading(false);
             }
         })
     }
@@ -71,6 +84,7 @@ const UserTable: React.FC = () => {
         }).then((result) => {
             /* Read more about isConfirmed, isDenied below */
             if (result.isConfirmed) {
+                setLoading(true);
                 declineWithdrawRequest({ requestId: requestId, requesteeId: requesteeId, amount: amount })
                     .then((res) => {
                         res.data
@@ -79,11 +93,16 @@ const UserTable: React.FC = () => {
                             .then((res) => {
                                 setRequest(res)
                                 console.log(res)
+                                setLoading(false);
                             })
-                            .catch((error) => console.error('Error fetching users:', error));
+                            .catch((error) => {
+                                setLoading(false);
+                                console.error('Error fetching users:', error)
+                            });
 
                     })
             } else if (result.isDenied) {
+                setLoading(false);
                 Swal.fire('Changes are not saved', '', 'info')
             }
         })
@@ -146,8 +165,8 @@ const UserTable: React.FC = () => {
                 <Grid item xs={12} md={12}>
                     <DataGrid rows={request} columns={columns} />
                 </Grid>
-            </Container>
-
+            </Container> 
+            <Loader isOpen={loading} />
         </Grid>
     );
 };

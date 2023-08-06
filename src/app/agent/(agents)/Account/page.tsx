@@ -13,10 +13,13 @@ import React from "react";
 import Swal from "sweetalert2";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import axios from "axios";
-import { SBregisterPOST, accountRegisterType, initial_Register } from '@/api/supabaseAPI';
-
+import { SBregisterPOST, accountRegisterType, initial_Register } from '@/api/supabaseAPI'; 
+import { truncate } from 'fs'; 
+import Loader from '@/publicComponents/Loading';
+ 
 export default function Accounts() {
 
+    const [loading, setLoading] = React.useState(true);
     const [formInput, setFormInput] = React.useState<accountRegisterType>(initial_Register)
     const [editUser, setEditUser] = React.useState(false)
     const commissionList = [
@@ -225,8 +228,10 @@ export default function Accounts() {
                 setUserlist(users);
             }
 
+            setLoading(false)
             // Assuming `users` is an array of objects with the 'PlayerName' property
-        } catch (error) {
+        } catch (error) { 
+            setLoading(false)
             console.error('Error fetching data:', error);
             // setUserList([]); // Set an empty array if there's an error or no data
         }
@@ -245,6 +250,7 @@ export default function Accounts() {
     const [user, setUser] = React.useState<UserModel>() 
     const filteredColumns = editUser ? columns : columns.filter((column) => column.field !== 'Newcommission');
     React.useEffect(() => {
+        setLoading(true)
         const fetch = async () => {
             const response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/bettor/tokenValue', null, {
                 withCredentials: true,
@@ -261,6 +267,7 @@ export default function Accounts() {
         }
         fetch()
         fetchData();
+        
     }, []);
     const formSubmit = async (event: React.ChangeEventHandler<HTMLInputElement> | React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         let inputsValid = false
@@ -280,19 +287,23 @@ export default function Accounts() {
             }
         }
         if (inputsValid) {
+            
+        setLoading(true)
             const err = await SBregisterPOST(formInput, user?.id)
             if (err === null) {
                 fetchData();
                 Swal.fire(
                     'Success',
                 )
-                // location.href = '/admin/Setup/Account'
+                setLoading(false)
+                location.href = '/admin/Setup/Account'
             } else {
                 Swal.fire(
                     'Failed',
                     err,
                     'error'
                 )
+                setLoading(false)
             }
         } else {
             Swal.fire(
@@ -300,6 +311,7 @@ export default function Accounts() {
                 'Invalid Details Entered',
                 'error'
             )
+            setLoading(false)
         }
         const columns: GridColDef[] = [
             { field: 'PlayerName', headerName: 'Player name', width: 130 },
@@ -484,7 +496,9 @@ export default function Accounts() {
                     </Container>
                 </Grid>
 
-            </Grid>
+            </Grid>  
+            <Loader isOpen={loading} />
         </div>
+        
     )
 }

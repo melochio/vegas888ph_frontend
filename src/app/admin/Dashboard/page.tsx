@@ -49,60 +49,46 @@ export default function Dashboard() {
     const [monthWithdrawalsAdmin, setmonthWithdrawalsAdmin] = React.useState('0.00')
     const [prevmonthWithdrawalsAdmin, setprevMonthWithdrawalsAdmin] = React.useState('0.00')
     const today = new Date();
+    // Get the first date of the current month
+    const firstDateOfCurrentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    // Subtract one day from the first date of the current month to get the last date of the last month
+    const lastDateOfLastMonth = new Date(firstDateOfCurrentMonth.getTime() - 1);
+
+    // Get the first date of the last month by setting the date to 1 and subtracting one month
+    const firstDateOfLastMonth = new Date(lastDateOfLastMonth);
+    firstDateOfLastMonth.setDate(1);
+    firstDateOfLastMonth.setMonth(firstDateOfLastMonth.getMonth() - 1);
     const thismonth = today.toLocaleString('default', { month: 'long' })
     const monthArray = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const previousMonth = monthArray.indexOf(thismonth) === 0 ? monthArray[11] : monthArray[monthArray.indexOf(thismonth) - 1];
     const fetch_totalearnings = async () => {
-        const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
         let { data, error } = await supabase
-          .rpc('admin_earnings', {
-            end_date: formatDate(today), 
-            start_date: formatDate(firstDay), 
-          })
-        
-        if (error) setTotalEarnings('0.00')
-        else setTotalEarnings(data)
-
-        // let { data, error } = await supabase
-        // .rpc('admin_earnings')      
-        // // console.log(data)
-        // if (error) return '0.00'
-        // else {
-        //     setTotalEarnings(data)
-        // }
+        .rpc('admin_earnings')      
+        // console.log(data)
+        if (error) return '0.00'
+        else {
+            setTotalEarnings(data)
+        }
     }
     const fetch_monthlyEarningsAdmin = async () => {
-        // const oneMonthBefore = new Date(today);
-        // oneMonthBefore.setMonth(oneMonthBefore.getMonth() - 1);
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
         let { data, error } = await supabase
-          .rpc('admin_earnings', {
+        .rpc('admin_earningsbetween', {
             end_date: formatDate(today), 
             start_date: formatDate(firstDay), 
-          })
-        
+        })
+
         if (error) setMonthlyEarningsAdmin('0.00')
         else setMonthlyEarningsAdmin(data)
-        
-        // let { data, error } = await supabase
-        // .rpc('getbalancebetween', {
-        //     end_date: formatDate(today), 
-        //     start_date: formatDate(firstDay), 
-        //     user_id: 9
-        // })
-
-        // if (error) setMonthlyEarningsAdmin('0.00')
-        // else setMonthlyEarningsAdmin(data)
 
     }
     const fetch_lastmonthPlasada = async () => {
         const firstDay = new Date(today.getFullYear(), today.getMonth()-1, 1);
-        const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() - 1, 0);
         let { data, error } = await supabase
-        .rpc('getbalancebetween', {
-        end_date: lastDayOfMonth, 
-        start_date: firstDay, 
-        user_id: 9
+        .rpc('admin_earningsbetween', {
+        end_date: formatDate(lastDateOfLastMonth), 
+        start_date: formatDate(firstDay), 
         })
 
         if (error) setprevMonthEarningsAdmin('0.00')
@@ -135,8 +121,8 @@ export default function Dashboard() {
         const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() - 1, 0);
         let { data, error } = await supabase
         .rpc('getwithdrawalsbetweendates', {
-        end_date: lastDayOfMonth, 
-        start_date: firstDay, 
+            end_date: formatDate(lastDateOfLastMonth), 
+            start_date: formatDate(firstDay), 
         user_id: 9
         })
 
@@ -172,8 +158,8 @@ export default function Dashboard() {
         const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() - 1, 0);
         let { data, error } = await supabase
             .rpc('getbalancebetween', {
-            end_date: lastDayOfMonth, 
-            start_date: firstDay, 
+                end_date: formatDate(lastDateOfLastMonth), 
+                start_date: formatDate(firstDay), 
             user_id: 0
         })
 

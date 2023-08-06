@@ -8,7 +8,6 @@ import Typography from '@mui/joy/Typography';
 import TextInput from '@/publicComponents/TextInput'
 import Model_tranferMoney, { initialUser } from '../../../../models/tranferMoney'
 import Model_user, { initialUser as initUser } from '../../../../models/users'
-import { transferWalletApi, getWalletHistory } from '@/api/agent/wallet'
 import { fetchUser, fetchUserWallet } from '@/api/agent/users'
 import MoneyFormat from "@/publicComponents/MoneyFormat";
 import userMiddleware from '@/utils/middleware';
@@ -22,6 +21,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Model_User from "../../../../models/users";
 import supabase from "@/utils/supabase";
 import { SBDepositTo } from "@/api/supabaseAPI";
+import { transferWalletApi } from "@/api/agent/wallet";
 
 
 const columns: GridColDef[] = [

@@ -4,10 +4,11 @@
 interface Model_tranferMoney { 
     requestee: number | any,
     amount: string | any, 
-    requesteeId: any, 
+    requesteeId: number | any, 
     transactionDetails: string | any, 
     type: string | any,
     password: string | any
+
 } 
 const initialUser: Model_tranferMoney = {
     requestee: '',

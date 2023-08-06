@@ -94,6 +94,8 @@ const RequestWithdrawal = async (data: any): Promise<string | any> => {
         email: data.email,
         phoneNo: data.phoneNo,
         request_amount: data.request_amount,
+        transaction_type: data.transaction_type,
+        address: data.address,
         status: 'REQUEST'
       }, config)
       return responseData
