@@ -158,7 +158,7 @@ export default function GameSettings() {
                             Game Title : {selectedId > 0 ? stream.filter(e => e.id == selectedId).map(e => e.gameTitle) : ''}
                         </h3>
                         <h3>
-                            Stream ID : {selectedId > 0 ? stream.filter(e => e.id == selectedId).map(e => e.streamID) : ''} 
+                            Stream ID : {selectedId > 0 ? stream.filter(e => e.id == selectedId).map(e => e.streamId) : ''} 
                         </h3>
                         {/* <h3>
                             Title : {selectedId > 0 ? stream.filter(e => e.id == selectedId).map(e => e.title) : ''}  

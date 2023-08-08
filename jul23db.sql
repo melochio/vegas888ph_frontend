@@ -207,7 +207,7 @@ CREATE TABLE `session` (
 CREATE TABLE `stream_configuration` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `gameTitle` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `streamID` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `streamId` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `src` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `passphrase` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
@@ -221,7 +221,7 @@ CREATE TABLE `stream_configuration` (
 -- Dumping data for table `stream_configuration`
 --
 
-INSERT INTO `stream_configuration` (`id`, `gameTitle`, `streamID`, `title`, `src`, `passphrase`, `viewState`, `expfights`, `created_at`, `updated_at`) VALUES
+INSERT INTO `stream_configuration` (`id`, `gameTitle`, `streamId`, `title`, `src`, `passphrase`, `viewState`, `expfights`, `created_at`, `updated_at`) VALUES
 (1, 'SABONG', 'MRLwgB4HRQkeUmbPXZS2aDbdqOz100yvX1BG17JJv68M', 'testStream', '', NULL, 'Public', 200, NULL, NULL);
 
 -- --------------------------------------------------------

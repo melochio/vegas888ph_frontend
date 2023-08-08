@@ -1,7 +1,7 @@
 interface Stream_Model {
     id: number | any,
     gameTitle: string| any,
-    streamID: string| any,
+    streamId: string| any,
     title: string| any,
     src: string| any,
     passphrase: string| any,
@@ -11,7 +11,7 @@ interface Stream_Model {
 const initialStreamValue: Stream_Model = {
     id: 0,
     gameTitle: '',
-    streamID: '',
+    streamId: '',
     title: '',
     src: '',
     passphrase: '',

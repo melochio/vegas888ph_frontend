@@ -74,8 +74,8 @@ export default function Declarator() {
                 .rpc('calculate_game_stats', {
                     game_id:currentGameState.id,
                 })
-                if (error) console.error(error)
-                else console.log(data)
+                // if (error) console.error(error)
+                // else console.log(data)
 
                 if(status === "DRAW" || status === "FAILED"){                    
                     let { data, error } = await SBAPI
@@ -83,8 +83,8 @@ export default function Declarator() {
                         game_id: currentGameState.id
                     })
 
-                    if (error) console.error(error)
-                    else console.log(data)
+                    // if (error) console.error(error)
+                    // else console.log(data)
                 }
                 if(status === "MERON" || status === "WALA") {
                     await updateGameResult(currentGameState.id, status)
@@ -127,13 +127,14 @@ export default function Declarator() {
         setGameList(gameListResponse)
     }
     const fetchCurrentStream = async () => {
-        const { data, error } = await SBAPI
-        .from('sabong_histories')
-        .select('*')
-        .or('result.eq.CLOSED,result.eq.OPEN,result.is.null')
-        .order('id', { ascending: true })
-        if(data !== null) {
-            data[0] && setStreamData(data[0])
+        let { data: stream_configuration, error } = await SBAPI
+        .from('stream_configuration')
+        .select("*")
+        .eq('gameTitle', 'SABONG')
+        if(stream_configuration !== null) {
+            // console.log(stream_configuration[0].streamId)
+            setStreamData(stream_configuration[0])
+            // console.log(streamData)
         }
     }
     const fetchCurrentGame = async () => {
@@ -158,26 +159,27 @@ export default function Declarator() {
             { event: '*', schema: 'public', table: 'sabong_histories' },
             (payload) => {
                 fetchCurrentGame()
-                // fetchCurrentStream()
                 fetchGameList()
                 fetchExpFights()
+            }
+        )
+        .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'stream_configuration' },
+            (payload) => {
+                fetchCurrentStream()  
             }
         )
         .subscribe()
     }, [])
     const LiveStreamComponent = () => {
         return (
-          <Grid container columns={12}>
-            <Grid item xs sm md lg className={'frameContainer'}>
-                <iframe id="ifvideo" style={{backgroundColor: 'gray', minHeight: '100%', minWidth: '99%'}} allowFullScreen={true}
-                    src={streamData.streamID}>
-                </iframe>
-                {/* <ReactPlayer url={streamData.streamID} controls style={{minHeight: '100%', minWidth: '99.8%'}} /> */}
-            </Grid>
-        </Grid>
+            
+            <iframe style={{backgroundColor: 'gray', minHeight: '100%', minWidth: '99%'}} allowFullScreen={true}
+            src={streamData.streamId}>
+        </iframe>
         );
     };
-    
     const GameHeader = (
         {bettingStatus, expFights, streamStatus}: 
         {bettingStatus: null | "OPEN" | "CLOSED", expFights: number, streamStatus: "Private" | "Public"} ) => {
@@ -239,7 +241,7 @@ export default function Declarator() {
         //   }
         // }, [gameInfo.result]);
         return (
-            <Grid margin={'auto'} item sm={6} xs={12} md={4} lg={4} xl={3}>
+            <Grid margin={'auto'} item sm={6} xs={12} md={12} lg={6} xl={6}>
                 <div style={{width: '100%'}}>
                     <div style={{backgroundColor: !isDisabled ? 'rgb(255 123 59)' : 'rgb(187 124 94)', fontWeight: 700, color: 'white', textAlign:'center', padding: '1em 0em', borderRadius: '1em 1em 0em 0em'}}>
                         Fight # {gameInfo.gameNo}
@@ -322,33 +324,47 @@ export default function Declarator() {
     })
     return (
         <div>
-            <LiveStreamComponent key={'streamComponent'}/>
-            <GameHeader
-                bettingStatus={currentGameState.result}
-                expFights={expFights}
-                streamStatus={streamData.viewState}
-                key={'gameHeader'} />
-            <Card style={{
-                maxWidth:"90%",
-                backgroundColor: 'transparent',
-                margin: 'auto',
-                maxHeight: '100vh',
-                overflowY: 'auto'
-            }}>
-            <CardContent key={'controls'}>
-                <Grid columns={12} container columnSpacing={3} rowSpacing={3}>
-                    {
-                        gameList.map((val, i) => (
-                            <RoundControl key={val.gameNo+"_"+val.id}
-                            isDisabled={val.result === "CLOSED" || val.result ===  "OPEN" || val.result === null 
-                            ? false:
-                            true} 
-                            gameInfo={val} />
-                        ))
-                    }
+            <Grid container columns={12}>
+                <Grid item xs={12} sm={12} md={6}>
+                    <Grid container columns={12}>
+                        <Grid item xs sm md lg className={'frameContainer'}>
+                            <LiveStreamComponent key={'streamComponent'}/>
+                            {/* <iframe id={'test_'+streamData.streamId} style={{backgroundColor: 'gray', minHeight: '100%', minWidth: '99%'}} allowFullScreen={true}
+                                src={streamData.streamId}>
+                            </iframe> */}
+                            {/* <ReactPlayer url={streamData.streamID} controls style={{minHeight: '100%', minWidth: '99.8%'}} /> */}
+                        </Grid>
+                    </Grid>
                 </Grid>
-            </CardContent>
-            </Card>
+                <Grid item xs={12} sm={12} md={6}>
+                    <GameHeader
+                        bettingStatus={currentGameState.result}
+                        expFights={expFights}
+                        streamStatus={streamData.viewState}
+                        key={'gameHeader'} />
+                    <Card style={{
+                        maxWidth:"90%",
+                        backgroundColor: 'transparent',
+                        margin: 'auto',
+                        maxHeight: '100vh',
+                        overflowY: 'auto'
+                    }}>
+                        <CardContent key={'controls'}>
+                            <Grid columns={12} container columnSpacing={3} rowSpacing={3}>
+                                {
+                                    gameList.map((val, i) => (
+                                        <RoundControl key={val.gameNo+"_"+val.id}
+                                        isDisabled={val.result === "CLOSED" || val.result ===  "OPEN" || val.result === null 
+                                        ? false:
+                                        true} 
+                                        gameInfo={val} />
+                                    ))
+                                }
+                            </Grid>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            </Grid>
         </div>
     )
 }

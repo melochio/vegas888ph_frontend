@@ -8,18 +8,18 @@
 /* For small screens and above (sm, md, lg, etc.) */
 @media screen and (min-width: 300px) {
     .frameContainer {
-        min-height: 50vh;
+        min-height: 30vh;
     }
 }
 @media screen and (min-width: 600px) {
     .frameContainer {
-        min-height: 70vh;
+        min-height: 50vh;
     }
 }
 
 /* For medium screens and above (md, lg, etc.) */
 @media screen and (min-width: 960px) {
     .frameContainer {
-        min-height: 100vh;
+        min-height: 70vh;
     }
 }

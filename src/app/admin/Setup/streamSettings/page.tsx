@@ -78,14 +78,14 @@ export default function StreamSettings() {
                                     <input
                                         onChange={(event) => handleInput(event)}
                                         type={'text'}
-                                        value={formInput.streamID}
+                                        value={formInput.streamId}
                                         style={{
                                             padding: '8px',
                                         }}
                                         min={1}
                                         className="form-control"
                                         id="textInput"
-                                        name="streamID"
+                                        name="streamId"
                                     />
                                 </div>
                             </Grid> 
@@ -95,7 +95,7 @@ export default function StreamSettings() {
                                     <input
                                         onChange={(event) => handleInput(event)}
                                         type={'text'}
-                                        value={formInput.streamID}
+                                        value={formInput.streamId}
                                         style={{
                                             padding: '8px',
                                         }}

@@ -503,14 +503,9 @@ export default function GameView() {
     }
     const LiveStreamComponent = () => {
         return (
-          <Grid container columns={12}>
-            <Grid item xs sm md lg className={'frameContainer'}>
-                <iframe id="ifvideo" style={{backgroundColor: 'gray', minHeight: '100%', minWidth: '99%'}} allowFullScreen={true}
-                    src={streamData.streamID}>
-                </iframe>
-                {/* <ReactPlayer url={streamData.streamID} controls style={{minHeight: '100%', minWidth: '99.8%'}} /> */}
-            </Grid>
-        </Grid>
+            <iframe id="ifvideo" style={{backgroundColor: 'gray', minHeight: '100%', minWidth: '99%'}} allowFullScreen={true}
+                src={streamData.streamId}>
+            </iframe>
         );
     };
     let counter = 0;
@@ -541,7 +536,15 @@ export default function GameView() {
             <LoggedHeader key={'header'} walletAmount={walletBalance}/>
             <Grid container columns={12}>
                 <Grid item xs={12} sm={12} md={6}>
-                    <LiveStreamComponent key={'liveStream'}/>
+                    <Grid container columns={12}>
+                        <Grid item xs sm md lg className={'frameContainer'}>
+                            <LiveStreamComponent key={'liveStream'}/>
+                            {/* <iframe id="ifvideo" style={{backgroundColor: 'gray', minHeight: '100%', minWidth: '99%'}} allowFullScreen={true}
+                                src={streamData.streamId}>
+                            </iframe> */}
+                            {/* <ReactPlayer url={streamData.streamID} controls style={{minHeight: '100%', minWidth: '99.8%'}} /> */}
+                        </Grid>
+                    </Grid>
                 </Grid>
                 <Grid item xs={12} sm={6} md={6}>
                     <GameHeader fight_num={currentGameState !== undefined?currentGameState.gameNo:'' }
