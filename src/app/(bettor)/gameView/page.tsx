@@ -1,5 +1,5 @@
 'use client'
-import { Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Typography } from "@mui/material"
+import { Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Input, Typography } from "@mui/material"
 import CircleIcon from '@mui/icons-material/Circle';
 import { colors } from "@/publicComponents/customStyles";
 import EastIcon from '@mui/icons-material/East';
@@ -12,6 +12,7 @@ import './styles.css'; // Import the CSS file
 import SBAPI from '@utils/supabase'
 import { UserModel_Hidden } from "@/models/users";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 type Round = {
     winner: "MERON" | "WALA" | "FAILED" | "DRAW";
@@ -268,6 +269,7 @@ export default function GameView() {
         .subscribe()
     }, [])
     const handleBet = async (side: string, amount: string) => {
+        console.log(amount === '')
         if(currentGameState.result === "OPEN"){
             if(parseFloat(amount) <= 0){
                 Swal.fire('Select Amount', 'Please enter an amount', 'warning')
@@ -275,39 +277,45 @@ export default function GameView() {
                 if(side === "") {
                     Swal.fire('No Sides Selected', 'Please select a winning side', 'warning')
                 } else {
-                    Swal.fire({
-                        title: 'Confirm Bet',
-                        html: `
-                          Confirm bet on <b style="color: ${side == "MERON" ? "red" : "blue" }">${side}</b> for <b>${amount}</b>
-                        `,
-                        showCancelButton: true,
-                        cancelButtonText: 'NO',
-                        confirmButtonText: 'YES',
-                        confirmButtonColor: 'gold',
-                        reverseButtons: true,
-                    }).then(async (result) =>{
-                        if(result.isConfirmed){
-                            TEAMFEE(user?.id, currentGameState.id, "SABONG");
-                            BET(amount, currentGameState.id, "SABONG", user?.id)
-                            const { data, error } = await SBAPI
-                            .from('sabong_transactions')
-                            .insert([
-                                { 
-                                    gameId: currentGameState.id,
-                                    userId: user?.id,
-                                    bet: side,
-                                    bet_amount: (parseFloat(amount)-0.5),
-                                },
-                            ])
-                            const {data: stats, error: statError}= await SBAPI
-                              .rpc('calculate_game_stats', {
-                                game_id: currentGameState.id
-                              })
-                            
-                            if (error) console.error(error)
-                            else console.log(data)
-                        }
-                    })
+                    if(walletBalance-parseFloat(amount) < 0 || amount === '') {
+                        Swal.fire('Bet Failed', 'Insufficient balance', 'warning')
+                    } else {
+
+                        Swal.fire({
+                            title: 'Confirm Bet',
+                            html: `
+                              Confirm bet on <b style="color: ${side == "MERON" ? "red" : "blue" }">${side}</b> for <b>${amount}</b>
+                            `,
+                            showCancelButton: true,
+                            cancelButtonText: 'NO',
+                            confirmButtonText: 'YES',
+                            confirmButtonColor: 'gold',
+                            reverseButtons: true,
+                        }).then(async (result) =>{
+                            if(result.isConfirmed){
+                                TEAMFEE(user?.id, currentGameState.id, "SABONG");
+                                BET(amount, currentGameState.id, "SABONG", user?.id)
+                                const { data, error } = await SBAPI
+                                .from('sabong_transactions')
+                                .insert([
+                                    { 
+                                        gameId: currentGameState.id,
+                                        userId: user?.id,
+                                        bet: side,
+                                        bet_amount: (parseFloat(amount)-0.5),
+                                    },
+                                ])
+                                const {data: stats, error: statError}= await SBAPI
+                                  .rpc('calculate_game_stats', {
+                                    game_id: currentGameState.id
+                                  })
+                                
+                                if (error) console.error(error)
+                                else console.log(data)
+                                Swal.fire('Bet Success')
+                            }
+                        })
+                    }
                 }
             }
         } else {
@@ -323,6 +331,7 @@ export default function GameView() {
             setIsOpen(true);
         };
         const BetModal = () => {
+            const [inputBet, setInputBet] = React.useState('0.00')
             const handleClose = () => {
                 setIsOpen(false);
             };
@@ -360,6 +369,20 @@ export default function GameView() {
                                             </Grid>
                                         ))
                                     }
+                                    <div style={{display: 'flex', margin: '0rem 1rem 1rem 1rem'}}>
+                                        <Input
+                                            placeholder="Custom Amount"
+                                            value={inputBet}
+                                            type="number"
+                                            fullWidth
+                                            onChange={(event) => parseFloat(event.target.value) >= 0 && setInputBet(event.target.value)}
+                                        />
+                                        <IconButton 
+                                            color="primary"
+                                            onClick={() => handleBet(selectedSide, inputBet)}>
+                                            <CheckCircleIcon />
+                                        </IconButton>
+                                    </div>
                                 </Grid>
                             </Grid>
                         </Grid>

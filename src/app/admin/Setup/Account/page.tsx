@@ -73,7 +73,7 @@ export default function Accounts() {
 
     const columns: GridColDef[] = [
         { field: 'created_at', headerName: 'DATE', width: 200 },
-        { field: 'user_level', headerName: 'TRANSACTION TYPE', width: 200 },
+        { field: 'user_level', headerName: 'ACCOUNT TYPE', width: 200 },
         { field: 'name', headerName: 'Name', width: 200 },
         // { field: 'commission', headerName: 'Commission %', width: 200 },
         {
@@ -139,7 +139,7 @@ export default function Accounts() {
             field: 'isActive',
             headerName: 'Action',
             flex: 1,
-            renderCell: (params: { row: { id: any; form: any; firstName: any; request_amount: any; userId: string }; }) => {
+            renderCell: (params: { row: { id: any; form: any; firstName: any; request_amount: any; userId: string; user_level: string}; }) => {
                 // const userId = params.row.id;
                 const form = params.row; 
                 const userId = params.row.userId; 
@@ -159,6 +159,7 @@ export default function Accounts() {
                                     </>
                                     :
                                     !editUser ?
+                                    params.row.user_level !== 'bettor' && params.row.user_level !== 'admin' &&
                                         <Button size="small" variant="contained" style={{ backgroundColor: 'red', color: 'white' }} onClick={() => handleEditUser(index)}>
                                             Edit
                                         </Button>
@@ -218,7 +219,7 @@ export default function Accounts() {
             let { data: users, error } = await supabase
               .from('users')
               .select('*')
-              .in('user_level', ['master agent', 'admin', 'declarator'])            
+            //   .in('user_level', ['master agent', 'admin', 'declarator'])            
             // const users: [] = await fetchUser(['master agent', 'admin', 'declarator'], 'active');
             // console.log(users)
             setUserlist(users !== null ? users : []); // Assuming `users` is an array of objects with the 'PlayerName' property

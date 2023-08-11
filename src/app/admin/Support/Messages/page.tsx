@@ -1,10 +1,11 @@
 'use client'
-import { Card, CardContent, Container, Divider, Grid, ListItem, ListItemButton, Typography, ListItemText, Paper, Button, Input } from "@mui/material";
+import { Card, CardContent, Container, Divider, Grid, ListItem, ListItemButton, Typography, ListItemText, Paper, Button, Input, IconButton } from "@mui/material";
 import { text } from "stream/consumers";
 import MailIcon from '@mui/icons-material/Mail';
 import SBAPI from '@utils/supabase'
 import React from "react";
 import { stringToShortDate } from "@/utils/tools";
+import SendIcon from '@mui/icons-material/Send';
 
 type messagesType = {
     id: number,
@@ -61,7 +62,7 @@ export default function Messages() {
     const MessageComponent = {
         me: (props: messagesType) => {
             return (
-                <Grid item md={12}>
+                <Grid item xs={12} sm={12} md={12} lg={12}>
                     <Paper elevation={3} sx={{width: 'fit-content', padding: 1.5, backgroundColor: "lightgray"}}>
                         {props.message}
                     </Paper>
@@ -73,7 +74,7 @@ export default function Messages() {
         }, 
         other: (props: messagesType) => {
             return ( 
-                <Grid item md={12} display={'grid'} justifyContent={'end'}>
+                <Grid item xs={12} sm={12} md={12} lg={12} display={'grid'} justifyContent={'end'} justifyItems={'end'}>
                     <Paper sx={{width: 'fit-content', padding: 1.5, backgroundColor: '#8ed0ff'}}>
                         {props.message}
                     </Paper>
@@ -93,18 +94,19 @@ export default function Messages() {
             ])
             setMessage("")
         }
-        onSendMessage(message)
+        if(message !== ""){
+            onSendMessage(message)
+        }
     }
     return (
-        <Container>
             <Card>
                 <Grid container columns={12} sx={{ minHeight: '75vh'}}>
-                    <Grid item sm={6} xs={6} md={3} lg={3}>
+                    <Grid item sm={2} xs={2} md={3} lg={3} sx={{backgroundColor: '#282a30'}}>
                         <Paper sx={{ overflowY: 'auto', maxHeight: '100%'}}>
                             {
                                 list.map((value, key) => (
                                     <div>
-                                        <ListItem key={key + "_" + value.sender} disablePadding sx={{backgroundColor: selectedSender === value.sender ? '#42b9ff' : ''}}>
+                                        <ListItem key={key + "_" + value.sender} disablePadding sx={{backgroundColor: selectedSender === value.sender ? '#42b9ff' : '#a3ddff'}}>
                                             <ListItemButton onClick={() => handleSelectedChat(value.sender)}>
                                                 <Typography variant={'body2'} fontWeight={700}>{value.sender_name}</Typography><br />
                                             </ListItemButton>
@@ -115,8 +117,8 @@ export default function Messages() {
                             }
                         </Paper>
                     </Grid>
-                    <Grid item sm={6} xs={6} md={9} lg={9} padding={4} borderLeft={'solid #cccccc 1px'}
-                    display={'flex'} flexDirection={'column'} justifyContent={'space-between'}>
+                    <Grid item sm={10} xs={10} md={9} lg={9} padding={4} borderLeft={'solid #cccccc 1px'}
+                    display={'flex'} flexDirection={'column'} justifyContent={'space-between'}  sx={{backgroundColor: '#282a30'}}>
                     {
                         selectedChat.length > 0 ?
                         <Grid container columns={12} sx={{maxHeight: '70vh', overflowY: 'auto'}}>
@@ -140,20 +142,21 @@ export default function Messages() {
                                 placeholder="Enter your message"
                                 value={message}
                                 fullWidth
+                                sx={{
+                                    backgroundColor: '#4f4f4fad',
+                                    color: 'white'
+                                }}
                                 onChange={(event) => setMessage(event.target.value)}
                             />
-                            <Button
-                                variant="contained"
+                            <IconButton 
                                 color="primary"
-                                onClick={handleSendMessage}
-                            >
-                                Send
-                            </Button>
+                                onClick={handleSendMessage}>
+                                <SendIcon />
+                            </IconButton>
                         </div>
                     }
                     </Grid>
                 </Grid>
             </Card>
-        </Container>
     )
 }
