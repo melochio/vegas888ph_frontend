@@ -1,5 +1,5 @@
 'use client'
-import { Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Input, Typography } from "@mui/material"
+import { Button, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, Input, Typography, TextField } from "@mui/material"
 import CircleIcon from '@mui/icons-material/Circle';
 import { colors } from "@/publicComponents/customStyles";
 import EastIcon from '@mui/icons-material/East';
@@ -369,20 +369,22 @@ export default function GameView() {
                                             </Grid>
                                         ))
                                     }
-                                    <div style={{display: 'flex', margin: '0rem 1rem 1rem 1rem'}}>
-                                        <Input
-                                            placeholder="Custom Amount"
-                                            value={inputBet}
-                                            type="number"
-                                            fullWidth
-                                            onChange={(event) => parseFloat(event.target.value) >= 0 && setInputBet(event.target.value)}
-                                        />
-                                        <IconButton 
-                                            color="primary"
-                                            onClick={() => handleBet(selectedSide, inputBet)}>
-                                            <CheckCircleIcon />
-                                        </IconButton>
-                                    </div>
+                                    <Grid item>
+                                        <div style={{display: 'flex', margin: '0rem 1rem 1rem 1rem'}}>
+                                            <TextField
+                                                helperText="Custom Amount"
+                                                value={inputBet}
+                                                type="number"
+                                                fullWidth
+                                                onChange={(event) => parseFloat(event.target.value) >= 0 && setInputBet(event.target.value)}
+                                            />
+                                            <IconButton 
+                                                color="primary"
+                                                onClick={() => handleBet(selectedSide, inputBet)}>
+                                                <CheckCircleIcon />
+                                            </IconButton>
+                                        </div>
+                                    </Grid>
                                 </Grid>
                             </Grid>
                         </Grid>

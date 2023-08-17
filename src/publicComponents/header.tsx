@@ -24,6 +24,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import SBAPI from '@utils/supabase'
 import userMiddleware from '@/utils/middleware';
 import { stringToShortDate } from '@/utils/tools';
+import SendIcon from '@mui/icons-material/Send';
 
 interface LoggedHeaderProps {}
 const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
@@ -39,7 +40,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
   type messagesType = {
     id: number,
     text: string,
-    sender: string, //userId
+    sender: number, //userId
     recepient: string, //userId
     created_at: Date, //userId
   }
@@ -65,7 +66,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
         .from('chats')
         .select('*')
         .or(`sender.eq.${currentuser.id},recipient.eq.${currentuser.id}`)
-        .order('created_at', {ascending: false})
+        .order('created_at', {ascending: true})
         if(data !== null) {
           setMessages(data)
         }
@@ -88,23 +89,17 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
     fetchBalance()
     fetchMessages()
     
-    const chats = SBAPI.channel('custom-insert-channel')
+    const chats = SBAPI.channel('schema-db-changes')
     .on(
       'postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'chats' },
-      (payload:any) => {
+      { event: '*', schema: 'public', table: '*' },
+      (payload: any) => {
         fetchMessages()
-      }
-    )
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'withdraw_requests' },
-      (payload:any) => {
         fetchUserData()
         fetchBalance()
       }
     )
-    .subscribe()
+    .subscribe();
   }, [])
   const [anchorEl, setAnchorEl] = useState<HTMLDivElement | null>(null);
 
@@ -629,7 +624,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
       </Box>
     );
   })
-  const ChatBox =  () => {
+  const ChatBox =  React.memo(() => {
     const [message, setMessage] = useState("");
     const onSendMessage = async (text: string) => {
       const { data, error } = await SBAPI
@@ -643,24 +638,67 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
       setMessage("");
     };
 
+    const containerRef = React.useRef<any | null>(null);
+
+    // Scroll to the bottom of the container when the selectedChat changes
+    React.useEffect(() => {
+        if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
+    }, [messages]);
+    
+    const MessageComponent = {
+      me: (props: messagesType) => {
+          return (
+              <Grid item xs={12} sm={12} md={12} lg={12}>
+                  <Paper elevation={3} sx={{width: 'fit-content', padding: 1.5, backgroundColor: "lightgray"}}>
+                      {props.text}
+                  </Paper>
+                  <Typography variant="caption" sx={{color: 'lightgray'}}>
+                      {stringToShortDate(props.created_at)}
+                  </Typography>
+              </Grid>
+          )
+      }, 
+      other: (props: messagesType) => {
+          return ( 
+              <Grid item xs={12} sm={12} md={12} lg={12} display={'grid'} justifyContent={'end'} justifyItems={'end'}>
+                  <Paper sx={{width: 'fit-content', padding: 1.5, backgroundColor: '#8ed0ff'}}>
+                      {props.text}
+                  </Paper>
+                  <Typography variant="caption" sx={{color: 'lightgray'}}>
+                      {stringToShortDate(props.created_at)}
+                  </Typography>
+              </Grid>
+          )
+      }
+  }
     return (
       <Container
         maxWidth={'xs'}
       >
         <Paper sx={{
           padding: '2em 1em',
+          backgroundColor: '#282a30'
         }}>
-          <Typography variant="h5">Admin Support</Typography>
+          <Typography variant="h5" sx={{color: 'white'}}>Admin Support</Typography>
           <div style={{
               border: '1px solid #e1e1e1',
               borderRadius: '1rem'
             }}>
-            <List sx={{maxHeight: '50vh', overflowY: 'auto'}}>
+            <Grid container columns={12} sx={{maxHeight: '40vh', overflowY: 'auto'}} ref={containerRef}>
+                {
+                    messages.map((val, i) => (
+                        val.sender === 9 ? MessageComponent.me(val):MessageComponent.other(val)
+                    ))
+                }
+            </Grid>
+            {/* <List sx={{maxHeight: '50vh', overflowY: 'auto'}} ref={containerRef}>
               {messages.map((message) => (
                 <ListItem key={message.id}>
                   <ListItemText
-                    primary={message.text}
-                    secondary={(message.sender !== "admin" ? "Sent" : "Received") + " " + new Date(message.created_at).toLocaleDateString(undefined, {
+                    primary={message.message}
+                    secondary={(message.sender !== 9 ? "Sent" : "Received") + " " + new Date(message.created_at).toLocaleDateString(undefined, {
                       year: 'numeric',
                       month: '2-digit',
                       day: '2-digit',
@@ -671,27 +709,29 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
                   />
                 </ListItem>
               ))}
-            </List>
+            </List> */}
             <div style={{display: 'flex', margin: '0rem 1rem 1rem 1rem'}}>
-              <Input
-                placeholder="Enter your message"
-                value={message}
-                fullWidth
-                onChange={(event) => setMessage(event.target.value)}
-              />
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSendMessage}
-              >
-                Send
-              </Button>
+                <Input
+                    placeholder="Enter your message"
+                    value={message}
+                    fullWidth
+                    sx={{
+                        backgroundColor: '#4f4f4fad',
+                        color: 'white'
+                    }}
+                    onChange={(event) => setMessage(event.target.value)}
+                />
+                <IconButton 
+                    color="primary"
+                    onClick={handleSendMessage}>
+                    <SendIcon />
+                </IconButton>
             </div>
           </div>
         </Paper>
       </Container>
     );
-  }
+  })
   return (
     <Grid
       container

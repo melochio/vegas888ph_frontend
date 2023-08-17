@@ -8,7 +8,7 @@
 /* For small screens and above (sm, md, lg, etc.) */
 @media screen and (min-width: 300px) {
     .frameContainer {
-        min-height: 30vh;
+        min-height: 28vh;
     }
 }
 @media screen and (min-width: 600px) {

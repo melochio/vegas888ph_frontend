@@ -32,7 +32,7 @@ export default function Messages() {
         .rpc('getchats_byid', {
             input_id: selectedSender
         })
-        .order('created_at', {ascending: false})
+        .order('created_at', {ascending: true})
 
         if (error) console.error(error)
         else setSelectedChat(data)
@@ -45,7 +45,6 @@ export default function Messages() {
           (payload:any) => {
             fetch()
             fetchCurrentChats()
-            console.log(selectedSender)
           }
         )
         .subscribe()
@@ -98,6 +97,14 @@ export default function Messages() {
             onSendMessage(message)
         }
     }
+    const containerRef = React.useRef<HTMLDivElement | null>(null);
+
+    // Scroll to the bottom of the container when the selectedChat changes
+    React.useEffect(() => {
+        if (containerRef.current) {
+        containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        }
+    }, [selectedChat]);
     return (
             <Card>
                 <Grid container columns={12} sx={{ minHeight: '75vh'}}>
@@ -121,7 +128,7 @@ export default function Messages() {
                     display={'flex'} flexDirection={'column'} justifyContent={'space-between'}  sx={{backgroundColor: '#282a30'}}>
                     {
                         selectedChat.length > 0 ?
-                        <Grid container columns={12} sx={{maxHeight: '70vh', overflowY: 'auto'}}>
+                        <Grid container columns={12} sx={{maxHeight: '70vh', overflowY: 'auto'}} ref={containerRef}>
                             {
                                 selectedChat.map((val, i) => (
                                     val.sender === 9 ? MessageComponent.me(val):MessageComponent.other(val)
