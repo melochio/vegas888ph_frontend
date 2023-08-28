@@ -38,9 +38,20 @@ const fetchUser = async () => {
     } catch(err) {
     }
 }
+
+const changePassword = async (data: any): Promise<string | any> => {
+    const changePassword_response = await axios.post(process.env.NEXT_PUBLIC_API_URL + '/api/agentUser/changePassword', {
+      currentPassword: data.currentPassword,
+      newPassword: data.newPassword
+    }, config).catch((err) => {
+        return err.response
+    })
+    return changePassword_response
+  }
 export {
     register,
     fetchUser,
     login,
-    logout
+    logout,
+    changePassword
 }

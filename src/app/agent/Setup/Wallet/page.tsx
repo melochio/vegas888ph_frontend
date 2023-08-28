@@ -126,7 +126,7 @@ export default function Wallet() {
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={8}>
                     <Box sx={{ display: 'flex', justifyContent: 'start', padding: '20px', backgroundColor: "black" }}>
-                        <Typography component="h1" sx={{ color: 'white', fontSize: '20px', marginTop: '10px' }}>Current Wallet : 100,000.00</Typography>
+                        {/* <Typography component="h1" sx={{ color: 'white', fontSize: '20px', marginTop: '10px' }}>Current Wallet : 100,000.00</Typography> */}
                     </Box>
                     <Container style={containerStyle} sx={{ borderTop: '6px solid red', backgroundColor: 'white' }}>
                         <Typography component="h1" sx={{ color: 'black', fontSize: '15px', marginTop: '10px' }}>Wallet Management</Typography>

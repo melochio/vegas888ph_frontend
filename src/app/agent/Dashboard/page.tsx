@@ -65,21 +65,17 @@ export default function Dashboard() {
     const [isCopied, setIsCopied] = React.useState(false); 
     const handleCopyClick = async () => {
         try {
-            try {
-                const textarea = document.createElement('textarea');
-                textarea.value = process.env.NEXT_PUBLIC_URL+'/register?refCode='+user?.referral_code;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-          
-                setIsCopied(true);
-              } catch (error) {
-                console.error('Failed to copy text:', error);
-              }
-        } catch (error) {
+            const textarea = document.createElement('textarea');
+            textarea.value = process.env.NEXT_PUBLIC_HOSTNAME+'/register?refCode='+user?.referral_code;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        
+            setIsCopied(true);
+            } catch (error) {
             console.error('Failed to copy text:', error);
-        }
+            }
     };
     const breadcrumbs = [
         <Link underline="hover" key="1" color="inherit" href="/" sx={{ color: 'black' }}>
@@ -126,7 +122,7 @@ export default function Dashboard() {
                         <Typography component="p" sx={{ color: 'black', fontSize: '14px', marginTop: '10px',textAlign:'center' }}>PLEASE TAKE NOTE OF YOUR REFFERAL LINK BELOW, ALL PLAYERS THAT WILL REGISTER UNDER THIS LINK WILL ATOMATICALLY BE UNDER YOUR ACCOUNT.
 
                         </Typography>
-                        <Typography component="h6" sx={{ color: 'black', fontSize: '14px' }}>{process.env.NEXT_PUBLIC_URL+'/register?refCode='+user?.referral_code}
+                        <Typography component="h6" sx={{ color: 'black', fontSize: '14px' }}>{process.env.NEXT_PUBLIC_HOSTNAME+'/register?refCode='+user?.referral_code}
 
                         </Typography>
                         <Box>

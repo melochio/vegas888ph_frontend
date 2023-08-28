@@ -76,7 +76,7 @@ const Form = () => {
             )
         }
     }
-    const [emailValidation, setEmailValidation] = React.useState(false)
+    const [emailValidation, setEmailValidation] = React.useState(true)
     const validateEmail = (email: string) => {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
@@ -181,7 +181,8 @@ const Form = () => {
                                 <FormControl fullWidth>
                                     <TextField id="emailInput"
                                     onChange={handleInput}
-                                    onKeyUp={() => setEmailValidation(validateEmail(formInput.email))}
+                                    onBlur={() => setEmailValidation(validateEmail(formInput.email))}
+                                    onFocus={() => setEmailValidation(true)}
                                     type="email"
                                     value={formInput.email}
                                     size={'small'}
@@ -190,8 +191,8 @@ const Form = () => {
                                     aria-describedby="emailInput-helper-text" 
                                     FormHelperTextProps={{style:{color: emailValidation ? 'rgba(0, 0, 0, 0.6)':'#ff1f1f'}}}
                                     inputProps={{style:{backgroundColor: 'white'}}}
-                                    helperText={emailValidation ? "We'll never share your email": "Please enter a valid email"} 
-                                    label="Email address"
+                                    helperText={emailValidation ? "Please enter <mobilenumber>@vegas888.ph; Example: 09123456789@vegas888.ph": "Please enter a valid email"} 
+                                    label="Email address <mobilenumber>@vegas888.ph"
                                     />
                                 </FormControl> 
                             </Grid>

@@ -16,7 +16,7 @@ import {
   } from '@mui/material';
 import axios from 'axios';
 import Model_User, { UserModel_Hidden } from '@/models/users';
-import { fetchUser, logout } from '@/api/bettor/auth';
+import { changePassword, fetchUser, logout } from '@/api/bettor/auth';
 import { Model_Withdrawal, initialWithdrawalValue } from '@/models/wallet';
 import { GetMyBalance, RequestWithdrawal, TransactionList } from '@/api/bettor/wallet';
 import Swal from 'sweetalert2';
@@ -732,6 +732,84 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
       </Container>
     );
   })
+  const [changePassword_open, setChangePassword_open] = useState(false);
+  const changePassword_close = () => {
+    setChangePassword_open(false)
+  }
+  const ChangePassword_Component = ({ open, onClose }: {open: boolean, onClose: any}) => {
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [passwordError, setPasswordError] = React.useState('')
+
+    const handleChangePassword = async () => {
+      // Handle the password change logic here
+      // You can compare newPassword and confirmPassword, make API calls, etc.
+      // Reset the form fields after the change
+      if(newPassword.length < 6) {
+        setPasswordError("Password must be 6 characters and above")
+        return
+      }
+      if(newPassword === confirmPassword) {
+        const response = await changePassword({newPassword: newPassword, currentPassword: currentPassword})
+        console.log(response.response.data)
+        setCurrentPassword('');
+        setNewPassword('');
+        setConfirmPassword('');
+        onClose(); // Close the modal
+      } else {
+        setPasswordError('Password does not match')
+      }
+    };
+    return (
+      <Modal open={open} onClose={onClose}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          bgcolor: 'background.paper',
+          boxShadow: 24,
+          p: 4,
+          maxWidth: 400,
+          outline: 'none',
+        }}
+      >
+        <h2>Change Password</h2>
+        <TextField
+          label="Current Password"
+          type="password"
+          value={currentPassword}
+          onChange={(e) => setCurrentPassword(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="New Password"
+          type="password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Confirm Password"
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          fullWidth
+          helperText={ passwordError }
+          FormHelperTextProps={{style: {color: 'red'}}}
+          margin="normal"
+        />
+        <Button variant="contained" color="primary" onClick={handleChangePassword}>
+          Submit
+        </Button>
+      </Box>
+    </Modal>
+    )
+  }
   return (
     <Grid
       container
@@ -790,6 +868,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
               >
                 {/* <MenuItem onClick={handleOpenProfileView}>View Profile</MenuItem> */}
                 <MenuItem onClick={handleOpenModal}>Transaction History</MenuItem>
+                <MenuItem onClick={() => setChangePassword_open(true)}>Change Password</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
               </Menu>
             </Paper>
@@ -810,6 +889,7 @@ const LoggedHeader = ({walletAmount}: {walletAmount?: number}) => {
           </div>
         </div>
       }
+      <ChangePassword_Component open={changePassword_open} onClose={changePassword_close}/>
     </Grid>
   );
 };
